@@ -3,7 +3,7 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Show } from "@/hooks/useShows";
 
-export function exportShowsPDF(shows: Show[]) {
+export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: string) {
   const sorted = [...shows].sort((a, b) => a.date.localeCompare(b.date));
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
