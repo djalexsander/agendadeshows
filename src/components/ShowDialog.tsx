@@ -117,9 +117,13 @@ export function ShowDialog({
   };
 
   const handleStatusChange = (newStatus: ShowStatus) => {
+    setStatus(newStatus);
+  };
+
+  const handleStatusSave = () => {
     if (existingShow) {
-      onUpdate(existingShow.id, { status: newStatus });
-      setStatus(newStatus);
+      onUpdate(existingShow.id, { status });
+      onClose();
     }
   };
 
