@@ -1,21 +1,24 @@
 import { useState, useMemo } from "react";
 import { format, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Music } from "lucide-react";
+import { Music, FileDown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import { useShows } from "@/hooks/useShows";
 import { ShowDialog } from "@/components/ShowDialog";
 import { UpcomingShows } from "@/components/UpcomingShows";
+import { exportShowsPDF } from "@/lib/exportPDF";
 
 const Index = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows } = useShows();
+  const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows, getShowsInMonth } = useShows();
 
   const showDates = getShowDates();
   const upcomingShows = getUpcomingShows();
+  const monthShows = getShowsInMonth(currentMonth);
 
   const modifiers = useMemo(() => {
     const dates: Date[] = [];
@@ -38,20 +41,46 @@ const Index = () => {
 
   const existingShow = selectedDate ? getShowByDate(selectedDate) : undefined;
 
+  const monthName = format(currentMonth, "MMMM", { locale: ptBR });
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="px-5 pt-6 pb-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Music className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Music className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
+              <p className="text-xs text-muted-foreground">Suas datas, sua música</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
-            <p className="text-xs text-muted-foreground">Suas datas, sua música</p>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 rounded-xl"
+            onClick={() => exportShowsPDF(shows)}
+            disabled={shows.length === 0}
+            title="Exportar PDF"
+          >
+            <FileDown className="h-5 w-5" />
+          </Button>
         </div>
       </header>
+
+      {/* Month counter */}
+      <div className="px-5 pb-2">
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/40">
+          <div className="h-7 w-7 rounded-lg bg-primary/20 flex items-center justify-center">
+            <span className="text-sm font-bold text-primary">{monthShows.length}</span>
+          </div>
+          <span className="text-sm text-muted-foreground">
+            {monthShows.length === 1 ? "show" : "shows"} em <span className="capitalize text-foreground font-medium">{monthName}</span>
+          </span>
+        </div>
+      </div>
 
       {/* Calendar */}
       <div className="px-3 pb-4">

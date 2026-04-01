@@ -70,5 +70,17 @@ export function useShows() {
       .sort((a, b) => a.date.localeCompare(b.date));
   }, [shows]);
 
-  return { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows };
+  const getShowsInMonth = useCallback(
+    (month: Date) => {
+      const y = month.getFullYear();
+      const m = month.getMonth();
+      return shows.filter((s) => {
+        const d = new Date(s.date + "T12:00:00");
+        return d.getFullYear() === y && d.getMonth() === m;
+      });
+    },
+    [shows]
+  );
+
+  return { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows, getShowsInMonth };
 }
