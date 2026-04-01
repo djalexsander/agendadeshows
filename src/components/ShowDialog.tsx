@@ -161,7 +161,7 @@ export function ShowDialog({
                     key={opt.value}
                     onClick={() => handleStatusChange(opt.value)}
                     className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border ${
-                      (existingShow.status || "pendente") === opt.value
+                      status === opt.value
                         ? `${opt.color} text-white border-transparent`
                         : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
                     }`}
