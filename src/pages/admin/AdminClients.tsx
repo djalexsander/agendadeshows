@@ -122,7 +122,7 @@ export default function AdminClients() {
         }).eq("user_id", newUserId);
 
         // Role is auto-assigned by database trigger
-        toast({ title: "Sucesso", description: `Cliente criado. Senha inicial: ${tempPassword}` });
+        toast({ title: "Sucesso", description: "Cliente criado. Ele definirá a senha no primeiro acesso." });
       }
     }
 
