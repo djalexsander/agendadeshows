@@ -66,44 +66,46 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="px-4 md:px-8 pt-6 pb-4">
-        <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <Music className="h-5 w-5 text-primary" />
+    <div className={isEmbedded ? "" : "min-h-screen bg-background"}>
+      {/* Header — only show when standalone */}
+      {!isEmbedded && (
+        <header className="px-4 md:px-8 pt-6 pb-4">
+          <div className="flex items-center justify-between max-w-6xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Music className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
+                <p className="text-xs text-muted-foreground">
+                  {profile?.nome_artistico || profile?.nome || "Sua agenda"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
-              <p className="text-xs text-muted-foreground">
-                {profile?.nome_artistico || profile?.nome || "Sua agenda"}
-              </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 rounded-xl border-border"
+                onClick={() => setExportOpen(true)}
+                disabled={shows.length === 0}
+              >
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">PDF</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 rounded-xl"
+                onClick={signOut}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Sair</span>
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 rounded-xl border-border"
-              onClick={() => setExportOpen(true)}
-              disabled={shows.length === 0}
-            >
-              <FileDown className="h-4 w-4" />
-              <span className="hidden sm:inline">PDF</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 rounded-xl"
-              onClick={signOut}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sair</span>
-            </Button>
-          </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 space-y-6">
         {/* Summary Cards */}
