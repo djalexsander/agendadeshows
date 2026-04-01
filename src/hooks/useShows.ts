@@ -4,6 +4,7 @@ export interface Show {
   id: string;
   date: string; // ISO date string YYYY-MM-DD
   cidade: string;
+  estado: string;
   // Campos futuros:
   evento?: string;
   horario?: string;
