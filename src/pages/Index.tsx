@@ -1,13 +1,12 @@
 import { useState, useMemo } from "react";
-import { format, isSameMonth } from "date-fns";
+import { format, isSameMonth, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, FileDown } from "lucide-react";
+import { Music, FileDown, CalendarDays, BarChart3, MapPin } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useShows } from "@/hooks/useShows";
 import { ShowDialog } from "@/components/ShowDialog";
-import { UpcomingShows } from "@/components/UpcomingShows";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 
 const Index = () => {
@@ -16,10 +15,9 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
-  const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows, getShowsInMonth } = useShows();
+  const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getShowsInMonth } = useShows();
 
   const showDates = getShowDates();
-  const upcomingShows = getUpcomingShows();
   const monthShows = getShowsInMonth(currentMonth);
 
   const modifiers = useMemo(() => {
@@ -42,14 +40,13 @@ const Index = () => {
   };
 
   const existingShow = selectedDate ? getShowByDate(selectedDate) : undefined;
-
-  const monthName = format(currentMonth, "MMMM", { locale: ptBR });
+  const monthName = format(currentMonth, "MMMM yyyy", { locale: ptBR });
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="px-5 pt-6 pb-3">
-        <div className="flex items-center justify-between">
+      <header className="px-4 md:px-8 pt-6 pb-4">
+        <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
               <Music className="h-5 w-5 text-primary" />
@@ -60,98 +57,152 @@ const Index = () => {
             </div>
           </div>
           <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 rounded-xl"
+            variant="outline"
+            size="sm"
+            className="gap-2 rounded-xl border-border"
             onClick={() => setExportOpen(true)}
             disabled={shows.length === 0}
-            title="Exportar PDF"
           >
-            <FileDown className="h-5 w-5" />
+            <FileDown className="h-4 w-4" />
+            <span className="hidden sm:inline">Exportar PDF</span>
           </Button>
         </div>
       </header>
 
-      {/* Month counter */}
-      <div className="px-5 pb-2">
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/40">
-          <div className="h-7 w-7 rounded-lg bg-primary/20 flex items-center justify-center">
-            <span className="text-sm font-bold text-primary">{monthShows.length}</span>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 space-y-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <CalendarDays className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{monthShows.length}</p>
+              <p className="text-sm text-muted-foreground">Eventos no mês</p>
+            </div>
           </div>
-          <span className="text-sm text-muted-foreground">
-            {monthShows.length === 1 ? "show" : "shows"} em <span className="capitalize text-foreground font-medium">{monthName}</span>
-          </span>
+          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <BarChart3 className="h-6 w-6 text-accent-foreground" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{shows.length}</p>
+              <p className="text-sm text-muted-foreground">Total de shows</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content: Calendar + Shows List */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Calendar Card */}
+          <div className="rounded-2xl bg-card border border-border p-4 md:p-6">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+              Calendário
+            </h2>
+            <Calendar
+              mode="single"
+              selected={selectedDate ? new Date(selectedDate + "T12:00:00") : undefined}
+              onSelect={handleDayClick}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
+              locale={ptBR}
+              modifiers={modifiers}
+              modifiersClassNames={{ hasShow: "has-show-date" }}
+              className="w-full pointer-events-auto"
+              classNames={{
+                months: "flex flex-col w-full",
+                month: "space-y-3 w-full",
+                caption: "flex justify-center pt-1 relative items-center",
+                caption_label: "text-base font-semibold capitalize",
+                nav: "space-x-2 flex items-center",
+                nav_button:
+                  "h-10 w-10 bg-secondary/50 hover:bg-secondary rounded-xl p-0 flex items-center justify-center text-foreground opacity-80 hover:opacity-100 transition-opacity",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                table: "w-full border-collapse",
+                head_row: "flex w-full",
+                head_cell:
+                  "text-muted-foreground rounded-md flex-1 font-medium text-xs uppercase",
+                row: "flex w-full mt-1",
+                cell: "flex-1 text-center text-sm p-0.5 relative",
+                day: "h-11 w-full rounded-xl font-medium hover:bg-secondary/60 transition-colors flex flex-col items-center justify-center gap-0.5",
+                day_range_end: "day-range-end",
+                day_selected:
+                  "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                day_today: "ring-1 ring-primary/50 text-primary font-bold",
+                day_outside: "text-muted-foreground opacity-30",
+                day_disabled: "text-muted-foreground opacity-50",
+                day_hidden: "invisible",
+              }}
+              components={{
+                DayContent: ({ date }) => {
+                  const dateStr = format(date, "yyyy-MM-dd");
+                  const hasShow = showDates.has(dateStr);
+                  const isCurrentMonth = isSameMonth(date, currentMonth);
+                  const showHighlight = hasShow && isCurrentMonth;
+                  return (
+                    <div className={cn(
+                      "w-full h-full flex items-center justify-center rounded-lg transition-colors",
+                      showHighlight && "bg-[hsl(140_60%_45%)] text-white font-bold"
+                    )}>
+                      <span>{date.getDate()}</span>
+                    </div>
+                  );
+                },
+              }}
+            />
+          </div>
+
+          {/* Shows List Card */}
+          <div className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+              Shows em <span className="capitalize text-foreground">{format(currentMonth, "MMMM", { locale: ptBR })}</span>
+            </h2>
+
+            {monthShows.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
+                <div className="h-14 w-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3">
+                  <Music className="h-7 w-7 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground text-sm">Nenhum show neste mês</p>
+                <p className="text-muted-foreground/60 text-xs mt-1">Toque em uma data para adicionar</p>
+              </div>
+            ) : (
+              <div className="space-y-3 flex-1 overflow-y-auto max-h-[500px] pr-1">
+                {monthShows
+                  .sort((a, b) => a.date.localeCompare(b.date))
+                  .map((show) => {
+                    const d = parseISO(show.date);
+                    const dayNum = format(d, "dd");
+                    const dayName = format(d, "EEE", { locale: ptBR });
+                    return (
+                      <button
+                        key={show.id}
+                        onClick={() => handleShowClick(show.date)}
+                        className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-4 transition-colors flex items-center gap-4 group"
+                      >
+                        <div className="h-12 w-12 rounded-xl bg-primary/15 flex flex-col items-center justify-center shrink-0">
+                          <span className="text-lg font-bold text-primary leading-none">{dayNum}</span>
+                          <span className="text-[10px] uppercase text-primary/70 leading-none mt-0.5">{dayName}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground truncate">{show.cidade}</p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <MapPin className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">{show.estado}</span>
+                          </div>
+                        </div>
+                        <div className="h-2 w-2 rounded-full bg-[hsl(140_60%_45%)] shrink-0 opacity-80" />
+                      </button>
+                    );
+                  })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Calendar */}
-      <div className="px-3 pb-4">
-        <Calendar
-          mode="single"
-          selected={selectedDate ? new Date(selectedDate + "T12:00:00") : undefined}
-          onSelect={handleDayClick}
-          month={currentMonth}
-          onMonthChange={setCurrentMonth}
-          locale={ptBR}
-          modifiers={modifiers}
-          modifiersClassNames={{
-            hasShow: "has-show-date",
-          }}
-          className="w-full pointer-events-auto"
-          classNames={{
-            months: "flex flex-col w-full",
-            month: "space-y-3 w-full",
-            caption: "flex justify-center pt-1 relative items-center",
-            caption_label: "text-base font-semibold capitalize",
-            nav: "space-x-2 flex items-center",
-            nav_button:
-              "h-10 w-10 bg-secondary/50 hover:bg-secondary rounded-xl p-0 flex items-center justify-center text-foreground opacity-80 hover:opacity-100 transition-opacity",
-            nav_button_previous: "absolute left-1",
-            nav_button_next: "absolute right-1",
-            table: "w-full border-collapse",
-            head_row: "flex w-full",
-            head_cell:
-              "text-muted-foreground rounded-md flex-1 font-medium text-xs uppercase",
-            row: "flex w-full mt-1",
-            cell: "flex-1 text-center text-sm p-0.5 relative",
-            day: "h-11 w-full rounded-xl font-medium hover:bg-secondary/60 transition-colors flex flex-col items-center justify-center gap-0.5",
-            day_range_end: "day-range-end",
-            day_selected:
-              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-            day_today:
-              "ring-1 ring-primary/50 text-primary font-bold",
-            day_outside: "text-muted-foreground opacity-30",
-            day_disabled: "text-muted-foreground opacity-50",
-            day_hidden: "invisible",
-          }}
-          components={{
-            DayContent: ({ date }) => {
-              const dateStr = format(date, "yyyy-MM-dd");
-              const hasShow = showDates.has(dateStr);
-              const isCurrentMonth = isSameMonth(date, currentMonth);
-              const showHighlight = hasShow && isCurrentMonth;
-              return (
-                <div className={cn(
-                  "w-full h-full flex items-center justify-center rounded-lg transition-colors",
-                  showHighlight && "bg-[hsl(140_60%_45%)] text-white font-bold"
-                )}>
-                  <span>{date.getDate()}</span>
-                </div>
-              );
-            },
-          }}
-        />
-      </div>
-
-      {/* Upcoming Shows */}
-      <div className="flex-1 px-5 pb-8">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-          Próximos Shows
-        </h2>
-        <UpcomingShows shows={upcomingShows} onShowClick={handleShowClick} />
-      </div>
-
-      {/* Dialog */}
+      {/* Dialogs */}
       <ShowDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
