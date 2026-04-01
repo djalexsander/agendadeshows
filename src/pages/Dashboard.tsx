@@ -10,8 +10,11 @@ import { ShowDialog } from "@/components/ShowDialog";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
+import { useLocation } from "react-router-dom";
 
 export default function Dashboard() {
+  const location = useLocation();
+  const isEmbedded = location.pathname.startsWith("/admin");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
