@@ -120,12 +120,7 @@ export default function AdminClients() {
           primeiro_acesso: true,
         }).eq("user_id", authData.user.id);
 
-        // Assign client role
-        await supabase.from("user_roles").insert({
-          user_id: authData.user.id,
-          role: "client" as const,
-        });
-
+        // Role is auto-assigned by database trigger
         toast({ title: "Sucesso", description: `Cliente criado. Senha inicial: ${tempPassword}` });
       }
     }
