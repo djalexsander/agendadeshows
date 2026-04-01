@@ -161,6 +161,11 @@ const Index = () => {
         onUpdate={updateShow}
         onDelete={deleteShow}
       />
+      <ExportPDFDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        shows={shows}
+      />
     </div>
   );
 };
