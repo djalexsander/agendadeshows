@@ -80,6 +80,7 @@ export function ShowDialog({
   const [estado, setEstado] = useState("");
   const [status, setStatus] = useState<ShowStatus>("pendente");
   const [isEditing, setIsEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (existingShow) {
