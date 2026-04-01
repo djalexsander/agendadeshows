@@ -39,8 +39,9 @@ export function exportShowsPDF(shows: Show[]) {
     doc.setFillColor(240, 240, 240);
     doc.rect(margin, y - 5, pageW - margin * 2, 8, "F");
     doc.text("Data", margin + 4, y);
-    doc.text("Dia", margin + 40, y);
-    doc.text("Cidade", margin + 70, y);
+    doc.text("Dia", margin + 35, y);
+    doc.text("Cidade", margin + 60, y);
+    doc.text("Estado", margin + 110, y);
     y += 7;
 
     doc.setFont("helvetica", "normal");
@@ -61,8 +62,9 @@ export function exportShowsPDF(shows: Show[]) {
       const dayOfWeek = format(parseISO(show.date), "EEE", { locale: ptBR });
 
       doc.text(dateFormatted, margin + 4, y);
-      doc.text(dayOfWeek, margin + 40, y);
-      doc.text(show.cidade, margin + 70, y);
+      doc.text(dayOfWeek, margin + 35, y);
+      doc.text(show.cidade, margin + 60, y);
+      doc.text(show.estado || "", margin + 110, y);
       y += 8;
     });
 
