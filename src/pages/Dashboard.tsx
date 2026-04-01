@@ -27,6 +27,14 @@ export default function Dashboard() {
   const showDates = getShowDates();
   const monthShows = getShowsInMonth(currentMonth);
 
+  const nextShow = useMemo(() => {
+    const today = startOfDay(new Date());
+    const future = shows
+      .filter((s) => isAfter(new Date(s.date + "T23:59:59"), today))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    return future.length > 0 ? future[0] : null;
+  }, [shows]);
+
   const modifiers = useMemo(() => {
     const dates: Date[] = [];
     showDates.forEach((d) => dates.push(new Date(d + "T12:00:00")));
