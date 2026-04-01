@@ -88,7 +88,7 @@ export default function AdminClients() {
     if (editingClient) {
       // Update profile
       await supabase.from("profiles").update({
-        nome: form.nome, nome_artistico: form.nome_artistico, telefone: form.telefone,
+        nome: form.nome, telefone: form.telefone,
         cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
         valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
         vencimento: form.vencimento || null, observacoes: form.observacoes,
