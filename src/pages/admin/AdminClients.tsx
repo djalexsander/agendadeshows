@@ -46,9 +46,8 @@ export default function AdminClients() {
 
   // Form state
   const [form, setForm] = useState({
-    nome: "", nome_artistico: "", email: "", telefone: "", cidade: "", estado: "",
+    nome: "", email: "", telefone: "", cidade: "", estado: "",
     status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
-    senha_inicial: "",
   });
 
   const fetchClients = async () => {
@@ -60,8 +59,8 @@ export default function AdminClients() {
 
   const resetForm = () => {
     setForm({
-      nome: "", nome_artistico: "", email: "", telefone: "", cidade: "", estado: "",
-      status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "", senha_inicial: "",
+      nome: "", email: "", telefone: "", cidade: "", estado: "",
+      status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
     });
     setEditingClient(null);
   };
@@ -71,10 +70,10 @@ export default function AdminClients() {
   const openEdit = (c: ClientProfile) => {
     setEditingClient(c);
     setForm({
-      nome: c.nome, nome_artistico: c.nome_artistico || "", email: c.email,
+      nome: c.nome, email: c.email,
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo", valor_plano: String(c.valor_plano || ""),
-      vencimento: c.vencimento || "", observacoes: c.observacoes || "", senha_inicial: "",
+      vencimento: c.vencimento || "", observacoes: c.observacoes || "",
     });
     setDialogOpen(true);
   };
@@ -89,7 +88,7 @@ export default function AdminClients() {
     if (editingClient) {
       // Update profile
       await supabase.from("profiles").update({
-        nome: form.nome, nome_artistico: form.nome_artistico, telefone: form.telefone,
+        nome: form.nome, telefone: form.telefone,
         cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
         valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
         vencimento: form.vencimento || null, observacoes: form.observacoes,
@@ -97,7 +96,7 @@ export default function AdminClients() {
       toast({ title: "Sucesso", description: "Cliente atualizado." });
     } else {
       // Create new user via edge function (preserves admin session)
-      const tempPassword = form.senha_inicial || "Temp@" + Math.random().toString(36).slice(-6);
+      const tempPassword = "Temp@" + Math.random().toString(36).slice(-6);
       const { data: { session } } = await supabase.auth.getSession();
       const response = await supabase.functions.invoke("create-user", {
         body: { email: form.email, password: tempPassword, nome: form.nome },
@@ -116,7 +115,7 @@ export default function AdminClients() {
 
         // Update the profile with additional data
         await supabase.from("profiles").update({
-          nome: form.nome, nome_artistico: form.nome_artistico, telefone: form.telefone,
+          nome: form.nome, telefone: form.telefone,
           cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
           valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
           vencimento: form.vencimento || null, observacoes: form.observacoes,
@@ -225,15 +224,9 @@ export default function AdminClients() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Nome *</Label>
-                <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="h-10 bg-secondary/50 border-border" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Nome Artístico</Label>
-                <Input value={form.nome_artistico} onChange={(e) => setForm({ ...form, nome_artistico: e.target.value })} className="h-10 bg-secondary/50 border-border" />
-              </div>
+            <div className="space-y-1.5">
+              <Label>Nome *</Label>
+              <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="h-10 bg-secondary/50 border-border" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -288,12 +281,6 @@ export default function AdminClients() {
                 <Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
             </div>
-            {!editingClient && (
-              <div className="space-y-1.5">
-                <Label>Senha Inicial</Label>
-                <Input value={form.senha_inicial} onChange={(e) => setForm({ ...form, senha_inicial: e.target.value })} placeholder="Deixe em branco para gerar automaticamente" className="h-10 bg-secondary/50 border-border" />
-              </div>
-            )}
             <div className="space-y-1.5">
               <Label>Observações</Label>
               <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
