@@ -14,16 +14,216 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      payments: {
+        Row: {
+          client_user_id: string
+          created_at: string
+          data_pagamento: string | null
+          data_vencimento: string | null
+          forma_pagamento: string | null
+          id: string
+          observacoes: string | null
+          status: string | null
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          client_user_id: string
+          created_at?: string
+          data_pagamento?: string | null
+          data_vencimento?: string | null
+          forma_pagamento?: string | null
+          id?: string
+          observacoes?: string | null
+          status?: string | null
+          updated_at?: string
+          valor?: number
+        }
+        Update: {
+          client_user_id?: string
+          created_at?: string
+          data_pagamento?: string | null
+          data_vencimento?: string | null
+          forma_pagamento?: string | null
+          id?: string
+          observacoes?: string | null
+          status?: string | null
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      pix_config: {
+        Row: {
+          admin_user_id: string
+          chave_pix: string
+          cidade_beneficiario: string | null
+          copia_cola: string | null
+          created_at: string
+          id: string
+          nome_beneficiario: string | null
+          qr_code_base64: string | null
+          tipo_chave: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_user_id: string
+          chave_pix?: string
+          cidade_beneficiario?: string | null
+          copia_cola?: string | null
+          created_at?: string
+          id?: string
+          nome_beneficiario?: string | null
+          qr_code_base64?: string | null
+          tipo_chave?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_user_id?: string
+          chave_pix?: string
+          cidade_beneficiario?: string | null
+          copia_cola?: string | null
+          created_at?: string
+          id?: string
+          nome_beneficiario?: string | null
+          qr_code_base64?: string | null
+          tipo_chave?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          cidade: string | null
+          created_at: string
+          email: string
+          estado: string | null
+          id: string
+          nome: string
+          nome_artistico: string | null
+          observacoes: string | null
+          primeiro_acesso: boolean | null
+          status_plano: string | null
+          telefone: string | null
+          updated_at: string
+          user_id: string
+          valor_plano: number | null
+          vencimento: string | null
+        }
+        Insert: {
+          cidade?: string | null
+          created_at?: string
+          email?: string
+          estado?: string | null
+          id?: string
+          nome?: string
+          nome_artistico?: string | null
+          observacoes?: string | null
+          primeiro_acesso?: boolean | null
+          status_plano?: string | null
+          telefone?: string | null
+          updated_at?: string
+          user_id: string
+          valor_plano?: number | null
+          vencimento?: string | null
+        }
+        Update: {
+          cidade?: string | null
+          created_at?: string
+          email?: string
+          estado?: string | null
+          id?: string
+          nome?: string
+          nome_artistico?: string | null
+          observacoes?: string | null
+          primeiro_acesso?: boolean | null
+          status_plano?: string | null
+          telefone?: string | null
+          updated_at?: string
+          user_id?: string
+          valor_plano?: number | null
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
+      shows: {
+        Row: {
+          cidade: string
+          created_at: string
+          date: string
+          estado: string
+          evento: string | null
+          horario: string | null
+          id: string
+          local: string | null
+          observacoes: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cidade: string
+          created_at?: string
+          date: string
+          estado?: string
+          evento?: string | null
+          horario?: string | null
+          id?: string
+          local?: string | null
+          observacoes?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cidade?: string
+          created_at?: string
+          date?: string
+          estado?: string
+          evento?: string | null
+          horario?: string | null
+          id?: string
+          local?: string | null
+          observacoes?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "client"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +350,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "client"],
+    },
   },
 } as const
