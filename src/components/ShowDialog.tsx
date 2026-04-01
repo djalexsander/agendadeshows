@@ -117,9 +117,13 @@ export function ShowDialog({
   };
 
   const handleStatusChange = (newStatus: ShowStatus) => {
+    setStatus(newStatus);
+  };
+
+  const handleStatusSave = () => {
     if (existingShow) {
-      onUpdate(existingShow.id, { status: newStatus });
-      setStatus(newStatus);
+      onUpdate(existingShow.id, { status });
+      onClose();
     }
   };
 
@@ -157,7 +161,7 @@ export function ShowDialog({
                     key={opt.value}
                     onClick={() => handleStatusChange(opt.value)}
                     className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border ${
-                      (existingShow.status || "pendente") === opt.value
+                      status === opt.value
                         ? `${opt.color} text-white border-transparent`
                         : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
                     }`}
@@ -167,6 +171,15 @@ export function ShowDialog({
                 ))}
               </div>
             </div>
+
+            {status !== (existingShow.status || "pendente") && (
+              <Button
+                onClick={handleStatusSave}
+                className="w-full h-12 text-base bg-primary hover:bg-primary/90"
+              >
+                Salvar Status
+              </Button>
+            )}
 
             <div className="flex gap-3">
               <Button
