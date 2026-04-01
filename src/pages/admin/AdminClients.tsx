@@ -96,10 +96,9 @@ export default function AdminClients() {
       toast({ title: "Sucesso", description: "Cliente atualizado." });
     } else {
       // Create new user via edge function (preserves admin session)
-      const tempPassword = "Temp@" + Math.random().toString(36).slice(-6);
-      const { data: { session } } = await supabase.auth.getSession();
+      // Internal temp password — client will set their own on first login
       const response = await supabase.functions.invoke("create-user", {
-        body: { email: form.email, password: tempPassword, nome: form.nome },
+        body: { email: form.email, nome: form.nome },
       });
 
       if (response.error || response.data?.error) {
@@ -123,7 +122,7 @@ export default function AdminClients() {
         }).eq("user_id", newUserId);
 
         // Role is auto-assigned by database trigger
-        toast({ title: "Sucesso", description: `Cliente criado. Senha inicial: ${tempPassword}` });
+        toast({ title: "Sucesso", description: "Cliente criado. Ele definirá a senha no primeiro acesso." });
       }
     }
 
