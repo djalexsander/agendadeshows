@@ -138,7 +138,7 @@ export default function Dashboard() {
           </div>
         )}
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
             <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <CalendarDays className="h-6 w-6 text-primary" />
@@ -155,6 +155,32 @@ export default function Dashboard() {
             <div>
               <p className="text-2xl font-bold">{shows.length}</p>
               <p className="text-sm text-muted-foreground">Total de shows</p>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <Clock className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-lg font-bold truncate">
+                {nextShow
+                  ? format(parseISO(nextShow.date), "dd/MM/yyyy")
+                  : "—"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {nextShow ? "Próximo show" : "Nenhum próximo show"}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <Navigation className="h-6 w-6 text-accent-foreground" />
+            </div>
+            <div>
+              <p className="text-lg font-bold truncate">
+                {nextShow ? nextShow.cidade : "—"}
+              </p>
+              <p className="text-sm text-muted-foreground">Cidade próximo show</p>
             </div>
           </div>
         </div>
