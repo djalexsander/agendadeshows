@@ -88,6 +88,7 @@ export function ShowDialog({
       setEstado(existingShow.estado || "");
       setStatus(existingShow.status || "pendente");
       setIsEditing(false);
+      setConfirmDelete(false);
     } else {
       setCidade("");
       setEstado("");
