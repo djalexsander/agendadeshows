@@ -192,14 +192,25 @@ export function ShowDialog({
                 <Pencil className="h-4 w-4" />
                 Editar
               </Button>
-              <Button
-                onClick={handleDelete}
-                className="flex-1 h-12 text-base gap-2"
-                variant="destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-                Excluir
-              </Button>
+              {!confirmDelete ? (
+                <Button
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex-1 h-12 text-base gap-2"
+                  variant="destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Excluir
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleDelete}
+                  className="flex-1 h-12 text-base gap-2 animate-pulse"
+                  variant="destructive"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  Confirmar Exclusão
+                </Button>
+              )}
             </div>
           </div>
         ) : (
