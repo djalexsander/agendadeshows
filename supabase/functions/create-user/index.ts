@@ -45,19 +45,22 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { email, password, nome } = body;
+    const { email, nome } = body;
 
-    if (!email || !password || !nome) {
-      return new Response(JSON.stringify({ error: "Email, senha e nome são obrigatórios" }), {
+    if (!email || !nome) {
+      return new Response(JSON.stringify({ error: "Email e nome são obrigatórios" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    // Generate a strong random password (client will set their own on first access)
+    const tempPassword = crypto.randomUUID() + "!Aa1";
+
     // Create user with service role (does NOT affect caller's session)
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
-      password,
+      password: tempPassword,
       email_confirm: true,
       user_metadata: { nome },
     });
