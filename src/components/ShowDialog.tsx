@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Pencil, Trash2, Music } from "lucide-react";
+import { MapPin, Pencil, Trash2, Music, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -80,6 +80,7 @@ export function ShowDialog({
   const [estado, setEstado] = useState("");
   const [status, setStatus] = useState<ShowStatus>("pendente");
   const [isEditing, setIsEditing] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     if (existingShow) {
@@ -87,6 +88,7 @@ export function ShowDialog({
       setEstado(existingShow.estado || "");
       setStatus(existingShow.status || "pendente");
       setIsEditing(false);
+      setConfirmDelete(false);
     } else {
       setCidade("");
       setEstado("");
@@ -190,14 +192,25 @@ export function ShowDialog({
                 <Pencil className="h-4 w-4" />
                 Editar
               </Button>
-              <Button
-                onClick={handleDelete}
-                className="flex-1 h-12 text-base gap-2"
-                variant="destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-                Excluir
-              </Button>
+              {!confirmDelete ? (
+                <Button
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex-1 h-12 text-base gap-2"
+                  variant="destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Excluir
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleDelete}
+                  className="flex-1 h-12 text-base gap-2 animate-pulse"
+                  variant="destructive"
+                >
+                  <AlertTriangle className="h-4 w-4" />
+                  Confirmar Exclusão
+                </Button>
+              )}
             </div>
           </div>
         ) : (
