@@ -107,7 +107,28 @@ export default function Dashboard() {
         </header>
       )}
 
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 space-y-6">
+      <div className={`max-w-6xl mx-auto ${isEmbedded ? 'p-6 md:p-8' : 'px-4 md:px-8 pb-8'} space-y-6`}>
+        {/* Embedded header */}
+        {isEmbedded && (
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Minha Agenda</h1>
+              <p className="text-muted-foreground text-sm">
+                {profile?.nome_artistico || profile?.nome || "Sua agenda pessoal"}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-xl border-border"
+              onClick={() => setExportOpen(true)}
+              disabled={shows.length === 0}
+            >
+              <FileDown className="h-4 w-4" />
+              PDF
+            </Button>
+          </div>
+        )}
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
