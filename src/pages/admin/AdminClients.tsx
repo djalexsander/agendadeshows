@@ -134,6 +134,22 @@ export default function AdminClients() {
     fetchClients();
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setLoading(true);
+    const response = await supabase.functions.invoke("delete-user", {
+      body: { user_id: deleteTarget.user_id },
+    });
+    if (response.error || response.data?.error) {
+      toast({ title: "Erro", description: response.data?.error || response.error?.message, variant: "destructive" });
+    } else {
+      toast({ title: "Sucesso", description: "Cliente excluído." });
+      fetchClients();
+    }
+    setLoading(false);
+    setDeleteTarget(null);
+  };
+
   const filtered = clients.filter((c) => {
     const q = search.toLowerCase();
     return (
