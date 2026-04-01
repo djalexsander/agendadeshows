@@ -59,8 +59,8 @@ export default function AdminClients() {
 
   const resetForm = () => {
     setForm({
-      nome: "", nome_artistico: "", email: "", telefone: "", cidade: "", estado: "",
-      status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "", senha_inicial: "",
+      nome: "", email: "", telefone: "", cidade: "", estado: "",
+      status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
     });
     setEditingClient(null);
   };
