@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useShows } from "@/hooks/useShows";
 import { ShowDialog } from "@/components/ShowDialog";
 import { UpcomingShows } from "@/components/UpcomingShows";
-import { exportShowsPDF } from "@/lib/exportPDF";
+import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 
 const Index = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
