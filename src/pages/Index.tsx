@@ -63,7 +63,7 @@ const Index = () => {
             variant="ghost"
             size="icon"
             className="h-10 w-10 rounded-xl"
-            onClick={() => exportShowsPDF(shows)}
+            onClick={() => setExportOpen(true)}
             disabled={shows.length === 0}
             title="Exportar PDF"
           >
