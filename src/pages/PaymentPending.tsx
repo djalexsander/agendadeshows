@@ -1,23 +1,41 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { QrCode, Copy, LogOut, Clock } from "lucide-react";
+import { QrCode, Copy, LogOut, Clock, Upload, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { generatePixCode } from "@/lib/pixGenerator";
 import { QRCodeSVG } from "qrcode.react";
 
 export default function PaymentPending() {
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const [pixCode, setPixCode] = useState("");
   const [loadingPix, setLoadingPix] = useState(true);
+  const [file, setFile] = useState<File | null>(null);
+  const [mensagem, setMensagem] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [alreadySent, setAlreadySent] = useState(false);
 
   useEffect(() => {
-    const loadPix = async () => {
-      // Fetch admin's pix config
+    if (!profile || !user) return;
+
+    const loadData = async () => {
+      // Check if already sent a proof
+      const { data: proofs } = await (supabase.from("payment_proofs") as any)
+        .select("id, status")
+        .eq("client_user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (proofs && proofs.length > 0) {
+        setAlreadySent(true);
+      }
+
+      // Fetch pix config
       const { data } = await supabase.from("pix_config").select("*").limit(1);
       if (data && data.length > 0 && profile?.valor_plano && profile.valor_plano > 0) {
         const config = data[0];
@@ -31,12 +49,44 @@ export default function PaymentPending() {
       }
       setLoadingPix(false);
     };
-    if (profile) loadPix();
-  }, [profile]);
+    loadData();
+  }, [profile, user]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(pixCode);
     toast({ title: "Copiado!", description: "Código Pix copiado para a área de transferência." });
+  };
+
+  const handleUpload = async () => {
+    if (!file || !user) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${user.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("comprovantes")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("comprovantes")
+        .getPublicUrl(filePath);
+
+      await (supabase.from("payment_proofs") as any).insert({
+        client_user_id: user.id,
+        image_url: urlData.publicUrl,
+        mensagem,
+      });
+
+      setAlreadySent(true);
+      toast({ title: "Comprovante enviado!", description: "O administrador será notificado e liberará seu acesso em breve." });
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message || "Erro ao enviar comprovante.", variant: "destructive" });
+    }
+    setUploading(false);
   };
 
   const valor = profile?.valor_plano || 0;
@@ -51,11 +101,12 @@ export default function PaymentPending() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Pagamento Pendente</h1>
             <p className="text-muted-foreground mt-1">
-              Olá, <strong>{profile?.nome}</strong>! Para liberar o acesso à sua agenda, realize o pagamento abaixo.
+              Olá, <strong>{profile?.nome}</strong>! Para liberar o acesso, realize o pagamento abaixo.
             </p>
           </div>
         </div>
 
+        {/* Pix QR Code */}
         <div className="rounded-2xl bg-card border border-border p-6 space-y-5">
           {loadingPix ? (
             <div className="flex justify-center py-8">
@@ -70,7 +121,7 @@ export default function PaymentPending() {
 
               <div className="flex justify-center">
                 <div className="bg-white p-4 rounded-xl">
-                  <QRCodeSVG value={pixCode} size={200} />
+                  <QRCodeSVG value={pixCode} size={180} />
                 </div>
               </div>
 
@@ -83,12 +134,6 @@ export default function PaymentPending() {
                   </Button>
                 </div>
               </div>
-
-              <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 p-4">
-                <p className="text-sm text-yellow-300 text-center">
-                  Após o pagamento, envie o comprovante ao administrador. Seu acesso será liberado em seguida.
-                </p>
-              </div>
             </>
           ) : (
             <div className="text-center py-8">
@@ -97,6 +142,61 @@ export default function PaymentPending() {
                 Dados de pagamento não configurados. Entre em contato com o administrador.
               </p>
             </div>
+          )}
+        </div>
+
+        {/* Upload comprovante */}
+        <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Enviar Comprovante
+          </h2>
+
+          {alreadySent ? (
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="h-14 w-14 rounded-2xl bg-[hsl(140_60%_45%)]/20 flex items-center justify-center">
+                <CheckCircle className="h-7 w-7 text-[hsl(140_60%_55%)]" />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold">Comprovante enviado!</p>
+                <p className="text-sm text-muted-foreground">
+                  Aguarde a aprovação do administrador para liberar seu acesso.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <Label>Foto do comprovante *</Label>
+                <div className="relative">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="h-10 bg-secondary/50 border-border file:text-primary file:font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Mensagem (opcional)</Label>
+                <Textarea
+                  value={mensagem}
+                  onChange={(e) => setMensagem(e.target.value)}
+                  placeholder="Ex: Paguei via Nubank às 14h"
+                  className="bg-secondary/50 border-border resize-none"
+                  rows={2}
+                />
+              </div>
+
+              <Button
+                onClick={handleUpload}
+                disabled={!file || uploading}
+                className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
+              >
+                <Send className="h-4 w-4" />
+                {uploading ? "Enviando..." : "Enviar Comprovante"}
+              </Button>
+            </>
           )}
         </div>
 
