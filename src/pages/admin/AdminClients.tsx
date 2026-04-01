@@ -224,15 +224,9 @@ export default function AdminClients() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Nome *</Label>
-                <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="h-10 bg-secondary/50 border-border" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Nome Artístico</Label>
-                <Input value={form.nome_artistico} onChange={(e) => setForm({ ...form, nome_artistico: e.target.value })} className="h-10 bg-secondary/50 border-border" />
-              </div>
+            <div className="space-y-1.5">
+              <Label>Nome *</Label>
+              <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="h-10 bg-secondary/50 border-border" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
