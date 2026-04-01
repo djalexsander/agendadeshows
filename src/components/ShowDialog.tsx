@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Pencil, Trash2, Music } from "lucide-react";
+import { MapPin, Pencil, Trash2, Music, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
