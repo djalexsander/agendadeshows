@@ -8,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { useShows } from "@/hooks/useShows";
 import { ShowDialog } from "@/components/ShowDialog";
 import { UpcomingShows } from "@/components/UpcomingShows";
-import { exportShowsPDF } from "@/lib/exportPDF";
+import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 
 const Index = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows, getShowsInMonth } = useShows();
 
@@ -62,7 +63,7 @@ const Index = () => {
             variant="ghost"
             size="icon"
             className="h-10 w-10 rounded-xl"
-            onClick={() => exportShowsPDF(shows)}
+            onClick={() => setExportOpen(true)}
             disabled={shows.length === 0}
             title="Exportar PDF"
           >
@@ -159,6 +160,11 @@ const Index = () => {
         onSave={addShow}
         onUpdate={updateShow}
         onDelete={deleteShow}
+      />
+      <ExportPDFDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        shows={shows}
       />
     </div>
   );

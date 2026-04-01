@@ -3,7 +3,7 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Show } from "@/hooks/useShows";
 
-export function exportShowsPDF(shows: Show[]) {
+export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: string) {
   const sorted = [...shows].sort((a, b) => a.date.localeCompare(b.date));
 
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -17,9 +17,16 @@ export function exportShowsPDF(shows: Show[]) {
   doc.text("Agenda de Shows", pageW / 2, y, { align: "center" });
   y += 8;
 
+  // Subtitle with period
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(120);
+  const periodParts: string[] = [];
+  if (startDate) periodParts.push(`De ${format(parseISO(startDate), "dd/MM/yyyy")}`);
+  if (endDate) periodParts.push(`${startDate ? "até" : "Até"} ${format(parseISO(endDate), "dd/MM/yyyy")}`);
+  const periodText = periodParts.length > 0 ? periodParts.join(" ") : "Todos os shows";
+  doc.text(periodText, pageW / 2, y, { align: "center" });
+  y += 5;
   doc.text(`Exportado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, pageW / 2, y, { align: "center" });
   doc.setTextColor(0);
   y += 5;
