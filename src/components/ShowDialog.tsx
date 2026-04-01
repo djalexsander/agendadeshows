@@ -12,15 +12,52 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Show } from "@/hooks/useShows";
+
+const ESTADOS_BR = [
+  { sigla: "AC", nome: "Acre" },
+  { sigla: "AL", nome: "Alagoas" },
+  { sigla: "AP", nome: "Amapá" },
+  { sigla: "AM", nome: "Amazonas" },
+  { sigla: "BA", nome: "Bahia" },
+  { sigla: "CE", nome: "Ceará" },
+  { sigla: "DF", nome: "Distrito Federal" },
+  { sigla: "ES", nome: "Espírito Santo" },
+  { sigla: "GO", nome: "Goiás" },
+  { sigla: "MA", nome: "Maranhão" },
+  { sigla: "MT", nome: "Mato Grosso" },
+  { sigla: "MS", nome: "Mato Grosso do Sul" },
+  { sigla: "MG", nome: "Minas Gerais" },
+  { sigla: "PA", nome: "Pará" },
+  { sigla: "PB", nome: "Paraíba" },
+  { sigla: "PR", nome: "Paraná" },
+  { sigla: "PE", nome: "Pernambuco" },
+  { sigla: "PI", nome: "Piauí" },
+  { sigla: "RJ", nome: "Rio de Janeiro" },
+  { sigla: "RN", nome: "Rio Grande do Norte" },
+  { sigla: "RS", nome: "Rio Grande do Sul" },
+  { sigla: "RO", nome: "Rondônia" },
+  { sigla: "RR", nome: "Roraima" },
+  { sigla: "SC", nome: "Santa Catarina" },
+  { sigla: "SP", nome: "São Paulo" },
+  { sigla: "SE", nome: "Sergipe" },
+  { sigla: "TO", nome: "Tocantins" },
+];
 
 interface ShowDialogProps {
   open: boolean;
   onClose: () => void;
   selectedDate: string | null;
   existingShow: Show | undefined;
-  onSave: (date: string, cidade: string) => void;
-  onUpdate: (id: string, cidade: string) => void;
+  onSave: (date: string, cidade: string, estado: string) => void;
+  onUpdate: (id: string, cidade: string, estado: string) => void;
   onDelete: (id: string) => void;
 }
 
@@ -34,14 +71,17 @@ export function ShowDialog({
   onDelete,
 }: ShowDialogProps) {
   const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (existingShow) {
       setCidade(existingShow.cidade);
+      setEstado(existingShow.estado || "");
       setIsEditing(false);
     } else {
       setCidade("");
+      setEstado("");
       setIsEditing(true);
     }
   }, [existingShow, selectedDate, open]);
@@ -51,11 +91,11 @@ export function ShowDialog({
   const dateFormatted = format(parseISO(selectedDate), "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
 
   const handleSave = () => {
-    if (!cidade.trim()) return;
+    if (!cidade.trim() || !estado) return;
     if (existingShow) {
-      onUpdate(existingShow.id, cidade.trim());
+      onUpdate(existingShow.id, cidade.trim(), estado);
     } else {
-      onSave(selectedDate, cidade.trim());
+      onSave(selectedDate, cidade.trim(), estado);
     }
     onClose();
   };
@@ -66,6 +106,10 @@ export function ShowDialog({
       onClose();
     }
   };
+
+  const estadoNome = existingShow?.estado
+    ? ESTADOS_BR.find((e) => e.sigla === existingShow.estado)
+    : undefined;
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -84,7 +128,10 @@ export function ShowDialog({
           <div className="space-y-4 py-2">
             <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
               <MapPin className="h-5 w-5 text-primary shrink-0" />
-              <span className="text-lg font-medium">{existingShow.cidade}</span>
+              <span className="text-lg font-medium">
+                {existingShow.cidade}
+                {estadoNome && <span className="text-muted-foreground"> — {estadoNome.sigla}</span>}
+              </span>
             </div>
             <div className="flex gap-3">
               <Button
@@ -121,6 +168,23 @@ export function ShowDialog({
                 onKeyDown={(e) => e.key === "Enter" && handleSave()}
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="estado" className="text-base">
+                Estado
+              </Label>
+              <Select value={estado} onValueChange={setEstado}>
+                <SelectTrigger className="h-12 text-base bg-secondary/50 border-border">
+                  <SelectValue placeholder="Selecione o estado" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60 bg-popover border-border">
+                  {ESTADOS_BR.map((e) => (
+                    <SelectItem key={e.sigla} value={e.sigla}>
+                      {e.sigla} — {e.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex gap-3">
               {existingShow && (
                 <Button
@@ -133,7 +197,7 @@ export function ShowDialog({
               )}
               <Button
                 onClick={handleSave}
-                disabled={!cidade.trim()}
+                disabled={!cidade.trim() || !estado}
                 className="flex-1 h-12 text-base bg-primary hover:bg-primary/90"
               >
                 Salvar

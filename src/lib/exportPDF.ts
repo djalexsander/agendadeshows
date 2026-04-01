@@ -62,8 +62,9 @@ export function exportShowsPDF(shows: Show[]) {
       const dayOfWeek = format(parseISO(show.date), "EEE", { locale: ptBR });
 
       doc.text(dateFormatted, margin + 4, y);
-      doc.text(dayOfWeek, margin + 40, y);
-      doc.text(show.cidade, margin + 70, y);
+      doc.text(dayOfWeek, margin + 35, y);
+      doc.text(show.cidade, margin + 60, y);
+      doc.text(show.estado || "", margin + 110, y);
       y += 8;
     });
 
