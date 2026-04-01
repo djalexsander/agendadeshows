@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 
+export type ShowStatus = "pendente" | "confirmado" | "finalizado";
+
 export interface Show {
   id: string;
   date: string; // ISO date string YYYY-MM-DD
   cidade: string;
   estado: string;
+  status: ShowStatus;
   // Campos futuros:
   evento?: string;
   horario?: string;
@@ -34,20 +37,21 @@ export function useShows() {
     saveShows(shows);
   }, [shows]);
 
-  const addShow = useCallback((date: string, cidade: string, estado: string) => {
+  const addShow = useCallback((date: string, cidade: string, estado: string, status: ShowStatus = "pendente") => {
     const newShow: Show = {
       id: crypto.randomUUID(),
       date,
       cidade,
       estado,
+      status,
     };
     setShows((prev) => [...prev, newShow]);
     return newShow;
   }, []);
 
-  const updateShow = useCallback((id: string, cidade: string, estado: string) => {
+  const updateShow = useCallback((id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => {
     setShows((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, cidade, estado } : s))
+      prev.map((s) => (s.id === id ? { ...s, ...updates } : s))
     );
   }, []);
 
