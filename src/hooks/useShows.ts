@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 
+export type ShowStatus = "pendente" | "confirmado" | "finalizado";
+
 export interface Show {
   id: string;
   date: string; // ISO date string YYYY-MM-DD
   cidade: string;
   estado: string;
+  status: ShowStatus;
   // Campos futuros:
   evento?: string;
   horario?: string;
