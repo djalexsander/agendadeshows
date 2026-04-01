@@ -191,9 +191,11 @@ export default function AdminClients() {
               )}
               <p className="text-sm text-muted-foreground">{c.email}</p>
             </div>
-            <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
+           <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
               c.status_plano === "ativo"
                 ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
+                : c.status_plano === "pendente_pagamento"
+                ? "bg-orange-500/20 text-orange-400"
                 : c.status_plano === "inativo"
                 ? "bg-destructive/20 text-destructive"
                 : "bg-yellow-500/20 text-yellow-400"

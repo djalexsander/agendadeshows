@@ -46,6 +46,15 @@ function AppRoutes() {
     );
   }
 
+  // Payment pending — client must pay before accessing
+  if (role === "client" && profile?.status_plano === "pendente_pagamento") {
+    return (
+      <Routes>
+        <Route path="*" element={<PaymentPending />} />
+      </Routes>
+    );
+  }
+
   // Admin routes
   if (role === "admin") {
     return (

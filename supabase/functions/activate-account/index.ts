@@ -64,8 +64,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Mark primeiro_acesso as false
-    await adminClient.from("profiles").update({ primeiro_acesso: false }).eq("user_id", profile.user_id);
+    // Mark primeiro_acesso as false and set status to pendente_pagamento
+    await adminClient.from("profiles").update({
+      primeiro_acesso: false,
+      status_plano: "pendente_pagamento",
+    }).eq("user_id", profile.user_id);
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
