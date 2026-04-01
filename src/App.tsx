@@ -51,6 +51,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="agenda" element={<Dashboard />} />
           <Route path="clients" element={<AdminClients />} />
           <Route path="financial" element={<AdminFinancial />} />
           <Route path="pix" element={<AdminPix />} />

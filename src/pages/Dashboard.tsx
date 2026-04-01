@@ -10,8 +10,11 @@ import { ShowDialog } from "@/components/ShowDialog";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
+import { useLocation } from "react-router-dom";
 
 export default function Dashboard() {
+  const location = useLocation();
+  const isEmbedded = location.pathname.startsWith("/admin");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -63,22 +66,57 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="px-4 md:px-8 pt-6 pb-4">
-        <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <Music className="h-5 w-5 text-primary" />
+    <div className={isEmbedded ? "" : "min-h-screen bg-background"}>
+      {/* Header — only show when standalone */}
+      {!isEmbedded && (
+        <header className="px-4 md:px-8 pt-6 pb-4">
+          <div className="flex items-center justify-between max-w-6xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Music className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
+                <p className="text-xs text-muted-foreground">
+                  {profile?.nome_artistico || profile?.nome || "Sua agenda"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
-              <p className="text-xs text-muted-foreground">
-                {profile?.nome_artistico || profile?.nome || "Sua agenda"}
-              </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 rounded-xl border-border"
+                onClick={() => setExportOpen(true)}
+                disabled={shows.length === 0}
+              >
+                <FileDown className="h-4 w-4" />
+                <span className="hidden sm:inline">PDF</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 rounded-xl"
+                onClick={signOut}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Sair</span>
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+        </header>
+      )}
+
+      <div className={`max-w-6xl mx-auto ${isEmbedded ? 'p-6 md:p-8' : 'px-4 md:px-8 pb-8'} space-y-6`}>
+        {/* Embedded header */}
+        {isEmbedded && (
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">Minha Agenda</h1>
+              <p className="text-muted-foreground text-sm">
+                {profile?.nome_artistico || profile?.nome || "Sua agenda pessoal"}
+              </p>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -87,22 +125,10 @@ export default function Dashboard() {
               disabled={shows.length === 0}
             >
               <FileDown className="h-4 w-4" />
-              <span className="hidden sm:inline">PDF</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-2 rounded-xl"
-              onClick={signOut}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Sair</span>
+              PDF
             </Button>
           </div>
-        </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 space-y-6">
+        )}
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
