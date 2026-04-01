@@ -34,19 +34,20 @@ export function useShows() {
     saveShows(shows);
   }, [shows]);
 
-  const addShow = useCallback((date: string, cidade: string) => {
+  const addShow = useCallback((date: string, cidade: string, estado: string) => {
     const newShow: Show = {
       id: crypto.randomUUID(),
       date,
       cidade,
+      estado,
     };
     setShows((prev) => [...prev, newShow]);
     return newShow;
   }, []);
 
-  const updateShow = useCallback((id: string, cidade: string) => {
+  const updateShow = useCallback((id: string, cidade: string, estado: string) => {
     setShows((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, cidade } : s))
+      prev.map((s) => (s.id === id ? { ...s, cidade, estado } : s))
     );
   }, []);
 
