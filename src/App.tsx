@@ -55,7 +55,7 @@ function AppRoutes() {
           <Route path="financial" element={<AdminFinancial />} />
           <Route path="pix" element={<AdminPix />} />
         </Route>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
     );
