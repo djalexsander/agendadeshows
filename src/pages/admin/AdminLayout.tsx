@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
+  { to: "/admin/agenda", icon: CalendarDays, label: "Agenda" },
   { to: "/admin/clients", icon: Users, label: "Clientes" },
   { to: "/admin/financial", icon: DollarSign, label: "Financeiro" },
   { to: "/admin/pix", icon: QrCode, label: "Pix" },
