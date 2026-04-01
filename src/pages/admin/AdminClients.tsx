@@ -281,12 +281,6 @@ export default function AdminClients() {
                 <Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
             </div>
-            {!editingClient && (
-              <div className="space-y-1.5">
-                <Label>Senha Inicial</Label>
-                <Input value={form.senha_inicial} onChange={(e) => setForm({ ...form, senha_inicial: e.target.value })} placeholder="Deixe em branco para gerar automaticamente" className="h-10 bg-secondary/50 border-border" />
-              </div>
-            )}
             <div className="space-y-1.5">
               <Label>Observações</Label>
               <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
