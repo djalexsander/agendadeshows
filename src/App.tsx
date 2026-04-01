@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
 import FirstAccess from "./pages/FirstAccess";
+import PaymentPending from "./pages/PaymentPending";
 import Dashboard from "./pages/Dashboard";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -41,6 +42,15 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="*" element={<FirstAccess />} />
+      </Routes>
+    );
+  }
+
+  // Payment pending — client must pay before accessing
+  if (role === "client" && profile?.status_plano === "pendente_pagamento") {
+    return (
+      <Routes>
+        <Route path="*" element={<PaymentPending />} />
       </Routes>
     );
   }

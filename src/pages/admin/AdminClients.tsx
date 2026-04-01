@@ -60,7 +60,7 @@ export default function AdminClients() {
   const resetForm = () => {
     setForm({
       nome: "", email: "", telefone: "", cidade: "", estado: "",
-      status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
+      status_plano: "pendente_pagamento", valor_plano: "", vencimento: "", observacoes: "",
     });
     setEditingClient(null);
   };
@@ -191,9 +191,11 @@ export default function AdminClients() {
               )}
               <p className="text-sm text-muted-foreground">{c.email}</p>
             </div>
-            <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
+           <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
               c.status_plano === "ativo"
                 ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
+                : c.status_plano === "pendente_pagamento"
+                ? "bg-orange-500/20 text-orange-400"
                 : c.status_plano === "inativo"
                 ? "bg-destructive/20 text-destructive"
                 : "bg-yellow-500/20 text-yellow-400"
@@ -264,10 +266,11 @@ export default function AdminClients() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                    <SelectItem value="ativo">Ativo</SelectItem>
-                    <SelectItem value="inativo">Inativo</SelectItem>
-                    <SelectItem value="trial">Trial</SelectItem>
-                    <SelectItem value="expirado">Expirado</SelectItem>
+                     <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
+                     <SelectItem value="ativo">Ativo</SelectItem>
+                     <SelectItem value="inativo">Inativo</SelectItem>
+                     <SelectItem value="trial">Trial</SelectItem>
+                     <SelectItem value="expirado">Expirado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
