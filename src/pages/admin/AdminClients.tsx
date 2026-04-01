@@ -46,9 +46,8 @@ export default function AdminClients() {
 
   // Form state
   const [form, setForm] = useState({
-    nome: "", nome_artistico: "", email: "", telefone: "", cidade: "", estado: "",
+    nome: "", email: "", telefone: "", cidade: "", estado: "",
     status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
-    senha_inicial: "",
   });
 
   const fetchClients = async () => {
