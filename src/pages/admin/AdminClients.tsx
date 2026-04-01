@@ -96,7 +96,7 @@ export default function AdminClients() {
       toast({ title: "Sucesso", description: "Cliente atualizado." });
     } else {
       // Create new user via edge function (preserves admin session)
-      const tempPassword = form.senha_inicial || "Temp@" + Math.random().toString(36).slice(-6);
+      const tempPassword = "Temp@" + Math.random().toString(36).slice(-6);
       const { data: { session } } = await supabase.auth.getSession();
       const response = await supabase.functions.invoke("create-user", {
         body: { email: form.email, password: tempPassword, nome: form.nome },
