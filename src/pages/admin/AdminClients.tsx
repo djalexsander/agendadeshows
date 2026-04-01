@@ -205,6 +205,9 @@ export default function AdminClients() {
             <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(c)}>
               <Pencil className="h-4 w-4" />
             </Button>
+            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(c)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         ))}
         {filtered.length === 0 && (
