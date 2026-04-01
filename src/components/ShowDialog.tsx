@@ -172,6 +172,15 @@ export function ShowDialog({
               </div>
             </div>
 
+            {status !== (existingShow.status || "pendente") && (
+              <Button
+                onClick={handleStatusSave}
+                className="w-full h-12 text-base bg-primary hover:bg-primary/90"
+              >
+                Salvar Status
+              </Button>
+            )}
+
             <div className="flex gap-3">
               <Button
                 onClick={() => setIsEditing(true)}
