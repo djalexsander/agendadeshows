@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { format, isSameMonth } from "date-fns";
+import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
 import { Music, FileDown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
