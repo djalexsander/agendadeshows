@@ -91,23 +91,21 @@ export default function AdminClients() {
       }).eq("id", editingClient.id);
       toast({ title: "Sucesso", description: "Cliente atualizado." });
     } else {
-      // Create new user via Supabase auth admin (use signUp as workaround)
+      // Create new user via edge function (preserves admin session)
       const tempPassword = form.senha_inicial || "Temp@" + Math.random().toString(36).slice(-6);
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: form.email,
-        password: tempPassword,
-        options: {
-          data: { nome: form.nome },
-        },
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await supabase.functions.invoke("create-user", {
+        body: { email: form.email, password: tempPassword, nome: form.nome },
       });
 
-      if (authError) {
-        toast({ title: "Erro", description: authError.message, variant: "destructive" });
+      if (response.error || response.data?.error) {
+        toast({ title: "Erro", description: response.data?.error || response.error?.message, variant: "destructive" });
         setLoading(false);
         return;
       }
 
-      if (authData.user) {
+      const newUserId = response.data?.user?.id;
+      if (newUserId) {
         // Wait a moment for the trigger to create the profile
         await new Promise((r) => setTimeout(r, 1000));
 
@@ -118,7 +116,7 @@ export default function AdminClients() {
           valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
           vencimento: form.vencimento || null, observacoes: form.observacoes,
           primeiro_acesso: true,
-        }).eq("user_id", authData.user.id);
+        }).eq("user_id", newUserId);
 
         // Role is auto-assigned by database trigger
         toast({ title: "Sucesso", description: `Cliente criado. Senha inicial: ${tempPassword}` });
