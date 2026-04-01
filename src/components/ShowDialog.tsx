@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Show } from "@/hooks/useShows";
+import type { Show, ShowStatus } from "@/hooks/useShows";
 
 const ESTADOS_BR = [
   { sigla: "AC", nome: "Acre" },
@@ -51,13 +51,19 @@ const ESTADOS_BR = [
   { sigla: "TO", nome: "Tocantins" },
 ];
 
+const STATUS_OPTIONS: { value: ShowStatus; label: string; color: string }[] = [
+  { value: "pendente", label: "Pendente", color: "bg-yellow-500" },
+  { value: "confirmado", label: "Confirmado", color: "bg-[hsl(140_60%_45%)]" },
+  { value: "finalizado", label: "Finalizado", color: "bg-blue-500" },
+];
+
 interface ShowDialogProps {
   open: boolean;
   onClose: () => void;
   selectedDate: string | null;
   existingShow: Show | undefined;
-  onSave: (date: string, cidade: string, estado: string) => void;
-  onUpdate: (id: string, cidade: string, estado: string) => void;
+  onSave: (date: string, cidade: string, estado: string, status: ShowStatus) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -72,16 +78,19 @@ export function ShowDialog({
 }: ShowDialogProps) {
   const [cidade, setCidade] = useState("");
   const [estado, setEstado] = useState("");
+  const [status, setStatus] = useState<ShowStatus>("pendente");
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (existingShow) {
       setCidade(existingShow.cidade);
       setEstado(existingShow.estado || "");
+      setStatus(existingShow.status || "pendente");
       setIsEditing(false);
     } else {
       setCidade("");
       setEstado("");
+      setStatus("pendente");
       setIsEditing(true);
     }
   }, [existingShow, selectedDate, open]);
@@ -93,9 +102,9 @@ export function ShowDialog({
   const handleSave = () => {
     if (!cidade.trim() || !estado) return;
     if (existingShow) {
-      onUpdate(existingShow.id, cidade.trim(), estado);
+      onUpdate(existingShow.id, { cidade: cidade.trim(), estado, status });
     } else {
-      onSave(selectedDate, cidade.trim(), estado);
+      onSave(selectedDate, cidade.trim(), estado, status);
     }
     onClose();
   };
@@ -107,9 +116,14 @@ export function ShowDialog({
     }
   };
 
-  const estadoNome = existingShow?.estado
-    ? ESTADOS_BR.find((e) => e.sigla === existingShow.estado)
-    : undefined;
+  const handleStatusChange = (newStatus: ShowStatus) => {
+    if (existingShow) {
+      onUpdate(existingShow.id, { status: newStatus });
+      setStatus(newStatus);
+    }
+  };
+
+  const currentStatusInfo = STATUS_OPTIONS.find((s) => s.value === (existingShow?.status || status));
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -130,9 +144,30 @@ export function ShowDialog({
               <MapPin className="h-5 w-5 text-primary shrink-0" />
               <span className="text-lg font-medium">
                 {existingShow.cidade}
-                {estadoNome && <span className="text-muted-foreground"> — {estadoNome.sigla}</span>}
+                {existingShow.estado && <span className="text-muted-foreground"> — {existingShow.estado}</span>}
               </span>
             </div>
+
+            {/* Status selector */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Status</Label>
+              <div className="flex gap-2">
+                {STATUS_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleStatusChange(opt.value)}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border ${
+                      (existingShow.status || "pendente") === opt.value
+                        ? `${opt.color} text-white border-transparent`
+                        : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex gap-3">
               <Button
                 onClick={() => setIsEditing(true)}
@@ -184,6 +219,25 @@ export function ShowDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base">Status</Label>
+              <div className="flex gap-2">
+                {STATUS_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setStatus(opt.value)}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border ${
+                      status === opt.value
+                        ? `${opt.color} text-white border-transparent`
+                        : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="flex gap-3">
               {existingShow && (
