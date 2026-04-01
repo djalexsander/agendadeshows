@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, Pencil, Search } from "lucide-react";
+import { UserPlus, Pencil, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -35,6 +39,7 @@ export default function AdminClients() {
   const [clients, setClients] = useState<ClientProfile[]>([]);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ClientProfile | null>(null);
   const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -129,6 +134,22 @@ export default function AdminClients() {
     fetchClients();
   };
 
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setLoading(true);
+    const response = await supabase.functions.invoke("delete-user", {
+      body: { user_id: deleteTarget.user_id },
+    });
+    if (response.error || response.data?.error) {
+      toast({ title: "Erro", description: response.data?.error || response.error?.message, variant: "destructive" });
+    } else {
+      toast({ title: "Sucesso", description: "Cliente excluído." });
+      fetchClients();
+    }
+    setLoading(false);
+    setDeleteTarget(null);
+  };
+
   const filtered = clients.filter((c) => {
     const q = search.toLowerCase();
     return (
@@ -183,6 +204,9 @@ export default function AdminClients() {
             </span>
             <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(c)}>
               <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(c)}>
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         ))}
@@ -280,6 +304,24 @@ export default function AdminClients() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent className="bg-card border-border rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{deleteTarget?.nome}</strong> ({deleteTarget?.email})?
+              Todos os dados (shows, pagamentos) serão removidos permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={loading} className="bg-destructive hover:bg-destructive/90">
+              {loading ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
