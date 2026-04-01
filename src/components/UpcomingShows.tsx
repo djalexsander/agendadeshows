@@ -39,7 +39,9 @@ export function UpcomingShows({ shows, onShowClick }: UpcomingShowsProps) {
             <div className="h-10 w-px bg-border" />
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <MapPin className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-base font-medium truncate">{show.cidade}</span>
+              <span className="text-base font-medium truncate">
+                {show.cidade}{show.estado ? ` — ${show.estado}` : ""}
+              </span>
             </div>
           </button>
         );
