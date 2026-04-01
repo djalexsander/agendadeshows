@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import { format, isSameMonth, parseISO } from "date-fns";
+import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, FileDown, CalendarDays, BarChart3, MapPin, LogOut } from "lucide-react";
+import { Music, FileDown, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
@@ -26,6 +26,14 @@ export default function Dashboard() {
 
   const showDates = getShowDates();
   const monthShows = getShowsInMonth(currentMonth);
+
+  const nextShow = useMemo(() => {
+    const today = startOfDay(new Date());
+    const future = shows
+      .filter((s) => isAfter(new Date(s.date + "T23:59:59"), today))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    return future.length > 0 ? future[0] : null;
+  }, [shows]);
 
   const modifiers = useMemo(() => {
     const dates: Date[] = [];
@@ -130,7 +138,7 @@ export default function Dashboard() {
           </div>
         )}
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
             <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <CalendarDays className="h-6 w-6 text-primary" />
@@ -147,6 +155,32 @@ export default function Dashboard() {
             <div>
               <p className="text-2xl font-bold">{shows.length}</p>
               <p className="text-sm text-muted-foreground">Total de shows</p>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <Clock className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-lg font-bold truncate">
+                {nextShow
+                  ? format(parseISO(nextShow.date), "dd/MM/yyyy")
+                  : "—"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {nextShow ? "Próximo show" : "Nenhum próximo show"}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <Navigation className="h-6 w-6 text-accent-foreground" />
+            </div>
+            <div>
+              <p className="text-lg font-bold truncate">
+                {nextShow ? nextShow.cidade : "—"}
+              </p>
+              <p className="text-sm text-muted-foreground">Cidade próximo show</p>
             </div>
           </div>
         </div>
