@@ -192,7 +192,15 @@ const Index = () => {
                             <span className="text-sm text-muted-foreground">{show.estado}</span>
                           </div>
                         </div>
-                        <div className="h-2 w-2 rounded-full bg-[hsl(140_60%_45%)] shrink-0 opacity-80" />
+                        <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
+                          (show.status || "pendente") === "confirmado"
+                            ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
+                            : (show.status || "pendente") === "finalizado"
+                            ? "bg-blue-500/20 text-blue-400"
+                            : "bg-yellow-500/20 text-yellow-400"
+                        }`}>
+                          {show.status || "pendente"}
+                        </span>
                       </button>
                     );
                   })}
