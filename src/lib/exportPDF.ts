@@ -46,15 +46,17 @@ export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: stri
     doc.setFillColor(240, 240, 240);
     doc.rect(margin, y - 5, pageW - margin * 2, 8, "F");
     const colData = margin + 4;
-    const colDia = margin + 30;
-    const colCidade = margin + 55;
-    const colEstado = margin + 130;
+    const colDia = margin + 28;
+    const colCidade = margin + 50;
+    const colEstado = margin + 115;
+    const colStatus = margin + 135;
     const maxCidadeWidth = colEstado - colCidade - 4;
 
     doc.text("Data", colData, y);
     doc.text("Dia", colDia, y);
     doc.text("Cidade", colCidade, y);
     doc.text("Estado", colEstado, y);
+    doc.text("Status", colStatus, y);
     y += 7;
 
     doc.setFont("helvetica", "normal");
@@ -74,17 +76,19 @@ export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: stri
       const dateFormatted = format(parseISO(show.date), "dd/MM/yyyy");
       const dayOfWeek = format(parseISO(show.date), "EEE", { locale: ptBR });
 
-      // Truncate city name if too wide
       let cidadeText = show.cidade;
       while (doc.getTextWidth(cidadeText) > maxCidadeWidth && cidadeText.length > 1) {
         cidadeText = cidadeText.slice(0, -1);
       }
       if (cidadeText !== show.cidade) cidadeText += "…";
 
+      const statusLabel = (show.status || "pendente").charAt(0).toUpperCase() + (show.status || "pendente").slice(1);
+
       doc.text(dateFormatted, colData, y);
       doc.text(dayOfWeek, colDia, y);
       doc.text(cidadeText, colCidade, y);
       doc.text(show.estado || "", colEstado, y);
+      doc.text(statusLabel, colStatus, y);
       y += 8;
     });
 
