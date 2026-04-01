@@ -70,10 +70,10 @@ export default function AdminClients() {
   const openEdit = (c: ClientProfile) => {
     setEditingClient(c);
     setForm({
-      nome: c.nome, nome_artistico: c.nome_artistico || "", email: c.email,
+      nome: c.nome, email: c.email,
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo", valor_plano: String(c.valor_plano || ""),
-      vencimento: c.vencimento || "", observacoes: c.observacoes || "", senha_inicial: "",
+      vencimento: c.vencimento || "", observacoes: c.observacoes || "",
     });
     setDialogOpen(true);
   };
