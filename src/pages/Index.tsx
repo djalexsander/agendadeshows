@@ -127,11 +127,13 @@ const Index = () => {
               const dateStr = format(date, "yyyy-MM-dd");
               const hasShow = showDates.has(dateStr);
               const isCurrentMonth = isSameMonth(date, currentMonth);
+              const showHighlight = hasShow && isCurrentMonth;
               return (
-                <div className="relative flex flex-col items-center">
-                  {hasShow && isCurrentMonth && <div className="show-circle" />}
+                <div className={cn(
+                  "w-full h-full flex items-center justify-center rounded-lg transition-colors",
+                  showHighlight && "bg-[hsl(140_60%_45%)] text-white font-bold"
+                )}>
                   <span>{date.getDate()}</span>
-                  {hasShow && isCurrentMonth && <div className="show-dot" />}
                 </div>
               );
             },
