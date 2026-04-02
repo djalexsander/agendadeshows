@@ -52,7 +52,21 @@ export default function AdminDashboard() {
     await (supabase.from("payment_proofs") as any).update({ status: "aprovado" }).eq("id", proof.id);
     // Activate client
     await supabase.from("profiles").update({ status_plano: "ativo" }).eq("user_id", proof.client_user_id);
-    toast({ title: "Aprovado!", description: `Acesso de ${proof.client_name} liberado.` });
+
+    // Get client valor_plano to register payment
+    const { data: clientProfile } = await supabase.from("profiles").select("valor_plano").eq("user_id", proof.client_user_id).single();
+    const valor = clientProfile?.valor_plano || 0;
+
+    // Register payment as "pago" in financeiro
+    await supabase.from("payments").insert({
+      client_user_id: proof.client_user_id,
+      valor,
+      status: "pago",
+      forma_pagamento: "pix",
+      data_pagamento: new Date().toISOString().split("T")[0],
+    });
+
+    toast({ title: "Aprovado!", description: `Acesso de ${proof.client_name} liberado e pagamento registrado.` });
     setLoading(null);
     load();
   };
