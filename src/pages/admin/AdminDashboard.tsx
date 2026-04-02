@@ -179,6 +179,16 @@ export default function AdminDashboard() {
     setLoading(proof.id);
     await (supabase.from("payment_proofs") as any).update({ status: "rejeitado" }).eq("id", proof.id);
     await supabase.from("profiles").update({ status_plano: "aguardando_pagamento" }).eq("user_id", proof.client_user_id);
+    // Send push to client
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "⚠️ Comprovante Rejeitado",
+        body: "Seu comprovante de pagamento foi rejeitado. Por favor, envie um novo comprovante.",
+        url: "/",
+        target_user_ids: [proof.client_user_id],
+      },
+    }).catch(() => {});
+
     toast({ title: "Rejeitado", description: `Comprovante de ${proof.client_name} rejeitado.` });
     setLoading(null);
     load();
