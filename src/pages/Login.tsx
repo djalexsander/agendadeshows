@@ -18,8 +18,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [signupConfig, setSignupConfig] = useState<{ valor_padrao: number; cadastro_ativo: boolean; instrucoes_pagamento: string } | null>(null);
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    (supabase.from("signup_config") as any).select("*").limit(1).then(({ data }: any) => {
+      if (data && data.length > 0) setSignupConfig(data[0]);
+    });
+  }, []);
 
   const isActivate = mode === "activate";
   const isSignup = mode === "signup";
