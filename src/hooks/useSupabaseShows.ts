@@ -43,6 +43,7 @@ export function useSupabaseShows() {
           horario: s.horario || undefined,
           local: s.local || undefined,
           observacoes: s.observacoes || undefined,
+          com_quem_evento: s.com_quem_evento || undefined,
         }))
       );
     }
