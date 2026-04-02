@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      payment_proofs: {
+        Row: {
+          client_user_id: string
+          created_at: string
+          id: string
+          image_url: string
+          mensagem: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_user_id: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          mensagem?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_user_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          mensagem?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           client_user_id: string
