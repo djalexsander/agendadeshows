@@ -287,11 +287,13 @@ export default function AdminClients() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                     <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
-                     <SelectItem value="ativo">Ativo</SelectItem>
-                     <SelectItem value="inativo">Inativo</SelectItem>
-                     <SelectItem value="trial">Trial</SelectItem>
-                     <SelectItem value="expirado">Expirado</SelectItem>
+                      <SelectItem value="pendente_aprovacao">Pend. Aprovação</SelectItem>
+                      <SelectItem value="aguardando_pagamento">Aguard. Pagamento</SelectItem>
+                      <SelectItem value="pagamento_em_analise">Pagto. em Análise</SelectItem>
+                      <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
+                      <SelectItem value="ativo">Ativo</SelectItem>
+                      <SelectItem value="inativo">Inativo</SelectItem>
+                      <SelectItem value="rejeitado">Rejeitado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
