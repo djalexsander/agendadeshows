@@ -227,6 +227,7 @@ export type Database = {
       shows: {
         Row: {
           cidade: string
+          com_quem_evento: string | null
           created_at: string
           date: string
           estado: string
@@ -241,6 +242,7 @@ export type Database = {
         }
         Insert: {
           cidade: string
+          com_quem_evento?: string | null
           created_at?: string
           date: string
           estado?: string
@@ -255,6 +257,7 @@ export type Database = {
         }
         Update: {
           cidade?: string
+          com_quem_evento?: string | null
           created_at?: string
           date?: string
           estado?: string

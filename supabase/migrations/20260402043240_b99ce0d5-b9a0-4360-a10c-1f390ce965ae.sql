@@ -1,0 +1,1 @@
+ALTER TABLE public.shows ADD COLUMN com_quem_evento text DEFAULT '' NULL;
