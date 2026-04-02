@@ -244,6 +244,35 @@ export default function AdminFinancial() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent className="bg-card border-border rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir pagamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o pagamento de <strong>{deleteTarget?.client_name}</strong> (R$ {deleteTarget?.valor.toFixed(2)})?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={loading}
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={async () => {
+                if (!deleteTarget) return;
+                setLoading(true);
+                await supabase.from("payments").delete().eq("id", deleteTarget.id);
+                setLoading(false);
+                setDeleteTarget(null);
+                fetchData();
+                toast({ title: "Excluído", description: "Pagamento removido." });
+              }}
+            >
+              {loading ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
