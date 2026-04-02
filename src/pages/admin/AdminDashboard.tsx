@@ -129,6 +129,16 @@ export default function AdminDashboard() {
       .update({ lida: true })
       .eq("referencia_user_id", pendingUser.user_id);
 
+    // Send push to rejected user
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "❌ Cadastro Rejeitado",
+        body: "Infelizmente seu cadastro não foi aprovado. Entre em contato para mais informações.",
+        url: "/",
+        target_user_ids: [pendingUser.user_id],
+      },
+    }).catch(() => {});
+
     toast({ title: "Rejeitado", description: `Cadastro de ${pendingUser.nome} rejeitado.` });
     setLoading(null);
     load();
