@@ -168,6 +168,9 @@ export default function AdminFinancial() {
             <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
               <Pencil className="h-4 w-4" />
             </Button>
+            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         ))}
         {payments.length === 0 && (
