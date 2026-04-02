@@ -24,6 +24,7 @@ const navItems = [
   { to: "/admin/clients", icon: Users, label: "Clientes" },
   { to: "/admin/financial", icon: DollarSign, label: "Financeiro" },
   { to: "/admin/pix", icon: QrCode, label: "Pix" },
+  { to: "/admin/settings", icon: Settings, label: "Config" },
 ];
 
 function requestNotificationPermission() {
