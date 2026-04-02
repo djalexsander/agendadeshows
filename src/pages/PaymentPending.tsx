@@ -87,6 +87,16 @@ export default function PaymentPending() {
       setAlreadySent(true);
       toast({ title: "Comprovante enviado!", description: "O administrador será notificado e liberará seu acesso em breve." });
 
+      // Send push to admins
+      supabase.functions.invoke("send-push", {
+        body: {
+          title: "📎 Novo Comprovante",
+          body: `${profile?.nome || "Um cliente"} enviou um comprovante de pagamento para análise.`,
+          url: "/admin",
+          target_role: "admin",
+        },
+      }).catch(() => {});
+
       // Reload to show the payment review screen
       window.location.reload();
     } catch (err: any) {

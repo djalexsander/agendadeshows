@@ -104,6 +104,16 @@ export default function AdminDashboard() {
       .update({ lida: true })
       .eq("referencia_user_id", pendingUser.user_id);
 
+    // Send push notification to the client
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "✅ Cadastro Aprovado!",
+        body: "Seu cadastro foi aprovado! Agora envie o comprovante de pagamento para liberar o acesso.",
+        url: "/",
+        target_user_ids: [pendingUser.user_id],
+      },
+    }).catch(() => {});
+
     toast({ title: "Aprovado!", description: `Cadastro de ${pendingUser.nome} aprovado. Aguardando pagamento.` });
     setLoading(null);
     load();
@@ -118,6 +128,16 @@ export default function AdminDashboard() {
     await (supabase.from("admin_notifications") as any)
       .update({ lida: true })
       .eq("referencia_user_id", pendingUser.user_id);
+
+    // Send push to rejected user
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "❌ Cadastro Rejeitado",
+        body: "Infelizmente seu cadastro não foi aprovado. Entre em contato para mais informações.",
+        url: "/",
+        target_user_ids: [pendingUser.user_id],
+      },
+    }).catch(() => {});
 
     toast({ title: "Rejeitado", description: `Cadastro de ${pendingUser.nome} rejeitado.` });
     setLoading(null);
@@ -140,6 +160,16 @@ export default function AdminDashboard() {
       data_pagamento: new Date().toISOString().split("T")[0],
     });
 
+    // Send push to client
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "🎉 Acesso Liberado!",
+        body: "Seu pagamento foi aprovado e seu acesso está liberado. Bem-vindo!",
+        url: "/",
+        target_user_ids: [proof.client_user_id],
+      },
+    }).catch(() => {});
+
     toast({ title: "Aprovado!", description: `Pagamento de ${proof.client_name} aprovado e acesso liberado.` });
     setLoading(null);
     load();
@@ -149,6 +179,16 @@ export default function AdminDashboard() {
     setLoading(proof.id);
     await (supabase.from("payment_proofs") as any).update({ status: "rejeitado" }).eq("id", proof.id);
     await supabase.from("profiles").update({ status_plano: "aguardando_pagamento" }).eq("user_id", proof.client_user_id);
+    // Send push to client
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "⚠️ Comprovante Rejeitado",
+        body: "Seu comprovante de pagamento foi rejeitado. Por favor, envie um novo comprovante.",
+        url: "/",
+        target_user_ids: [proof.client_user_id],
+      },
+    }).catch(() => {});
+
     toast({ title: "Rejeitado", description: `Comprovante de ${proof.client_name} rejeitado.` });
     setLoading(null);
     load();
