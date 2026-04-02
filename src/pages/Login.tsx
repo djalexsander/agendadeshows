@@ -183,6 +183,7 @@ export default function Login() {
         <p className="text-center text-xs text-muted-foreground">
           {isActivate ? "Use o e-mail informado pelo administrador." : "Acesso fornecido pelo administrador"}
         </p>
+        <p className="text-center text-[10px] text-muted-foreground/50">{APP_VERSION}</p>
       </div>
     </div>
   );
