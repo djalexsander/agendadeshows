@@ -11,7 +11,6 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, nome: string) => Promise<{ error: any; needsEmailConfirmation: boolean }>;
   signOut: () => Promise<void>;
-  updatePassword: (password: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -41,16 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("*")
       .eq("user_id", currentUser.id)
       .single();
-
-    if (prof?.primeiro_acesso && currentUser.user_metadata?.self_signup) {
-      await supabase
-        .from("profiles")
-        .update({ primeiro_acesso: false })
-        .eq("user_id", currentUser.id);
-
-      setProfile({ ...prof, primeiro_acesso: false });
-      return;
-    }
 
     setProfile(prof);
   };
@@ -116,21 +105,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
-  const updatePassword = async (password: string) => {
-    const { error } = await supabase.auth.updateUser({ password });
-    if (!error && profile) {
-      await supabase
-        .from("profiles")
-        .update({ primeiro_acesso: false })
-        .eq("user_id", user!.id);
-      setProfile({ ...profile, primeiro_acesso: false });
-    }
-    return { error };
-  };
-
   return (
     <AuthContext.Provider
-      value={{ session, user, role, profile, loading, signIn, signUp, signOut, updatePassword }}
+      value={{ session, user, role, profile, loading, signIn, signUp, signOut }}
     >
       {children}
     </AuthContext.Provider>

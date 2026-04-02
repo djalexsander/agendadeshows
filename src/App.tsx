@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
-import FirstAccess from "./pages/FirstAccess";
 import PaymentPending from "./pages/PaymentPending";
 import Dashboard from "./pages/Dashboard";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -33,15 +32,6 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="*" element={<Login />} />
-      </Routes>
-    );
-  }
-
-  // First access — must set password
-  if (profile?.primeiro_acesso) {
-    return (
-      <Routes>
-        <Route path="*" element={<FirstAccess />} />
       </Routes>
     );
   }
