@@ -16,7 +16,7 @@ interface PaymentProof {
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0 });
+  const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0, pendentes_pagamento: 0 });
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const { toast } = useToast();
