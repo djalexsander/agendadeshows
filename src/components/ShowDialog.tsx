@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Pencil, Trash2, Music, AlertTriangle } from "lucide-react";
+import { MapPin, Pencil, Trash2, Music, AlertTriangle, Users, Image } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Show, ShowStatus } from "@/hooks/useShows";
+import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
+import { exportShowPNG } from "@/lib/exportPNG";
 
 const ESTADOS_BR = [
   { sigla: "AC", nome: "Acre" },
@@ -62,8 +63,8 @@ interface ShowDialogProps {
   onClose: () => void;
   selectedDate: string | null;
   existingShow: Show | undefined;
-  onSave: (date: string, cidade: string, estado: string, status: ShowStatus) => void;
-  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => void;
+  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -79,6 +80,7 @@ export function ShowDialog({
   const [cidade, setCidade] = useState("");
   const [estado, setEstado] = useState("");
   const [status, setStatus] = useState<ShowStatus>("pendente");
+  const [comQuemEvento, setComQuemEvento] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -87,12 +89,14 @@ export function ShowDialog({
       setCidade(existingShow.cidade);
       setEstado(existingShow.estado || "");
       setStatus(existingShow.status || "pendente");
+      setComQuemEvento(existingShow.com_quem_evento || "");
       setIsEditing(false);
       setConfirmDelete(false);
     } else {
       setCidade("");
       setEstado("");
       setStatus("pendente");
+      setComQuemEvento("");
       setIsEditing(true);
     }
   }, [existingShow, selectedDate, open]);
@@ -104,9 +108,14 @@ export function ShowDialog({
   const handleSave = () => {
     if (!cidade.trim() || !estado) return;
     if (existingShow) {
-      onUpdate(existingShow.id, { cidade: cidade.trim(), estado, status });
+      onUpdate(existingShow.id, {
+        cidade: cidade.trim(),
+        estado,
+        status,
+        com_quem_evento: comQuemEvento.trim() || "",
+      });
     } else {
-      onSave(selectedDate, cidade.trim(), estado, status);
+      onSave(selectedDate, cidade.trim(), estado, status, comQuemEvento.trim() || undefined);
     }
     onClose();
   };
@@ -118,18 +127,11 @@ export function ShowDialog({
     }
   };
 
-  const handleStatusChange = (newStatus: ShowStatus) => {
-    setStatus(newStatus);
-  };
-
-  const handleStatusSave = () => {
+  const handleExportPNG = () => {
     if (existingShow) {
-      onUpdate(existingShow.id, { status });
-      onClose();
+      exportShowPNG(existingShow);
     }
   };
-
-  const currentStatusInfo = STATUS_OPTIONS.find((s) => s.value === (existingShow?.status || status));
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -137,7 +139,7 @@ export function ShowDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <Music className="h-5 w-5 text-primary" />
-            {existingShow && !isEditing ? "Detalhes do Show" : existingShow ? "Editar Show" : "Novo Show"}
+            {existingShow && !isEditing ? "Detalhes do Evento" : existingShow ? "Editar Evento" : "Novo Evento"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground capitalize">
             {dateFormatted}
@@ -145,6 +147,7 @@ export function ShowDialog({
         </DialogHeader>
 
         {existingShow && !isEditing ? (
+          /* VIEW MODE — no status, just info + edit/delete/export */
           <div className="space-y-4 py-2">
             <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
               <MapPin className="h-5 w-5 text-primary shrink-0" />
@@ -154,33 +157,14 @@ export function ShowDialog({
               </span>
             </div>
 
-            {/* Status selector */}
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">Status</Label>
-              <div className="flex gap-2">
-                {STATUS_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => handleStatusChange(opt.value)}
-                    className={`flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border ${
-                      status === opt.value
-                        ? `${opt.color} text-white border-transparent`
-                        : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+            {existingShow.com_quem_evento && (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
+                <Users className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Com quem será o evento</p>
+                  <p className="font-medium">{existingShow.com_quem_evento}</p>
+                </div>
               </div>
-            </div>
-
-            {status !== (existingShow.status || "pendente") && (
-              <Button
-                onClick={handleStatusSave}
-                className="w-full h-12 text-base bg-primary hover:bg-primary/90"
-              >
-                Salvar Status
-              </Button>
             )}
 
             <div className="flex gap-3">
@@ -191,6 +175,14 @@ export function ShowDialog({
               >
                 <Pencil className="h-4 w-4" />
                 Editar
+              </Button>
+              <Button
+                onClick={handleExportPNG}
+                className="h-12 text-base gap-2"
+                variant="outline"
+              >
+                <Image className="h-4 w-4" />
+                PNG
               </Button>
               {!confirmDelete ? (
                 <Button
@@ -208,17 +200,16 @@ export function ShowDialog({
                   variant="destructive"
                 >
                   <AlertTriangle className="h-4 w-4" />
-                  Confirmar Exclusão
+                  Confirmar
                 </Button>
               )}
             </div>
           </div>
         ) : (
+          /* EDIT MODE — includes status */
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="cidade" className="text-base">
-                Cidade
-              </Label>
+              <Label htmlFor="cidade" className="text-base">Cidade</Label>
               <Input
                 id="cidade"
                 value={cidade}
@@ -230,9 +221,7 @@ export function ShowDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="estado" className="text-base">
-                Estado
-              </Label>
+              <Label htmlFor="estado" className="text-base">Estado</Label>
               <Select value={estado} onValueChange={setEstado}>
                 <SelectTrigger className="h-12 text-base bg-secondary/50 border-border">
                   <SelectValue placeholder="Selecione o estado" />
@@ -245,6 +234,16 @@ export function ShowDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="comQuem" className="text-base">Com quem será o evento</Label>
+              <Input
+                id="comQuem"
+                value={comQuemEvento}
+                onChange={(e) => setComQuemEvento(e.target.value)}
+                placeholder="Artista, empresa, contratante..."
+                className="h-12 text-base bg-secondary/50 border-border"
+              />
             </div>
             <div className="space-y-2">
               <Label className="text-base">Status</Label>
