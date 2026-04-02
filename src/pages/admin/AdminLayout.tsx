@@ -1,7 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { format, parseISO, isToday, isTomorrow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   Music,
   LayoutDashboard,
