@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, nome: string) => {
+  const signUp = async (email: string, password: string, nome: string, telefone?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -88,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         emailRedirectTo: window.location.origin,
         data: {
           nome,
+          telefone: telefone || "",
           self_signup: true,
         },
       },
