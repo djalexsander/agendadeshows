@@ -104,6 +104,16 @@ export default function AdminDashboard() {
       .update({ lida: true })
       .eq("referencia_user_id", pendingUser.user_id);
 
+    // Send push notification to the client
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "✅ Cadastro Aprovado!",
+        body: "Seu cadastro foi aprovado! Agora envie o comprovante de pagamento para liberar o acesso.",
+        url: "/",
+        target_user_ids: [pendingUser.user_id],
+      },
+    }).catch(() => {});
+
     toast({ title: "Aprovado!", description: `Cadastro de ${pendingUser.nome} aprovado. Aguardando pagamento.` });
     setLoading(null);
     load();

@@ -23,6 +23,7 @@ const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, role, profile, loading } = useAuth();
+  usePushSubscription();
 
   if (loading) {
     return (
