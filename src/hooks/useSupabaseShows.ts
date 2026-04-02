@@ -55,11 +55,11 @@ export function useSupabaseShows() {
   }, [fetchShows]);
 
   const addShow = useCallback(
-    async (date: string, cidade: string, estado: string, status: ShowStatus = "pendente") => {
+    async (date: string, cidade: string, estado: string, status: ShowStatus = "pendente", com_quem_evento?: string) => {
       if (!user) return;
       const { data, error } = await supabase
         .from("shows")
-        .insert({ user_id: user.id, date, cidade, estado, status })
+        .insert({ user_id: user.id, date, cidade, estado, status, com_quem_evento: com_quem_evento || "" })
         .select()
         .single();
       if (data && !error) {
