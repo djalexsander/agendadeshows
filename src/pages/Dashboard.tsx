@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { ShowDialog } from "@/components/ShowDialog";
-import { ExportPDFDialog } from "@/components/ExportPDFDialog";
+import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { useLocation } from "react-router-dom";
