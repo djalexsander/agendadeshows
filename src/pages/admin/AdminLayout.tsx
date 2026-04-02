@@ -68,7 +68,7 @@ export default function AdminLayout() {
 
       {/* Mobile header */}
       <div className="flex-1 flex flex-col">
-        <header className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
+        <header className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card sticky top-0 z-50">
           <div className="flex items-center gap-2">
             <Music className="h-5 w-5 text-primary" />
             <span className="font-bold text-sm">Admin</span>
