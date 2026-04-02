@@ -1,7 +1,7 @@
 import jsPDF from "jspdf";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { Show } from "@/hooks/useShows";
+import type { Show } from "@/hooks/useSupabaseShows";
 
 export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: string) {
   const sorted = [...shows].sort((a, b) => a.date.localeCompare(b.date));

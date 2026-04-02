@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Image, CalendarIcon } from "lucide-react";
+import { FileDown, Image, CalendarIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { Show } from "@/hooks/useSupabaseShows";
-import { exportShowPNG } from "@/lib/exportPNG";
+import { exportShowsListPNG } from "@/lib/exportPNG";
+import { exportShowsPDF } from "@/lib/exportPDF";
 
 const MESES = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -36,6 +37,7 @@ interface ExportPNGListDialogProps {
 }
 
 export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialogProps) {
+  const [exportFormat, setExportFormat] = useState<"png" | "pdf">("png");
   const [mode, setMode] = useState<"mensal" | "periodo">("mensal");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -54,10 +56,20 @@ export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialo
     return true;
   });
 
-  const handleExportAll = () => {
-    filtered.forEach((show, i) => {
-      setTimeout(() => exportShowPNG(show), i * 300);
-    });
+  const handleExport = () => {
+    const sorted = [...filtered].sort((a, b) => a.date.localeCompare(b.date));
+
+    const periodLabel = mode === "mensal"
+      ? `${MESES[selectedMonth]} ${selectedYear}`
+      : undefined;
+    const startStr = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
+    const endStr = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
+
+    if (exportFormat === "png") {
+      exportShowsListPNG(sorted, periodLabel, startStr, endStr);
+    } else {
+      exportShowsPDF(sorted, startStr, endStr);
+    }
     onClose();
   };
 
@@ -72,39 +84,73 @@ export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialo
       <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <Image className="h-5 w-5 text-primary" />
-            Exportar Imagens
+            <FileDown className="h-5 w-5 text-primary" />
+            Exportar Agenda
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Escolha como filtrar os eventos
+            Escolha o formato e período
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          {/* Format toggle */}
+          <div className="space-y-2">
+            <Label className="text-base">Formato</Label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setExportFormat("png")}
+                className={cn(
+                  "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border flex items-center justify-center gap-2",
+                  exportFormat === "png"
+                    ? "bg-primary text-primary-foreground border-transparent"
+                    : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                )}
+              >
+                <Image className="h-4 w-4" />
+                PNG
+              </button>
+              <button
+                onClick={() => setExportFormat("pdf")}
+                className={cn(
+                  "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border flex items-center justify-center gap-2",
+                  exportFormat === "pdf"
+                    ? "bg-primary text-primary-foreground border-transparent"
+                    : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                )}
+              >
+                <FileDown className="h-4 w-4" />
+                PDF
+              </button>
+            </div>
+          </div>
+
           {/* Mode toggle */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setMode("mensal")}
-              className={cn(
-                "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border",
-                mode === "mensal"
-                  ? "bg-primary text-primary-foreground border-transparent"
-                  : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
-              )}
-            >
-              Mensal
-            </button>
-            <button
-              onClick={() => setMode("periodo")}
-              className={cn(
-                "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border",
-                mode === "periodo"
-                  ? "bg-primary text-primary-foreground border-transparent"
-                  : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
-              )}
-            >
-              Por Período
-            </button>
+          <div className="space-y-2">
+            <Label className="text-base">Período</Label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMode("mensal")}
+                className={cn(
+                  "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border",
+                  mode === "mensal"
+                    ? "bg-primary text-primary-foreground border-transparent"
+                    : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                )}
+              >
+                Mensal
+              </button>
+              <button
+                onClick={() => setMode("periodo")}
+                className={cn(
+                  "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border",
+                  mode === "periodo"
+                    ? "bg-primary text-primary-foreground border-transparent"
+                    : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+                )}
+              >
+                Por Período
+              </button>
+            </div>
           </div>
 
           {mode === "mensal" ? (
@@ -199,12 +245,12 @@ export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialo
               </Button>
             )}
             <Button
-              onClick={handleExportAll}
+              onClick={handleExport}
               disabled={filtered.length === 0}
               className="flex-1 h-12 text-base bg-primary hover:bg-primary/90 gap-2"
             >
-              <Image className="h-4 w-4" />
-              Exportar ({filtered.length})
+              {exportFormat === "png" ? <Image className="h-4 w-4" /> : <FileDown className="h-4 w-4" />}
+              Exportar {exportFormat.toUpperCase()} ({filtered.length})
             </Button>
           </div>
         </div>
