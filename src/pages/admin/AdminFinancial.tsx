@@ -108,6 +108,20 @@ export default function AdminFinancial() {
     }
   };
 
+  const totalRecebido = payments.filter(p => p.status === "pago").reduce((s, p) => s + p.valor, 0);
+  const totalPendente = payments.filter(p => p.status === "pendente").reduce((s, p) => s + p.valor, 0);
+  const totalAtrasado = payments.filter(p => p.status === "atrasado").reduce((s, p) => s + p.valor, 0);
+  const qtdPago = payments.filter(p => p.status === "pago").length;
+  const qtdPendente = payments.filter(p => p.status === "pendente").length;
+  const qtdAtrasado = payments.filter(p => p.status === "atrasado").length;
+
+  const summaryCards = [
+    { label: "Recebido", valor: totalRecebido, qtd: qtdPago, icon: CheckCircle, color: "bg-[hsl(140_60%_45%)]/15 text-[hsl(140_60%_55%)]" },
+    { label: "Pendente", valor: totalPendente, qtd: qtdPendente, icon: Clock, color: "bg-yellow-500/15 text-yellow-400" },
+    { label: "Atrasado", valor: totalAtrasado, qtd: qtdAtrasado, icon: XCircle, color: "bg-destructive/15 text-destructive" },
+    { label: "Total Geral", valor: totalRecebido + totalPendente + totalAtrasado, qtd: payments.length, icon: DollarSign, color: "bg-primary/15 text-primary" },
+  ];
+
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -118,6 +132,19 @@ export default function AdminFinancial() {
         <Button onClick={openNew} className="gap-2 rounded-xl">
           <Plus className="h-4 w-4" /> Novo Pagamento
         </Button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {summaryCards.map((card) => (
+          <div key={card.label} className="rounded-2xl bg-card border border-border p-5 space-y-2">
+            <div className={`h-10 w-10 rounded-xl ${card.color} flex items-center justify-center`}>
+              <card.icon className="h-5 w-5" />
+            </div>
+            <p className="text-2xl font-bold">R$ {card.valor.toFixed(2)}</p>
+            <p className="text-sm text-muted-foreground">{card.label} ({card.qtd})</p>
+          </div>
+        ))}
       </div>
 
       <div className="space-y-3">
