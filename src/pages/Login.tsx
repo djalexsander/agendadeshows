@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { APP_VERSION } from "@/lib/version";
 
 export default function Login() {
   const [mode, setMode] = useState<"login" | "activate">("login");

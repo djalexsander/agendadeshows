@@ -57,11 +57,12 @@ export default function AdminLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-2">
           <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={signOut}>
             <LogOut className="h-5 w-5" />
             Sair
           </Button>
+          <p className="text-[10px] text-muted-foreground/50 text-center">{APP_VERSION}</p>
         </div>
       </aside>
 

@@ -330,6 +330,9 @@ export default function Dashboard() {
         onClose={() => setExportOpen(false)}
         shows={shows as any}
       />
+      {!isEmbedded && (
+        <p className="text-center text-[10px] text-muted-foreground/50 py-2">{APP_VERSION}</p>
+      )}
     </div>
   );
 }
