@@ -160,6 +160,16 @@ export default function AdminDashboard() {
       data_pagamento: new Date().toISOString().split("T")[0],
     });
 
+    // Send push to client
+    supabase.functions.invoke("send-push", {
+      body: {
+        title: "🎉 Acesso Liberado!",
+        body: "Seu pagamento foi aprovado e seu acesso está liberado. Bem-vindo!",
+        url: "/",
+        target_user_ids: [proof.client_user_id],
+      },
+    }).catch(() => {});
+
     toast({ title: "Aprovado!", description: `Pagamento de ${proof.client_name} aprovado e acesso liberado.` });
     setLoading(null);
     load();
