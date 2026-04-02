@@ -22,9 +22,10 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   const load = async () => {
-    const [profilesRes, paymentsRes, proofsRes] = await Promise.all([
+    const [profilesRes, paymentsRes, pendingPaymentsRes, proofsRes] = await Promise.all([
       supabase.from("profiles").select("user_id, nome, status_plano"),
       supabase.from("payments").select("status").eq("status", "pago"),
+      supabase.from("payments").select("status").eq("status", "pendente"),
       (supabase.from("payment_proofs") as any).select("*").eq("status", "pendente").order("created_at", { ascending: false }),
     ]);
 
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
       inativos: profiles.filter((p) => p.status_plano === "inativo").length,
       pagos: paymentsRes.data?.length || 0,
       pendentes: proofsList.length,
+      pendentes_pagamento: pendingPaymentsRes.data?.length || 0,
     });
 
     // Map client names
