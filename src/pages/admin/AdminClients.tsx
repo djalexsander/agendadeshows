@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, Pencil, Search, Trash2 } from "lucide-react";
+import { UserPlus, Pencil, Search, Trash2, Globe, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,7 @@ interface ClientProfile {
   valor_plano: number | null;
   vencimento: string | null;
   observacoes: string | null;
+  origem_cadastro: string | null;
 }
 
 export default function AdminClients() {
@@ -42,9 +43,9 @@ export default function AdminClients() {
   const [deleteTarget, setDeleteTarget] = useState<ClientProfile | null>(null);
   const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(false);
+  const [defaultPrice, setDefaultPrice] = useState(0);
   const { toast } = useToast();
 
-  // Form state
   const [form, setForm] = useState({
     nome: "", email: "", telefone: "", cidade: "", estado: "",
     status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
@@ -55,12 +56,21 @@ export default function AdminClients() {
     if (data) setClients(data as ClientProfile[]);
   };
 
-  useEffect(() => { fetchClients(); }, []);
+  const fetchDefaultPrice = async () => {
+    const { data } = await (supabase.from("signup_config") as any).select("valor_padrao").limit(1);
+    if (data && data.length > 0) setDefaultPrice(data[0].valor_padrao || 0);
+  };
+
+  useEffect(() => {
+    fetchClients();
+    fetchDefaultPrice();
+  }, []);
 
   const resetForm = () => {
     setForm({
       nome: "", email: "", telefone: "", cidade: "", estado: "",
-      status_plano: "pendente_pagamento", valor_plano: "", vencimento: "", observacoes: "",
+      status_plano: "pendente_pagamento", valor_plano: String(defaultPrice || ""),
+      vencimento: "", observacoes: "",
     });
     setEditingClient(null);
   };
@@ -86,7 +96,6 @@ export default function AdminClients() {
     setLoading(true);
 
     if (editingClient) {
-      // Update profile
       await supabase.from("profiles").update({
         nome: form.nome, telefone: form.telefone,
         cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
@@ -95,8 +104,6 @@ export default function AdminClients() {
       }).eq("id", editingClient.id);
       toast({ title: "Sucesso", description: "Cliente atualizado." });
     } else {
-      // Create new user via edge function (preserves admin session)
-      // Internal temp password — client will set their own on first login
       const response = await supabase.functions.invoke("create-user", {
         body: { email: form.email, nome: form.nome },
       });
@@ -109,20 +116,20 @@ export default function AdminClients() {
 
       const newUserId = response.data?.user?.id;
       if (newUserId) {
-        // Wait a moment for the trigger to create the profile
         await new Promise((r) => setTimeout(r, 1000));
 
-        // Update the profile with additional data
+        const valor = form.valor_plano ? parseFloat(form.valor_plano) : 0;
+
         await supabase.from("profiles").update({
           nome: form.nome, telefone: form.telefone,
           cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
-          valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
+          valor_plano: valor,
+          valor_padrao_na_data: valor,
+          origem_cadastro: "admin_manual",
           vencimento: form.vencimento || null, observacoes: form.observacoes,
           primeiro_acesso: true,
-        }).eq("user_id", newUserId);
+        } as any).eq("user_id", newUserId);
 
-        // Create pending payment record in financeiro
-        const valor = form.valor_plano ? parseFloat(form.valor_plano) : 0;
         if (valor > 0) {
           await supabase.from("payments").insert({
             client_user_id: newUserId,
@@ -133,7 +140,6 @@ export default function AdminClients() {
           });
         }
 
-        // Role is auto-assigned by database trigger
         toast({ title: "Sucesso", description: "Cliente criado. Ele definirá a senha no primeiro acesso." });
       }
     }
@@ -169,6 +175,28 @@ export default function AdminClients() {
     );
   });
 
+  const statusLabel = (s: string | null) => {
+    switch (s) {
+      case "pendente_aprovacao": return "Pend. Aprovação";
+      case "aguardando_pagamento": return "Aguard. Pagamento";
+      case "pagamento_em_analise": return "Pagto. em Análise";
+      default: return s || "ativo";
+    }
+  };
+
+  const statusColor = (s: string | null) => {
+    switch (s) {
+      case "ativo": return "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]";
+      case "pendente_pagamento":
+      case "aguardando_pagamento": return "bg-orange-500/20 text-orange-400";
+      case "pendente_aprovacao": return "bg-yellow-500/20 text-yellow-400";
+      case "pagamento_em_analise": return "bg-blue-500/20 text-blue-400";
+      case "rejeitado":
+      case "inativo": return "bg-destructive/20 text-destructive";
+      default: return "bg-yellow-500/20 text-yellow-400";
+    }
+  };
+
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -181,7 +209,6 @@ export default function AdminClients() {
         </Button>
       </div>
 
-      {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -192,36 +219,28 @@ export default function AdminClients() {
         />
       </div>
 
-      {/* Clients List */}
       <div className="space-y-3">
         {filtered.map((c) => (
           <div key={c.id} className="rounded-xl bg-card border border-border p-4 flex items-center gap-4">
             <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate">{c.nome}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold truncate">{c.nome}</p>
+                {c.origem_cadastro === "publico_link" ? (
+                  <Globe className="h-3.5 w-3.5 text-blue-400 shrink-0" title="Cadastro pelo link" />
+                ) : (
+                  <Shield className="h-3.5 w-3.5 text-primary shrink-0" title="Criado pelo admin" />
+                )}
+              </div>
               {c.nome_artistico && (
                 <p className="text-sm text-primary truncate">{c.nome_artistico}</p>
               )}
               <p className="text-sm text-muted-foreground">{c.email}</p>
+              {c.valor_plano != null && c.valor_plano > 0 && (
+                <p className="text-xs text-muted-foreground">R$ {c.valor_plano.toFixed(2)}</p>
+              )}
             </div>
-           <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
-              c.status_plano === "ativo"
-                ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
-                : c.status_plano === "pendente_pagamento" || c.status_plano === "aguardando_pagamento"
-                ? "bg-orange-500/20 text-orange-400"
-                : c.status_plano === "pendente_aprovacao"
-                ? "bg-yellow-500/20 text-yellow-400"
-                : c.status_plano === "pagamento_em_analise"
-                ? "bg-blue-500/20 text-blue-400"
-                : c.status_plano === "rejeitado"
-                ? "bg-destructive/20 text-destructive"
-                : c.status_plano === "inativo"
-                ? "bg-destructive/20 text-destructive"
-                : "bg-yellow-500/20 text-yellow-400"
-            }`}>
-              {c.status_plano === "pendente_aprovacao" ? "Pend. Aprovação"
-                : c.status_plano === "aguardando_pagamento" ? "Aguard. Pagamento"
-                : c.status_plano === "pagamento_em_analise" ? "Pagto. em Análise"
-                : c.status_plano || "ativo"}
+            <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(c.status_plano)}`}>
+              {statusLabel(c.status_plano)}
             </span>
             <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(c)}>
               <Pencil className="h-4 w-4" />
@@ -236,7 +255,6 @@ export default function AdminClients() {
         )}
       </div>
 
-      {/* Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(o) => !o && setDialogOpen(false)}>
         <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -287,25 +305,30 @@ export default function AdminClients() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                      <SelectItem value="pendente_aprovacao">Pend. Aprovação</SelectItem>
-                      <SelectItem value="aguardando_pagamento">Aguard. Pagamento</SelectItem>
-                      <SelectItem value="pagamento_em_analise">Pagto. em Análise</SelectItem>
-                      <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
-                      <SelectItem value="ativo">Ativo</SelectItem>
-                      <SelectItem value="inativo">Inativo</SelectItem>
-                      <SelectItem value="rejeitado">Rejeitado</SelectItem>
+                    <SelectItem value="pendente_aprovacao">Pend. Aprovação</SelectItem>
+                    <SelectItem value="aguardando_pagamento">Aguard. Pagamento</SelectItem>
+                    <SelectItem value="pagamento_em_analise">Pagto. em Análise</SelectItem>
+                    <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
+                    <SelectItem value="ativo">Ativo</SelectItem>
+                    <SelectItem value="inativo">Inativo</SelectItem>
+                    <SelectItem value="rejeitado">Rejeitado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label>Valor (R$)</Label>
-                <Input type="number" value={form.valor_plano} onChange={(e) => setForm({ ...form, valor_plano: e.target.value })} className="h-10 bg-secondary/50 border-border" />
+                <Input type="number" step="0.01" value={form.valor_plano} onChange={(e) => setForm({ ...form, valor_plano: e.target.value })} className="h-10 bg-secondary/50 border-border" placeholder={defaultPrice ? `Padrão: ${defaultPrice}` : "0.00"} />
               </div>
               <div className="space-y-1.5">
                 <Label>Vencimento</Label>
                 <Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
             </div>
+            {!editingClient && defaultPrice > 0 && (
+              <p className="text-xs text-muted-foreground">
+                💡 Valor padrão configurado: <strong>R$ {defaultPrice.toFixed(2)}</strong>. Altere acima se quiser um valor personalizado.
+              </p>
+            )}
             <div className="space-y-1.5">
               <Label>Observações</Label>
               <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
