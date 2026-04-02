@@ -99,8 +99,8 @@ export default function Dashboard() {
                 onClick={() => setExportOpen(true)}
                 disabled={shows.length === 0}
               >
-                <FileDown className="h-4 w-4" />
-                <span className="hidden sm:inline">PDF</span>
+                <Image className="h-4 w-4" />
+                <span className="hidden sm:inline">Exportar</span>
               </Button>
               <Button
                 variant="ghost"
