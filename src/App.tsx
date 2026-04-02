@@ -103,6 +103,7 @@ function AppRoutes() {
           <Route path="clients" element={<AdminClients />} />
           <Route path="financial" element={<AdminFinancial />} />
           <Route path="pix" element={<AdminPix />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
