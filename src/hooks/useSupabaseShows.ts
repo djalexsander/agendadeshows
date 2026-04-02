@@ -14,6 +14,7 @@ export interface Show {
   horario?: string;
   local?: string;
   observacoes?: string;
+  com_quem_evento?: string;
 }
 
 export function useSupabaseShows() {
@@ -42,6 +43,7 @@ export function useSupabaseShows() {
           horario: s.horario || undefined,
           local: s.local || undefined,
           observacoes: s.observacoes || undefined,
+          com_quem_evento: s.com_quem_evento || undefined,
         }))
       );
     }
@@ -53,11 +55,11 @@ export function useSupabaseShows() {
   }, [fetchShows]);
 
   const addShow = useCallback(
-    async (date: string, cidade: string, estado: string, status: ShowStatus = "pendente") => {
+    async (date: string, cidade: string, estado: string, status: ShowStatus = "pendente", com_quem_evento?: string) => {
       if (!user) return;
       const { data, error } = await supabase
         .from("shows")
-        .insert({ user_id: user.id, date, cidade, estado, status })
+        .insert({ user_id: user.id, date, cidade, estado, status, com_quem_evento: com_quem_evento || "" })
         .select()
         .single();
       if (data && !error) {
@@ -77,7 +79,7 @@ export function useSupabaseShows() {
   );
 
   const updateShow = useCallback(
-    async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => {
+    async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => {
       await supabase.from("shows").update(updates).eq("id", id);
       setShows((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
     },

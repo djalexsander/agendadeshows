@@ -2,12 +2,12 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, FileDown, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { ShowDialog } from "@/components/ShowDialog";
-import { ExportPDFDialog } from "@/components/ExportPDFDialog";
+import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { useLocation } from "react-router-dom";
@@ -62,11 +62,11 @@ export default function Dashboard() {
     ? { ...existingShow, status: existingShow.status as ShowStatus }
     : undefined;
 
-  const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus) => {
-    await addShow(date, cidade, estado, status);
+  const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => {
+    await addShow(date, cidade, estado, status, comQuem);
   };
 
-  const handleUpdate = async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => {
+  const handleUpdate = async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => {
     await updateShow(id, updates);
   };
 
@@ -99,8 +99,8 @@ export default function Dashboard() {
                 onClick={() => setExportOpen(true)}
                 disabled={shows.length === 0}
               >
-                <FileDown className="h-4 w-4" />
-                <span className="hidden sm:inline">PDF</span>
+                <Image className="h-4 w-4" />
+                <span className="hidden sm:inline">Exportar</span>
               </Button>
               <Button
                 variant="ghost"
@@ -133,8 +133,8 @@ export default function Dashboard() {
               onClick={() => setExportOpen(true)}
               disabled={shows.length === 0}
             >
-              <FileDown className="h-4 w-4" />
-              PDF
+              <Image className="h-4 w-4" />
+              Exportar
             </Button>
           </div>
         )}
@@ -325,10 +325,10 @@ export default function Dashboard() {
         onUpdate={handleUpdate as any}
         onDelete={handleDelete as any}
       />
-      <ExportPDFDialog
+      <ExportPNGListDialog
         open={exportOpen}
         onClose={() => setExportOpen(false)}
-        shows={shows as any}
+        shows={shows}
       />
       {!isEmbedded && (
         <p className="text-center text-[10px] text-muted-foreground/50 py-2">{APP_VERSION}</p>
