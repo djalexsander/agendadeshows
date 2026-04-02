@@ -79,7 +79,7 @@ export function useSupabaseShows() {
   );
 
   const updateShow = useCallback(
-    async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => {
+    async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => {
       await supabase.from("shows").update(updates).eq("id", id);
       setShows((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates } : s)));
     },
