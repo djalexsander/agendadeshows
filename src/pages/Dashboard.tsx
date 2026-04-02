@@ -133,8 +133,8 @@ export default function Dashboard() {
               onClick={() => setExportOpen(true)}
               disabled={shows.length === 0}
             >
-              <FileDown className="h-4 w-4" />
-              PDF
+              <Image className="h-4 w-4" />
+              Exportar
             </Button>
           </div>
         )}
