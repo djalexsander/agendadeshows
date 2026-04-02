@@ -115,16 +115,13 @@ export default function AdminFinancial() {
 
   const totalRecebido = payments.filter(p => p.status === "pago").reduce((s, p) => s + p.valor, 0);
   const totalPendente = payments.filter(p => p.status === "pendente").reduce((s, p) => s + p.valor, 0);
-  const totalAtrasado = payments.filter(p => p.status === "atrasado").reduce((s, p) => s + p.valor, 0);
   const qtdPago = payments.filter(p => p.status === "pago").length;
   const qtdPendente = payments.filter(p => p.status === "pendente").length;
-  const qtdAtrasado = payments.filter(p => p.status === "atrasado").length;
 
   const summaryCards = [
     { label: "Recebido", valor: totalRecebido, qtd: qtdPago, icon: CheckCircle, color: "bg-[hsl(140_60%_45%)]/15 text-[hsl(140_60%_55%)]" },
     { label: "Pendente", valor: totalPendente, qtd: qtdPendente, icon: Clock, color: "bg-yellow-500/15 text-yellow-400" },
-    { label: "Atrasado", valor: totalAtrasado, qtd: qtdAtrasado, icon: XCircle, color: "bg-destructive/15 text-destructive" },
-    { label: "Total Geral", valor: totalRecebido + totalPendente + totalAtrasado, qtd: payments.length, icon: DollarSign, color: "bg-primary/15 text-primary" },
+    { label: "Total Geral", valor: totalRecebido + totalPendente, qtd: payments.length, icon: DollarSign, color: "bg-primary/15 text-primary" },
   ];
 
   return (
