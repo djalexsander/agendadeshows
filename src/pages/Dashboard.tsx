@@ -11,6 +11,7 @@ import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { useLocation } from "react-router-dom";
+import { APP_VERSION } from "@/lib/version";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -329,6 +330,9 @@ export default function Dashboard() {
         onClose={() => setExportOpen(false)}
         shows={shows as any}
       />
+      {!isEmbedded && (
+        <p className="text-center text-[10px] text-muted-foreground/50 py-2">{APP_VERSION}</p>
+      )}
     </div>
   );
 }

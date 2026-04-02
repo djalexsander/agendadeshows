@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { APP_VERSION } from "@/lib/version";
 
 export default function Login() {
   const [mode, setMode] = useState<"login" | "activate">("login");
@@ -183,6 +184,7 @@ export default function Login() {
         <p className="text-center text-xs text-muted-foreground">
           {isActivate ? "Use o e-mail informado pelo administrador." : "Acesso fornecido pelo administrador"}
         </p>
+        <p className="text-center text-[10px] text-muted-foreground/50">{APP_VERSION}</p>
       </div>
     </div>
   );
