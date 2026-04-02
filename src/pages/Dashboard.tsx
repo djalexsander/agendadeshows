@@ -66,7 +66,7 @@ export default function Dashboard() {
     await addShow(date, cidade, estado, status, comQuem);
   };
 
-  const handleUpdate = async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => {
+  const handleUpdate = async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => {
     await updateShow(id, updates);
   };
 
