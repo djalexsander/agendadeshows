@@ -37,6 +37,7 @@ export default function AdminFinancial() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
   const { toast } = useToast();
 
   const [form, setForm] = useState({
