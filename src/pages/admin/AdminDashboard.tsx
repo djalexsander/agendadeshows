@@ -49,7 +49,7 @@ export default function AdminDashboard() {
 
   const load = async () => {
     const [profilesRes, paymentsRes, pendingPaymentsRes, proofsRes, notificationsRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, nome, email, telefone, status_plano, created_at"),
+      supabase.from("profiles").select("user_id, nome, email, telefone, status_plano, created_at, origem_cadastro, valor_plano"),
       supabase.from("payments").select("status").eq("status", "pago"),
       supabase.from("payments").select("status").eq("status", "pendente"),
       (supabase.from("payment_proofs") as any).select("*").eq("status", "pendente").order("created_at", { ascending: false }),
