@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { QrCode, Copy, LogOut, Clock, Upload, Send, CheckCircle } from "lucide-react";
+import { QrCode, Copy, LogOut, Clock, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +24,6 @@ export default function PaymentPending() {
     if (!profile || !user) return;
 
     const loadData = async () => {
-      // Check if already sent a proof
       const { data: proofs } = await (supabase.from("payment_proofs") as any)
         .select("id, status")
         .eq("client_user_id", user.id)
@@ -35,7 +34,6 @@ export default function PaymentPending() {
         setAlreadySent(true);
       }
 
-      // Fetch pix config
       const { data } = await supabase.from("pix_config").select("*").limit(1);
       if (data && data.length > 0 && profile?.valor_plano && profile.valor_plano > 0) {
         const config = data[0];
@@ -81,8 +79,16 @@ export default function PaymentPending() {
         mensagem,
       });
 
+      // Update status to pagamento_em_analise
+      await supabase.from("profiles").update({
+        status_plano: "pagamento_em_analise",
+      }).eq("user_id", user.id);
+
       setAlreadySent(true);
       toast({ title: "Comprovante enviado!", description: "O administrador será notificado e liberará seu acesso em breve." });
+
+      // Reload to show the payment review screen
+      window.location.reload();
     } catch (err: any) {
       toast({ title: "Erro", description: err.message || "Erro ao enviar comprovante.", variant: "destructive" });
     }
@@ -99,10 +105,26 @@ export default function PaymentPending() {
             <Clock className="h-8 w-8 text-yellow-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Pagamento Pendente</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Envie seu Pagamento</h1>
             <p className="text-muted-foreground mt-1">
-              Olá, <strong>{profile?.nome}</strong>! Para liberar o acesso, realize o pagamento abaixo.
+              Olá, <strong>{profile?.nome}</strong>! Seu cadastro foi aprovado. Para liberar o acesso, realize o pagamento abaixo.
             </p>
+          </div>
+        </div>
+
+        {/* Progress steps */}
+        <div className="rounded-2xl bg-card border border-border p-4 space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-6 rounded-full bg-[hsl(140_60%_45%)]/20 flex items-center justify-center text-[10px] font-bold text-[hsl(140_60%_55%)]">✓</div>
+            <p className="text-xs text-muted-foreground">Cadastro aprovado</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-6 rounded-full bg-yellow-500/20 flex items-center justify-center text-[10px] font-bold text-yellow-400">3</div>
+            <p className="text-xs font-semibold">Enviar comprovante de pagamento</p>
+          </div>
+          <div className="flex items-center gap-3 opacity-40">
+            <div className="h-6 w-6 rounded-full bg-secondary flex items-center justify-center text-[10px] font-bold text-muted-foreground">4</div>
+            <p className="text-xs">Acesso liberado</p>
           </div>
         </div>
 
@@ -118,13 +140,11 @@ export default function PaymentPending() {
                 <p className="text-sm text-muted-foreground mb-1">Valor do plano</p>
                 <p className="text-3xl font-bold text-primary">R$ {valor.toFixed(2)}</p>
               </div>
-
               <div className="flex justify-center">
                 <div className="bg-white p-4 rounded-xl">
                   <QRCodeSVG value={pixCode} size={180} />
                 </div>
               </div>
-
               <div className="space-y-1.5">
                 <Label>Código Pix Copia e Cola</Label>
                 <div className="flex gap-2">
@@ -167,16 +187,13 @@ export default function PaymentPending() {
             <>
               <div className="space-y-1.5">
                 <Label>Foto do comprovante *</Label>
-                <div className="relative">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    className="h-10 bg-secondary/50 border-border file:text-primary file:font-medium"
-                  />
-                </div>
+                <Input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  className="h-10 bg-secondary/50 border-border file:text-primary file:font-medium"
+                />
               </div>
-
               <div className="space-y-1.5">
                 <Label>Mensagem (opcional)</Label>
                 <Textarea
@@ -187,7 +204,6 @@ export default function PaymentPending() {
                   rows={2}
                 />
               </div>
-
               <Button
                 onClick={handleUpload}
                 disabled={!file || uploading}

@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          lida: boolean
+          mensagem: string
+          referencia_user_id: string | null
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string
+          referencia_user_id?: string | null
+          tipo?: string
+          titulo?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          mensagem?: string
+          referencia_user_id?: string | null
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: []
+      }
       payment_proofs: {
         Row: {
           client_user_id: string
@@ -124,6 +154,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           cidade: string | null
           created_at: string
           email: string
@@ -141,6 +173,8 @@ export type Database = {
           vencimento: string | null
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           cidade?: string | null
           created_at?: string
           email?: string
@@ -158,6 +192,8 @@ export type Database = {
           vencimento?: string | null
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           cidade?: string | null
           created_at?: string
           email?: string

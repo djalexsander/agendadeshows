@@ -206,13 +206,22 @@ export default function AdminClients() {
            <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
               c.status_plano === "ativo"
                 ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
-                : c.status_plano === "pendente_pagamento"
+                : c.status_plano === "pendente_pagamento" || c.status_plano === "aguardando_pagamento"
                 ? "bg-orange-500/20 text-orange-400"
+                : c.status_plano === "pendente_aprovacao"
+                ? "bg-yellow-500/20 text-yellow-400"
+                : c.status_plano === "pagamento_em_analise"
+                ? "bg-blue-500/20 text-blue-400"
+                : c.status_plano === "rejeitado"
+                ? "bg-destructive/20 text-destructive"
                 : c.status_plano === "inativo"
                 ? "bg-destructive/20 text-destructive"
                 : "bg-yellow-500/20 text-yellow-400"
             }`}>
-              {c.status_plano || "ativo"}
+              {c.status_plano === "pendente_aprovacao" ? "Pend. Aprovação"
+                : c.status_plano === "aguardando_pagamento" ? "Aguard. Pagamento"
+                : c.status_plano === "pagamento_em_analise" ? "Pagto. em Análise"
+                : c.status_plano || "ativo"}
             </span>
             <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(c)}>
               <Pencil className="h-4 w-4" />
@@ -278,11 +287,13 @@ export default function AdminClients() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                     <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
-                     <SelectItem value="ativo">Ativo</SelectItem>
-                     <SelectItem value="inativo">Inativo</SelectItem>
-                     <SelectItem value="trial">Trial</SelectItem>
-                     <SelectItem value="expirado">Expirado</SelectItem>
+                      <SelectItem value="pendente_aprovacao">Pend. Aprovação</SelectItem>
+                      <SelectItem value="aguardando_pagamento">Aguard. Pagamento</SelectItem>
+                      <SelectItem value="pagamento_em_analise">Pagto. em Análise</SelectItem>
+                      <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
+                      <SelectItem value="ativo">Ativo</SelectItem>
+                      <SelectItem value="inativo">Inativo</SelectItem>
+                      <SelectItem value="rejeitado">Rejeitado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
