@@ -226,9 +226,9 @@ export default function AdminClients() {
               <div className="flex items-center gap-2">
                 <p className="font-semibold truncate">{c.nome}</p>
                 {c.origem_cadastro === "publico_link" ? (
-                  <Globe className="h-3.5 w-3.5 text-blue-400 shrink-0" title="Cadastro pelo link" />
+                  <span title="Cadastro pelo link"><Globe className="h-3.5 w-3.5 text-blue-400 shrink-0" /></span>
                 ) : (
-                  <Shield className="h-3.5 w-3.5 text-primary shrink-0" title="Criado pelo admin" />
+                  <span title="Criado pelo admin"><Shield className="h-3.5 w-3.5 text-primary shrink-0" /></span>
                 )}
               </div>
               {c.nome_artistico && (
