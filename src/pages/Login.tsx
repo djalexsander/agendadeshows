@@ -305,7 +305,7 @@ export default function Login() {
 
             <Button
               type="submit"
-              disabled={loading || !email || !password || ((isActivate || isSignup) && !confirmPassword) || (isSignup && (!nome || !telefone))}
+              disabled={loading || !email || !password || ((isActivate || isSignup) && !confirmPassword) || (isSignup && (!nome || !telefone)) || (isSignup && signupConfig?.cadastro_ativo === false)}
               className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
             >
               {isSignup ? <UserPlus className="h-5 w-5" /> : isActivate ? <UserCheck className="h-5 w-5" /> : <LogIn className="h-5 w-5" />}
