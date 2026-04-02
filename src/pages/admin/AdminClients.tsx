@@ -121,6 +121,18 @@ export default function AdminClients() {
           primeiro_acesso: true,
         }).eq("user_id", newUserId);
 
+        // Create pending payment record in financeiro
+        const valor = form.valor_plano ? parseFloat(form.valor_plano) : 0;
+        if (valor > 0) {
+          await supabase.from("payments").insert({
+            client_user_id: newUserId,
+            valor,
+            status: "pendente",
+            forma_pagamento: "pix",
+            data_vencimento: form.vencimento || null,
+          });
+        }
+
         // Role is auto-assigned by database trigger
         toast({ title: "Sucesso", description: "Cliente criado. Ele definirá a senha no primeiro acesso." });
       }

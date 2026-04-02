@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink } from "lucide-react";
+import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
@@ -16,15 +16,16 @@ interface PaymentProof {
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0 });
+  const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0, pendentes_pagamento: 0 });
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
-    const [profilesRes, paymentsRes, proofsRes] = await Promise.all([
+    const [profilesRes, paymentsRes, pendingPaymentsRes, proofsRes] = await Promise.all([
       supabase.from("profiles").select("user_id, nome, status_plano"),
       supabase.from("payments").select("status").eq("status", "pago"),
+      supabase.from("payments").select("status").eq("status", "pendente"),
       (supabase.from("payment_proofs") as any).select("*").eq("status", "pendente").order("created_at", { ascending: false }),
     ]);
 
@@ -37,6 +38,7 @@ export default function AdminDashboard() {
       inativos: profiles.filter((p) => p.status_plano === "inativo").length,
       pagos: paymentsRes.data?.length || 0,
       pendentes: proofsList.length,
+      pendentes_pagamento: pendingPaymentsRes.data?.length || 0,
     });
 
     // Map client names
@@ -52,7 +54,21 @@ export default function AdminDashboard() {
     await (supabase.from("payment_proofs") as any).update({ status: "aprovado" }).eq("id", proof.id);
     // Activate client
     await supabase.from("profiles").update({ status_plano: "ativo" }).eq("user_id", proof.client_user_id);
-    toast({ title: "Aprovado!", description: `Acesso de ${proof.client_name} liberado.` });
+
+    // Get client valor_plano to register payment
+    const { data: clientProfile } = await supabase.from("profiles").select("valor_plano").eq("user_id", proof.client_user_id).single();
+    const valor = clientProfile?.valor_plano || 0;
+
+    // Register payment as "pago" in financeiro
+    await supabase.from("payments").insert({
+      client_user_id: proof.client_user_id,
+      valor,
+      status: "pago",
+      forma_pagamento: "pix",
+      data_pagamento: new Date().toISOString().split("T")[0],
+    });
+
+    toast({ title: "Aprovado!", description: `Acesso de ${proof.client_name} liberado e pagamento registrado.` });
     setLoading(null);
     load();
   };
@@ -70,6 +86,7 @@ export default function AdminDashboard() {
     { label: "Ativos", value: stats.ativos, icon: UserCheck, color: "bg-[hsl(140_60%_45%)]/15 text-[hsl(140_60%_55%)]" },
     { label: "Inativos", value: stats.inativos, icon: UserX, color: "bg-destructive/15 text-destructive" },
     { label: "Pagamentos Recebidos", value: stats.pagos, icon: DollarSign, color: "bg-blue-500/15 text-blue-400" },
+    { label: "Pagamentos Pendentes", value: stats.pendentes_pagamento, icon: Clock, color: "bg-orange-500/15 text-orange-400" },
   ];
 
   return (
