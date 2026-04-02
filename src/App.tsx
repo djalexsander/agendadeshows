@@ -5,7 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
+import PendingApproval from "./pages/PendingApproval";
 import PaymentPending from "./pages/PaymentPending";
+import PaymentReview from "./pages/PaymentReview";
+import RejectedPage from "./pages/RejectedPage";
 import Dashboard from "./pages/Dashboard";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -36,11 +39,55 @@ function AppRoutes() {
     );
   }
 
-  // Payment pending — client must pay before accessing
-  if (role === "client" && profile?.status_plano === "pendente_pagamento") {
+  const status = profile?.status_plano;
+
+  // Status-based routing for clients
+  if (role === "client") {
+    if (status === "pendente_aprovacao") {
+      return (
+        <Routes>
+          <Route path="*" element={<PendingApproval />} />
+        </Routes>
+      );
+    }
+
+    if (status === "aguardando_pagamento" || status === "pendente_pagamento") {
+      return (
+        <Routes>
+          <Route path="*" element={<PaymentPending />} />
+        </Routes>
+      );
+    }
+
+    if (status === "pagamento_em_analise") {
+      return (
+        <Routes>
+          <Route path="*" element={<PaymentReview />} />
+        </Routes>
+      );
+    }
+
+    if (status === "rejeitado") {
+      return (
+        <Routes>
+          <Route path="*" element={<RejectedPage />} />
+        </Routes>
+      );
+    }
+
+    if (status === "inativo") {
+      return (
+        <Routes>
+          <Route path="*" element={<PaymentPending />} />
+        </Routes>
+      );
+    }
+
+    // ativo — full access
     return (
       <Routes>
-        <Route path="*" element={<PaymentPending />} />
+        <Route path="/" element={<Dashboard />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
@@ -62,7 +109,7 @@ function AppRoutes() {
     );
   }
 
-  // Client routes
+  // Fallback
   return (
     <Routes>
       <Route path="/" element={<Dashboard />} />
