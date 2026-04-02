@@ -58,6 +58,7 @@ function showBrowserNotification(title: string, body: string) {
 export default function AdminLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
+  const showNotifiedRef = useRef(false);
 
   useEffect(() => {
     // Request notification permission and register SW
@@ -72,12 +73,10 @@ export default function AdminLayout() {
         { event: "INSERT", schema: "public", table: "admin_notifications" },
         (payload: any) => {
           const data = payload.new;
-          // Show browser notification
           showBrowserNotification(
             data.titulo || "Nova notificação",
             data.mensagem || "Você tem uma nova notificação"
           );
-          // Also show in-app toast
           toast({
             title: data.titulo || "Nova notificação",
             description: data.mensagem || "Você tem uma nova notificação",
@@ -85,6 +84,49 @@ export default function AdminLayout() {
         }
       )
       .subscribe();
+
+    // Check for upcoming shows (today/tomorrow)
+    if (!showNotifiedRef.current) {
+      showNotifiedRef.current = true;
+      supabase
+        .from("shows")
+        .select("date, cidade, estado")
+        .gte("date", format(new Date(), "yyyy-MM-dd"))
+        .order("date", { ascending: true })
+        .limit(10)
+        .then(({ data }) => {
+          if (!data || data.length === 0) return;
+
+          const todayShows = data.filter((s) => isToday(parseISO(s.date)));
+          const tomorrowShows = data.filter((s) => isTomorrow(parseISO(s.date)));
+
+          if (todayShows.length > 0) {
+            const cities = todayShows.map((s) => s.cidade).join(", ");
+            showBrowserNotification(
+              "🎵 Show HOJE!",
+              `${todayShows.length} show${todayShows.length > 1 ? "s" : ""} hoje: ${cities}`
+            );
+            toast({
+              title: "🎵 Show HOJE!",
+              description: `${todayShows.length} show${todayShows.length > 1 ? "s" : ""} hoje: ${cities}`,
+            });
+          }
+
+          if (tomorrowShows.length > 0) {
+            const cities = tomorrowShows.map((s) => s.cidade).join(", ");
+            setTimeout(() => {
+              showBrowserNotification(
+                "📅 Show AMANHÃ!",
+                `${tomorrowShows.length} show${tomorrowShows.length > 1 ? "s" : ""} amanhã: ${cities}`
+              );
+              toast({
+                title: "📅 Show AMANHÃ!",
+                description: `${tomorrowShows.length} show${tomorrowShows.length > 1 ? "s" : ""} amanhã: ${cities}`,
+              });
+            }, todayShows.length > 0 ? 3000 : 0);
+          }
+        });
+    }
 
     return () => {
       supabase.removeChannel(channel);
