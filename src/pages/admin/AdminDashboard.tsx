@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink } from "lucide-react";
+import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
