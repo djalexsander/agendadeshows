@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
-import { Plus, Pencil, DollarSign, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, DollarSign, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -33,6 +37,7 @@ export default function AdminFinancial() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
   const { toast } = useToast();
 
   const [form, setForm] = useState({
@@ -163,6 +168,9 @@ export default function AdminFinancial() {
             <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
               <Pencil className="h-4 w-4" />
             </Button>
+            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         ))}
         {payments.length === 0 && (
@@ -236,6 +244,35 @@ export default function AdminFinancial() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent className="bg-card border-border rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir pagamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o pagamento de <strong>{deleteTarget?.client_name}</strong> (R$ {deleteTarget?.valor.toFixed(2)})?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={loading}
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={async () => {
+                if (!deleteTarget) return;
+                setLoading(true);
+                await supabase.from("payments").delete().eq("id", deleteTarget.id);
+                setLoading(false);
+                setDeleteTarget(null);
+                fetchData();
+                toast({ title: "Excluído", description: "Pagamento removido." });
+              }}
+            >
+              {loading ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
