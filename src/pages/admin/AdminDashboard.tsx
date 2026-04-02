@@ -86,6 +86,7 @@ export default function AdminDashboard() {
     { label: "Ativos", value: stats.ativos, icon: UserCheck, color: "bg-[hsl(140_60%_45%)]/15 text-[hsl(140_60%_55%)]" },
     { label: "Inativos", value: stats.inativos, icon: UserX, color: "bg-destructive/15 text-destructive" },
     { label: "Pagamentos Recebidos", value: stats.pagos, icon: DollarSign, color: "bg-blue-500/15 text-blue-400" },
+    { label: "Pagamentos Pendentes", value: stats.pendentes_pagamento, icon: Clock, color: "bg-orange-500/15 text-orange-400" },
   ];
 
   return (
