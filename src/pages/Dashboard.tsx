@@ -325,10 +325,10 @@ export default function Dashboard() {
         onUpdate={handleUpdate as any}
         onDelete={handleDelete as any}
       />
-      <ExportPDFDialog
+      <ExportPNGListDialog
         open={exportOpen}
         onClose={() => setExportOpen(false)}
-        shows={shows as any}
+        shows={shows}
       />
       {!isEmbedded && (
         <p className="text-center text-[10px] text-muted-foreground/50 py-2">{APP_VERSION}</p>
