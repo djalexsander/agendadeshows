@@ -24,6 +24,8 @@ interface PendingUser {
   telefone: string | null;
   created_at: string;
   status_plano: string | null;
+  origem_cadastro: string | null;
+  valor_plano: number | null;
 }
 
 interface AdminNotification {
