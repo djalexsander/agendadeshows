@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Image, CalendarIcon } from "lucide-react";
 import {
@@ -13,9 +13,21 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import type { Show } from "@/hooks/useSupabaseShows";
 import { exportShowPNG } from "@/lib/exportPNG";
+
+const MESES = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
 
 interface ExportPNGListDialogProps {
   open: boolean;
@@ -24,10 +36,17 @@ interface ExportPNGListDialogProps {
 }
 
 export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialogProps) {
+  const [mode, setMode] = useState<"mensal" | "periodo">("mensal");
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const filtered = shows.filter((s) => {
+    if (mode === "mensal") {
+      const d = new Date(s.date + "T12:00:00");
+      return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+    }
     const startStr = startDate ? format(startDate, "yyyy-MM-dd") : undefined;
     const endStr = endDate ? format(endDate, "yyyy-MM-dd") : undefined;
     if (startStr && s.date < startStr) return false;
@@ -42,6 +61,12 @@ export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialo
     onClose();
   };
 
+  const years = Array.from(new Set(shows.map((s) => new Date(s.date + "T12:00:00").getFullYear())));
+  const currentYear = new Date().getFullYear();
+  if (!years.includes(currentYear)) years.push(currentYear);
+  if (!years.includes(currentYear + 1)) years.push(currentYear + 1);
+  years.sort();
+
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
@@ -51,61 +76,120 @@ export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialo
             Exportar Imagens
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Selecione o período para gerar imagens PNG
+            Escolha como filtrar os eventos
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label className="text-base">Data Início</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full h-12 text-base justify-start bg-secondary/50 border-border",
-                    !startDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {startDate ? format(startDate, "dd/MM/yyyy") : "Sem limite"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
-                <Calendar mode="single" selected={startDate} onSelect={setStartDate} locale={ptBR} />
-              </PopoverContent>
-            </Popover>
+          {/* Mode toggle */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setMode("mensal")}
+              className={cn(
+                "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border",
+                mode === "mensal"
+                  ? "bg-primary text-primary-foreground border-transparent"
+                  : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+              )}
+            >
+              Mensal
+            </button>
+            <button
+              onClick={() => setMode("periodo")}
+              className={cn(
+                "flex-1 py-2.5 px-3 rounded-xl text-sm font-medium transition-all border",
+                mode === "periodo"
+                  ? "bg-primary text-primary-foreground border-transparent"
+                  : "bg-secondary/30 text-muted-foreground border-border hover:bg-secondary/50"
+              )}
+            >
+              Por Período
+            </button>
           </div>
 
-          <div className="space-y-2">
-            <Label className="text-base">Data Fim</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full h-12 text-base justify-start bg-secondary/50 border-border",
-                    !endDate && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {endDate ? format(endDate, "dd/MM/yyyy") : "Sem limite"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
-                <Calendar mode="single" selected={endDate} onSelect={setEndDate} locale={ptBR} />
-              </PopoverContent>
-            </Popover>
-          </div>
+          {mode === "mensal" ? (
+            <div className="flex gap-3">
+              <div className="flex-1 space-y-2">
+                <Label className="text-base">Mês</Label>
+                <Select value={String(selectedMonth)} onValueChange={(v) => setSelectedMonth(Number(v))}>
+                  <SelectTrigger className="h-12 text-base bg-secondary/50 border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    {MESES.map((m, i) => (
+                      <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="w-28 space-y-2">
+                <Label className="text-base">Ano</Label>
+                <Select value={String(selectedYear)} onValueChange={(v) => setSelectedYear(Number(v))}>
+                  <SelectTrigger className="h-12 text-base bg-secondary/50 border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    {years.map((y) => (
+                      <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2">
+                <Label className="text-base">Data Início</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full h-12 text-base justify-start bg-secondary/50 border-border",
+                        !startDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {startDate ? format(startDate, "dd/MM/yyyy") : "Sem limite"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
+                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} locale={ptBR} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-base">Data Fim</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full h-12 text-base justify-start bg-secondary/50 border-border",
+                        !endDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {endDate ? format(endDate, "dd/MM/yyyy") : "Sem limite"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
+                    <Calendar mode="single" selected={endDate} onSelect={setEndDate} locale={ptBR} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </>
+          )}
 
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/40">
             <span className="text-sm text-muted-foreground">
-              <span className="text-foreground font-medium">{filtered.length}</span> show{filtered.length !== 1 ? "s" : ""} no período
+              <span className="text-foreground font-medium">{filtered.length}</span> show{filtered.length !== 1 ? "s" : ""}{" "}
+              {mode === "mensal" ? `em ${MESES[selectedMonth]}` : "no período"}
             </span>
           </div>
 
           <div className="flex gap-3">
-            {(startDate || endDate) && (
+            {mode === "periodo" && (startDate || endDate) && (
               <Button
                 onClick={() => { setStartDate(undefined); setEndDate(undefined); }}
                 variant="secondary"
