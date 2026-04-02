@@ -158,17 +158,21 @@ export type Database = {
           approved_by: string | null
           cidade: string | null
           created_at: string
+          data_aprovacao_pagamento: string | null
+          data_envio_comprovante: string | null
           email: string
           estado: string | null
           id: string
           nome: string
           nome_artistico: string | null
           observacoes: string | null
+          origem_cadastro: string | null
           primeiro_acesso: boolean | null
           status_plano: string | null
           telefone: string | null
           updated_at: string
           user_id: string
+          valor_padrao_na_data: number | null
           valor_plano: number | null
           vencimento: string | null
         }
@@ -177,17 +181,21 @@ export type Database = {
           approved_by?: string | null
           cidade?: string | null
           created_at?: string
+          data_aprovacao_pagamento?: string | null
+          data_envio_comprovante?: string | null
           email?: string
           estado?: string | null
           id?: string
           nome?: string
           nome_artistico?: string | null
           observacoes?: string | null
+          origem_cadastro?: string | null
           primeiro_acesso?: boolean | null
           status_plano?: string | null
           telefone?: string | null
           updated_at?: string
           user_id: string
+          valor_padrao_na_data?: number | null
           valor_plano?: number | null
           vencimento?: string | null
         }
@@ -196,17 +204,21 @@ export type Database = {
           approved_by?: string | null
           cidade?: string | null
           created_at?: string
+          data_aprovacao_pagamento?: string | null
+          data_envio_comprovante?: string | null
           email?: string
           estado?: string | null
           id?: string
           nome?: string
           nome_artistico?: string | null
           observacoes?: string | null
+          origem_cadastro?: string | null
           primeiro_acesso?: boolean | null
           status_plano?: string | null
           telefone?: string | null
           updated_at?: string
           user_id?: string
+          valor_padrao_na_data?: number | null
           valor_plano?: number | null
           vencimento?: string | null
         }
@@ -254,6 +266,33 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      signup_config: {
+        Row: {
+          cadastro_ativo: boolean
+          created_at: string
+          id: string
+          instrucoes_pagamento: string | null
+          updated_at: string
+          valor_padrao: number
+        }
+        Insert: {
+          cadastro_ativo?: boolean
+          created_at?: string
+          id?: string
+          instrucoes_pagamento?: string | null
+          updated_at?: string
+          valor_padrao?: number
+        }
+        Update: {
+          cadastro_ativo?: boolean
+          created_at?: string
+          id?: string
+          instrucoes_pagamento?: string | null
+          updated_at?: string
+          valor_padrao?: number
         }
         Relationships: []
       }

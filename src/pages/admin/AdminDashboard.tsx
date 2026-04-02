@@ -24,6 +24,8 @@ interface PendingUser {
   telefone: string | null;
   created_at: string;
   status_plano: string | null;
+  origem_cadastro: string | null;
+  valor_plano: number | null;
 }
 
 interface AdminNotification {
@@ -47,7 +49,7 @@ export default function AdminDashboard() {
 
   const load = async () => {
     const [profilesRes, paymentsRes, pendingPaymentsRes, proofsRes, notificationsRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, nome, email, telefone, status_plano, created_at"),
+      supabase.from("profiles").select("user_id, nome, email, telefone, status_plano, created_at, origem_cadastro, valor_plano"),
       supabase.from("payments").select("status").eq("status", "pago"),
       supabase.from("payments").select("status").eq("status", "pendente"),
       (supabase.from("payment_proofs") as any).select("*").eq("status", "pendente").order("created_at", { ascending: false }),
@@ -208,6 +210,9 @@ export default function AdminDashboard() {
                     {pu.telefone && <p className="text-xs text-muted-foreground">{pu.telefone}</p>}
                     <p className="text-xs text-muted-foreground mt-1">
                       Cadastrado em {format(parseISO(pu.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                      {" · "}
+                      {pu.origem_cadastro === "publico_link" ? "Via link público" : "Criado pelo admin"}
+                      {pu.valor_plano != null && pu.valor_plano > 0 && ` · R$ ${pu.valor_plano.toFixed(2)}`}
                     </p>
                   </div>
                   <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg bg-yellow-500/20 text-yellow-400">

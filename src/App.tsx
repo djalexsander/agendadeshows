@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminClients from "./pages/admin/AdminClients";
 import AdminFinancial from "./pages/admin/AdminFinancial";
 import AdminPix from "./pages/admin/AdminPix";
+import AdminSettings from "./pages/admin/AdminSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -102,6 +103,7 @@ function AppRoutes() {
           <Route path="clients" element={<AdminClients />} />
           <Route path="financial" element={<AdminFinancial />} />
           <Route path="pix" element={<AdminPix />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />

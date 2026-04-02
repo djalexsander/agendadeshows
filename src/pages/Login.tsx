@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Music, LogIn, Eye, EyeOff, UserCheck, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [signupConfig, setSignupConfig] = useState<{ valor_padrao: number; cadastro_ativo: boolean; instrucoes_pagamento: string } | null>(null);
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    (supabase.from("signup_config") as any).select("*").limit(1).then(({ data }: any) => {
+      if (data && data.length > 0) setSignupConfig(data[0]);
+    });
+  }, []);
 
   const isActivate = mode === "activate";
   const isSignup = mode === "signup";
@@ -204,11 +211,18 @@ export default function Login() {
               </h2>
               <p className="text-sm text-muted-foreground">
                 {isSignup
-                  ? "Preencha seus dados para solicitar acesso"
+                  ? signupConfig?.cadastro_ativo === false
+                    ? "Cadastro público desativado no momento."
+                    : "Preencha seus dados para solicitar acesso"
                   : isActivate
                   ? "Defina sua senha para ativar sua conta"
                   : "Acesse sua conta"}
               </p>
+              {isSignup && signupConfig?.cadastro_ativo !== false && signupConfig?.valor_padrao != null && signupConfig.valor_padrao > 0 && (
+                <p className="text-sm font-semibold text-primary mt-1">
+                  Valor de acesso: R$ {signupConfig.valor_padrao.toFixed(2)}
+                </p>
+              )}
             </div>
           </div>
 
@@ -291,7 +305,7 @@ export default function Login() {
 
             <Button
               type="submit"
-              disabled={loading || !email || !password || ((isActivate || isSignup) && !confirmPassword) || (isSignup && (!nome || !telefone))}
+              disabled={loading || !email || !password || ((isActivate || isSignup) && !confirmPassword) || (isSignup && (!nome || !telefone)) || (isSignup && signupConfig?.cadastro_ativo === false)}
               className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
             >
               {isSignup ? <UserPlus className="h-5 w-5" /> : isActivate ? <UserCheck className="h-5 w-5" /> : <LogIn className="h-5 w-5" />}
