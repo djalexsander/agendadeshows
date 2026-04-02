@@ -62,8 +62,8 @@ export default function Dashboard() {
     ? { ...existingShow, status: existingShow.status as ShowStatus }
     : undefined;
 
-  const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus) => {
-    await addShow(date, cidade, estado, status);
+  const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => {
+    await addShow(date, cidade, estado, status, comQuem);
   };
 
   const handleUpdate = async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status">>) => {
