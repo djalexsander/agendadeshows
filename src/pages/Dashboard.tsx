@@ -11,6 +11,7 @@ import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { useLocation } from "react-router-dom";
+import { APP_VERSION } from "@/lib/version";
 
 export default function Dashboard() {
   const location = useLocation();
