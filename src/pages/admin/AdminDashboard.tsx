@@ -210,6 +210,9 @@ export default function AdminDashboard() {
                     {pu.telefone && <p className="text-xs text-muted-foreground">{pu.telefone}</p>}
                     <p className="text-xs text-muted-foreground mt-1">
                       Cadastrado em {format(parseISO(pu.created_at), "dd/MM/yyyy 'às' HH:mm")}
+                      {" · "}
+                      {pu.origem_cadastro === "publico_link" ? "Via link público" : "Criado pelo admin"}
+                      {pu.valor_plano != null && pu.valor_plano > 0 && ` · R$ ${pu.valor_plano.toFixed(2)}`}
                     </p>
                   </div>
                   <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg bg-yellow-500/20 text-yellow-400">
