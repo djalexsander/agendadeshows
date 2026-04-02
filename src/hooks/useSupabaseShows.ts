@@ -14,6 +14,7 @@ export interface Show {
   horario?: string;
   local?: string;
   observacoes?: string;
+  com_quem_evento?: string;
 }
 
 export function useSupabaseShows() {
