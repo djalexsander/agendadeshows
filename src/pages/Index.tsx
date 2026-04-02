@@ -137,13 +137,15 @@ const Index = () => {
               components={{
                 DayContent: ({ date }) => {
                   const dateStr = format(date, "yyyy-MM-dd");
-                  const hasShow = showDates.has(dateStr);
+                  const show = getShowByDate(dateStr);
                   const isCurrentMonth = isSameMonth(date, currentMonth);
-                  const showHighlight = hasShow && isCurrentMonth;
+                  const hasShow = !!show && isCurrentMonth;
+                  const isFinalizado = hasShow && show?.status === "finalizado";
                   return (
                     <div className={cn(
                       "w-full h-full flex items-center justify-center rounded-lg transition-colors",
-                      showHighlight && "bg-[hsl(140_60%_45%)] text-white font-bold"
+                      hasShow && !isFinalizado && "bg-[hsl(140_60%_45%)] text-white font-bold",
+                      isFinalizado && "bg-muted text-muted-foreground font-bold"
                     )}>
                       <span>{date.getDate()}</span>
                     </div>
