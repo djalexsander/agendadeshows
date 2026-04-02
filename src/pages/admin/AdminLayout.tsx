@@ -41,12 +41,13 @@ function registerServiceWorker() {
 
 function showBrowserNotification(title: string, body: string) {
   if ("Notification" in window && Notification.permission === "granted") {
-    new Notification(title, {
+    const options: NotificationOptions = {
       body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",
-      vibrate: [200, 100, 200],
-    });
+    };
+    (options as any).vibrate = [200, 100, 200];
+    new Notification(title, options);
   }
 }
 
