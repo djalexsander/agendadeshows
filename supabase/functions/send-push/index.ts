@@ -6,6 +6,17 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+function jsonResponse(body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function shortenEndpoint(endpoint: string) {
+  return endpoint.length <= 24 ? endpoint : `${endpoint.slice(0, 12)}...${endpoint.slice(-12)}`;
+}
+
 // Web Push utilities using Web Crypto API (no npm dependency needed in Deno)
 async function sendWebPush(
   subscription: { endpoint: string; p256dh: string; auth: string },
@@ -334,45 +345,84 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
     const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY")!;
     const vapidPublicKey = "BK7AUlCrJsddB2-FfvIxt8WzeQu56g7D_lZFWO7TPKgqo0FGKLfEuHSBV6LKrh7bq29nJj19cL6y06ASQCPomPM";
     const vapidSubject = "mailto:admin@agendadeshows.lovable.app";
 
+    if (!anonKey) {
+      return jsonResponse({ error: "Missing auth configuration" }, 500);
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: authData, error: authError } = await authClient.auth.getUser();
+    if (authError || !authData.user) {
+      return jsonResponse({ error: "Unauthorized" }, 401);
+    }
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
-    const { title, body, url, target_user_ids, target_role } = await req.json();
+    const { data: callerRoles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", authData.user.id);
+
+    const isAdmin = (callerRoles || []).some((role: any) => role.role === "admin");
+
+    const requestBody = await req.json().catch(() => null);
+    const title = typeof requestBody?.title === "string" ? requestBody.title.trim() : "";
+    const body = typeof requestBody?.body === "string" ? requestBody.body.trim() : "";
+    const url = typeof requestBody?.url === "string" && requestBody.url.trim() ? requestBody.url.trim() : "/";
+    const targetRole = typeof requestBody?.target_role === "string" ? requestBody.target_role.trim() : null;
+    const targetUserIds = Array.isArray(requestBody?.target_user_ids)
+      ? [...new Set(requestBody.target_user_ids.filter((id: unknown) => typeof id === "string" && id.trim().length > 0))]
+      : [];
 
     if (!title || !body) {
-      return new Response(
-        JSON.stringify({ error: "title and body are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return jsonResponse({ error: "title and body are required" }, 400);
     }
 
-    // SECURITY: Never send to all users — require explicit target
-    if ((!target_user_ids || target_user_ids.length === 0) && !target_role) {
-      return new Response(
-        JSON.stringify({ error: "target_user_ids or target_role is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (targetRole && targetRole !== "admin") {
+      return jsonResponse({ error: "Unsupported target_role" }, 400);
     }
+
+    if (targetUserIds.length === 0 && !targetRole) {
+      return jsonResponse({ error: "target_user_ids or target_role is required" }, 400);
+    }
+
+    if (!isAdmin && targetUserIds.some((targetUserId) => targetUserId !== authData.user.id)) {
+      return jsonResponse({ error: "You can only send user-targeted notifications to your own account" }, 403);
+    }
+
+    console.log("[send-push] request", {
+      callerUserId: authData.user.id,
+      isAdmin,
+      targetRole,
+      targetUserIds,
+      title,
+    });
 
     // Get subscriptions based on target
     let query = supabase.from("push_subscriptions").select("*");
     
-    if (target_user_ids && target_user_ids.length > 0) {
-      query = query.in("user_id", target_user_ids);
-    } else if (target_role === "admin") {
+    if (targetUserIds.length > 0) {
+      query = query.in("user_id", targetUserIds);
+    } else if (targetRole === "admin") {
       const { data: adminRoles } = await supabase
         .from("user_roles")
         .select("user_id")
         .eq("role", "admin");
       const adminIds = (adminRoles || []).map((r: any) => r.user_id);
       if (adminIds.length === 0) {
-        return new Response(
-          JSON.stringify({ sent: 0 }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+        return jsonResponse({ sent: 0, failed: 0, cleaned: 0 });
       }
       query = query.in("user_id", adminIds);
     }
@@ -383,17 +433,26 @@ Deno.serve(async (req) => {
       throw error;
     }
 
+    const uniqueSubscriptions = Array.from(
+      new Map((subscriptions || []).map((subscription: any) => [subscription.endpoint, subscription])).values()
+    );
+
+    console.log("[send-push] recipients", uniqueSubscriptions.map((subscription: any) => ({
+      userId: subscription.user_id,
+      endpoint: shortenEndpoint(subscription.endpoint),
+    })));
+
     const payload = JSON.stringify({
       title,
       body,
-      url: url || "/",
+      url,
     });
 
     let sent = 0;
     let failed = 0;
     const staleEndpoints: string[] = [];
 
-    for (const sub of subscriptions || []) {
+    for (const sub of uniqueSubscriptions) {
       try {
         await sendWebPush(
           { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
@@ -421,15 +480,9 @@ Deno.serve(async (req) => {
         .in("endpoint", staleEndpoints);
     }
 
-    return new Response(
-      JSON.stringify({ sent, failed, cleaned: staleEndpoints.length }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonResponse({ sent, failed, cleaned: staleEndpoints.length });
   } catch (err: any) {
     console.error("send-push error:", err);
-    return new Response(
-      JSON.stringify({ error: err.message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return jsonResponse({ error: err.message }, 500);
   }
 });

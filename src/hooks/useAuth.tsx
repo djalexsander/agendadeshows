@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentBrowserPushSubscription, getSubscriptionPayload } from "@/lib/pushSubscription";
 
 interface AuthContextType {
   session: Session | null;
@@ -101,6 +102,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (user) {
+      try {
+        const subscription = await getCurrentBrowserPushSubscription();
+
+        if (subscription) {
+          const { endpoint } = getSubscriptionPayload(subscription);
+
+          await (supabase.from("push_subscriptions") as any)
+            .delete()
+            .eq("user_id", user.id)
+            .eq("endpoint", endpoint);
+
+          await subscription.unsubscribe().catch(() => undefined);
+        }
+      } catch (error) {
+        console.warn("Push cleanup on sign out failed", error);
+      }
+    }
+
     await supabase.auth.signOut();
     setRole(null);
     setProfile(null);
