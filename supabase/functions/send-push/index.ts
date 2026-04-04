@@ -349,6 +349,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    // SECURITY: Never send to all users — require explicit target
+    if ((!target_user_ids || target_user_ids.length === 0) && !target_role) {
+      return new Response(
+        JSON.stringify({ error: "target_user_ids or target_role is required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Get subscriptions based on target
     let query = supabase.from("push_subscriptions").select("*");
     
