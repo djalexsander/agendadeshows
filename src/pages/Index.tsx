@@ -137,17 +137,42 @@ const Index = () => {
               components={{
                 DayContent: ({ date }) => {
                   const dateStr = format(date, "yyyy-MM-dd");
-                  const show = getShowByDate(dateStr);
                   const isCurrentMonth = isSameMonth(date, currentMonth);
-                  const hasShow = !!show && isCurrentMonth;
-                  const isFinalizado = hasShow && show?.status === "finalizado";
+                  const dayShows = isCurrentMonth ? shows.filter((s) => s.date === dateStr) : [];
+
+                  if (dayShows.length === 0) {
+                    return (
+                      <div className="w-full h-full flex items-center justify-center rounded-lg">
+                        <span>{date.getDate()}</span>
+                      </div>
+                    );
+                  }
+
+                  const statuses = new Set(dayShows.map((s) => s.status || "pendente"));
+                  const isMulti = statuses.size > 1;
+                  const primaryStatus = statuses.has("confirmado")
+                    ? "confirmado"
+                    : statuses.has("pendente")
+                    ? "pendente"
+                    : "finalizado";
+
+                  const statusColors: Record<string, string> = {
+                    confirmado: "bg-[hsl(140,60%,45%)] text-white",
+                    finalizado: "bg-blue-500 text-white",
+                    pendente: "bg-yellow-500 text-white",
+                  };
+
                   return (
-                    <div className={cn(
-                      "w-full h-full flex items-center justify-center rounded-lg transition-colors",
-                      hasShow && !isFinalizado && "bg-[hsl(140_60%_45%)] text-white font-bold",
-                      isFinalizado && "bg-muted text-muted-foreground font-bold"
-                    )}>
+                    <div
+                      className={cn(
+                        "w-full h-full flex items-center justify-center rounded-lg font-bold transition-colors relative",
+                        statusColors[primaryStatus]
+                      )}
+                    >
                       <span>{date.getDate()}</span>
+                      {isMulti && (
+                        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-yellow-400 border border-background" />
+                      )}
                     </div>
                   );
                 },
