@@ -6,7 +6,7 @@ import { Music, FileDown, CalendarDays, BarChart3, MapPin } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useShows } from "@/hooks/useShows";
-import { ShowDialog } from "@/components/ShowDialog";
+import { DayEventsDialog } from "@/components/DayEventsDialog";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 
 const Index = () => {
