@@ -2,13 +2,14 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { DayEventsDialog } from "@/components/DayEventsDialog";
 import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { useLocation } from "react-router-dom";
 import { APP_VERSION } from "@/lib/version";
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const { profile, signOut } = useAuth();
+  const { pushEnabled, togglePush } = usePushSubscription();
 
   const { shows, addShow, updateShow, deleteShow, getShowsByDate, getShowDates, getShowsInMonth } =
     useSupabaseShows();
@@ -105,6 +107,15 @@ export default function Dashboard() {
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Sair</span>
+              </Button>
+              <Button
+                variant={pushEnabled ? "default" : "outline"}
+                size="sm"
+                className="gap-2 rounded-xl"
+                onClick={togglePush}
+                title={pushEnabled ? "Desativar notificações" : "Ativar notificações"}
+              >
+                <Bell className="h-4 w-4" />
               </Button>
             </div>
           </div>

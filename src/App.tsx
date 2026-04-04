@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { usePushSubscription } from "@/hooks/usePushSubscription";
 import Login from "./pages/Login";
 import PendingApproval from "./pages/PendingApproval";
 import PaymentPending from "./pages/PaymentPending";
@@ -23,7 +22,6 @@ const queryClient = new QueryClient();
 
 function AppRoutes() {
   const { user, role, profile, loading } = useAuth();
-  usePushSubscription();
 
   if (loading) {
     return (
