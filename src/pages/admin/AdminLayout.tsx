@@ -125,16 +125,14 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="p-4 border-t border-border space-y-2">
-          {"Notification" in window && Notification.permission !== "granted" && (
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 text-muted-foreground text-xs"
-              onClick={handleEnableNotifications}
-            >
-              <Bell className="h-4 w-4" />
-              Ativar notificações
-            </Button>
-          )}
+          <Button
+            variant={pushEnabled ? "default" : "outline"}
+            className="w-full justify-start gap-3 text-muted-foreground text-xs"
+            onClick={togglePush}
+          >
+            {pushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+            {pushEnabled ? "Desativar notificações" : "Ativar notificações"}
+          </Button>
           <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={signOut}>
             <LogOut className="h-5 w-5" />
             Sair
