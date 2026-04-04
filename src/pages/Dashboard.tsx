@@ -6,7 +6,7 @@ import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigatio
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
-import { ShowDialog } from "@/components/ShowDialog";
+import { DayEventsDialog } from "@/components/DayEventsDialog";
 import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
@@ -22,7 +22,7 @@ export default function Dashboard() {
   const [exportOpen, setExportOpen] = useState(false);
   const { profile, signOut } = useAuth();
 
-  const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getShowsInMonth } =
+  const { shows, addShow, updateShow, deleteShow, getShowsByDate, getShowDates, getShowsInMonth } =
     useSupabaseShows();
 
   const showDates = getShowDates();
@@ -55,12 +55,7 @@ export default function Dashboard() {
     setCurrentMonth(new Date(date + "T12:00:00"));
   };
 
-  const existingShow = selectedDate ? getShowByDate(selectedDate) : undefined;
-
-  // Adapter for ShowDialog which expects the old Show type
-  const adaptedShow = existingShow
-    ? { ...existingShow, status: existingShow.status as ShowStatus }
-    : undefined;
+  const dayShows = selectedDate ? getShowsByDate(selectedDate) : [];
 
   const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => {
     await addShow(date, cidade, estado, status, comQuem);
@@ -242,7 +237,7 @@ export default function Dashboard() {
                   }
 
                   const statuses = new Set(dayShows.map((s) => s.status || "pendente"));
-                  const isMulti = statuses.size > 1;
+                  const hasMultipleEvents = dayShows.length > 1;
 
                   // Priority: confirmado > pendente > finalizado
                   const primaryStatus = statuses.has("confirmado")
@@ -265,8 +260,10 @@ export default function Dashboard() {
                       )}
                     >
                       <span>{date.getDate()}</span>
-                      {isMulti && (
-                        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-yellow-400 border border-background" />
+                      {hasMultipleEvents && (
+                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-accent-foreground text-[9px] font-bold flex items-center justify-center border border-background">
+                          {dayShows.length}
+                        </span>
                       )}
                     </div>
                   );
@@ -343,11 +340,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <ShowDialog
+      <DayEventsDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         selectedDate={selectedDate}
-        existingShow={adaptedShow as any}
+        dayShows={dayShows}
         onSave={handleSave as any}
         onUpdate={handleUpdate as any}
         onDelete={handleDelete as any}

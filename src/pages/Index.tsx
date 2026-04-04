@@ -6,7 +6,7 @@ import { Music, FileDown, CalendarDays, BarChart3, MapPin } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useShows } from "@/hooks/useShows";
-import { ShowDialog } from "@/components/ShowDialog";
+import { DayEventsDialog } from "@/components/DayEventsDialog";
 import { ExportPDFDialog } from "@/components/ExportPDFDialog";
 
 const Index = () => {
@@ -15,7 +15,7 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
-  const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getShowsInMonth } = useShows();
+  const { shows, addShow, updateShow, deleteShow, getShowsByDate, getShowDates, getShowsInMonth } = useShows();
 
   const showDates = getShowDates();
   const monthShows = getShowsInMonth(currentMonth);
@@ -39,7 +39,7 @@ const Index = () => {
     setCurrentMonth(new Date(date + "T12:00:00"));
   };
 
-  const existingShow = selectedDate ? getShowByDate(selectedDate) : undefined;
+  const dayShows = selectedDate ? getShowsByDate(selectedDate) : [];
   const monthName = format(currentMonth, "MMMM yyyy", { locale: ptBR });
 
   return (
@@ -149,7 +149,7 @@ const Index = () => {
                   }
 
                   const statuses = new Set(dayShows.map((s) => s.status || "pendente"));
-                  const isMulti = statuses.size > 1;
+                  const hasMultipleEvents = dayShows.length > 1;
                   const primaryStatus = statuses.has("confirmado")
                     ? "confirmado"
                     : statuses.has("pendente")
@@ -170,8 +170,10 @@ const Index = () => {
                       )}
                     >
                       <span>{date.getDate()}</span>
-                      {isMulti && (
-                        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-yellow-400 border border-background" />
+                      {hasMultipleEvents && (
+                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-accent-foreground text-[9px] font-bold flex items-center justify-center border border-background">
+                          {dayShows.length}
+                        </span>
                       )}
                     </div>
                   );
@@ -238,11 +240,11 @@ const Index = () => {
       </div>
 
       {/* Dialogs */}
-      <ShowDialog
+      <DayEventsDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         selectedDate={selectedDate}
-        existingShow={existingShow}
+        dayShows={dayShows}
         onSave={addShow}
         onUpdate={updateShow}
         onDelete={deleteShow}

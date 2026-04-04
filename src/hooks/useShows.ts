@@ -64,6 +64,11 @@ export function useShows() {
     [shows]
   );
 
+  const getShowsByDate = useCallback(
+    (date: string) => shows.filter((s) => s.date === date),
+    [shows]
+  );
+
   const getShowDates = useCallback(
     () => new Set(shows.map((s) => s.date)),
     [shows]
@@ -88,5 +93,5 @@ export function useShows() {
     [shows]
   );
 
-  return { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows, getShowsInMonth };
+  return { shows, addShow, updateShow, deleteShow, getShowByDate, getShowsByDate, getShowDates, getUpcomingShows, getShowsInMonth };
 }
