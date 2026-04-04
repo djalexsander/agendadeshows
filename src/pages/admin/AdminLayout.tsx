@@ -58,6 +58,7 @@ function showBrowserNotification(title: string, body: string) {
 export default function AdminLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
+  const { pushEnabled, togglePush } = usePushSubscription();
 
   useEffect(() => {
     // Request notification permission and register SW
