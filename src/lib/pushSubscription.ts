@@ -58,9 +58,11 @@ export async function getOrCreateBrowserPushSubscription(): Promise<PushSubscrip
   let subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) {
+    const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer;
+
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      applicationServerKey,
     });
   }
 
