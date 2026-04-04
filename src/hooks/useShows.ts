@@ -93,5 +93,5 @@ export function useShows() {
     [shows]
   );
 
-  return { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getUpcomingShows, getShowsInMonth };
+  return { shows, addShow, updateShow, deleteShow, getShowByDate, getShowsByDate, getShowDates, getUpcomingShows, getShowsInMonth };
 }

@@ -96,6 +96,11 @@ export function useSupabaseShows() {
     [shows]
   );
 
+  const getShowsByDate = useCallback(
+    (date: string) => shows.filter((s) => s.date === date),
+    [shows]
+  );
+
   const getShowDates = useCallback(() => new Set(shows.map((s) => s.date)), [shows]);
 
   const getShowsInMonth = useCallback(
