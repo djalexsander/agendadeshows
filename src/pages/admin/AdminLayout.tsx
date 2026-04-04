@@ -11,12 +11,14 @@ import {
   QrCode,
   LogOut,
   Bell,
+  BellOff,
   Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
 import { useToast } from "@/hooks/use-toast";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
