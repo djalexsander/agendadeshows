@@ -238,11 +238,11 @@ const Index = () => {
       </div>
 
       {/* Dialogs */}
-      <ShowDialog
+      <DayEventsDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         selectedDate={selectedDate}
-        existingShow={existingShow}
+        dayShows={dayShows}
         onSave={addShow}
         onUpdate={updateShow}
         onDelete={deleteShow}
