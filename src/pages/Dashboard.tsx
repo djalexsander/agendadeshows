@@ -6,7 +6,7 @@ import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigatio
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
-import { ShowDialog } from "@/components/ShowDialog";
+import { DayEventsDialog } from "@/components/DayEventsDialog";
 import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
 import { useAuth } from "@/hooks/useAuth";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
