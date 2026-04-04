@@ -338,11 +338,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <ShowDialog
+      <DayEventsDialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
         selectedDate={selectedDate}
-        existingShow={adaptedShow as any}
+        dayShows={dayShows}
         onSave={handleSave as any}
         onUpdate={handleUpdate as any}
         onDelete={handleDelete as any}
