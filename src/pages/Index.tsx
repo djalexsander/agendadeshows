@@ -15,7 +15,7 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
 
-  const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getShowsInMonth } = useShows();
+  const { shows, addShow, updateShow, deleteShow, getShowsByDate, getShowDates, getShowsInMonth } = useShows();
 
   const showDates = getShowDates();
   const monthShows = getShowsInMonth(currentMonth);
