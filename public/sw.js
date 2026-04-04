@@ -1,4 +1,5 @@
 // Service Worker for Web Push Notifications
+var CACHE_VERSION = 'v1.0.2';
 
 self.addEventListener('push', function(event) {
   let data = {};
@@ -48,9 +49,32 @@ self.addEventListener('notificationclick', function(event) {
 
 // Keep service worker alive
 self.addEventListener('activate', function(event) {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.filter(function(name) {
+          return name !== CACHE_VERSION;
+        }).map(function(name) {
+          return caches.delete(name);
+        })
+      );
+    }).then(function() {
+      return self.clients.claim();
+    })
+  );
 });
 
 self.addEventListener('install', function(event) {
   self.skipWaiting();
+});
+
+// Network-first for navigation requests
+self.addEventListener('fetch', function(event) {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+  }
 });
