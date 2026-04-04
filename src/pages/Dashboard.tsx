@@ -55,12 +55,7 @@ export default function Dashboard() {
     setCurrentMonth(new Date(date + "T12:00:00"));
   };
 
-  const existingShow = selectedDate ? getShowByDate(selectedDate) : undefined;
-
-  // Adapter for ShowDialog which expects the old Show type
-  const adaptedShow = existingShow
-    ? { ...existingShow, status: existingShow.status as ShowStatus }
-    : undefined;
+  const dayShows = selectedDate ? getShowsByDate(selectedDate) : [];
 
   const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => {
     await addShow(date, cidade, estado, status, comQuem);
