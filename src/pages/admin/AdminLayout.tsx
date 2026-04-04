@@ -90,15 +90,6 @@ export default function AdminLayout() {
     };
   }, [toast]);
 
-  const handleEnableNotifications = () => {
-    if ("Notification" in window) {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          toast({ title: "Notificações ativadas!", description: "Você receberá alertas de novos cadastros." });
-        }
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background flex">
