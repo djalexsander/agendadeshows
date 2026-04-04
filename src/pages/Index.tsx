@@ -39,7 +39,7 @@ const Index = () => {
     setCurrentMonth(new Date(date + "T12:00:00"));
   };
 
-  const existingShow = selectedDate ? getShowByDate(selectedDate) : undefined;
+  const dayShows = selectedDate ? getShowsByDate(selectedDate) : [];
   const monthName = format(currentMonth, "MMMM yyyy", { locale: ptBR });
 
   return (
