@@ -149,7 +149,7 @@ const Index = () => {
                   }
 
                   const statuses = new Set(dayShows.map((s) => s.status || "pendente"));
-                  const isMulti = statuses.size > 1;
+                  const hasMultipleEvents = dayShows.length > 1;
                   const primaryStatus = statuses.has("confirmado")
                     ? "confirmado"
                     : statuses.has("pendente")
@@ -170,8 +170,10 @@ const Index = () => {
                       )}
                     >
                       <span>{date.getDate()}</span>
-                      {isMulti && (
-                        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-yellow-400 border border-background" />
+                      {hasMultipleEvents && (
+                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-accent-foreground text-[9px] font-bold flex items-center justify-center border border-background">
+                          {dayShows.length}
+                        </span>
                       )}
                     </div>
                   );
