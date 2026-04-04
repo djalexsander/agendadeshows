@@ -11,12 +11,14 @@ import {
   QrCode,
   LogOut,
   Bell,
+  BellOff,
   Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
 import { useToast } from "@/hooks/use-toast";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 const navItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
@@ -56,6 +58,7 @@ function showBrowserNotification(title: string, body: string) {
 export default function AdminLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
+  const { pushEnabled, togglePush } = usePushSubscription();
 
   useEffect(() => {
     // Request notification permission and register SW
@@ -87,15 +90,6 @@ export default function AdminLayout() {
     };
   }, [toast]);
 
-  const handleEnableNotifications = () => {
-    if ("Notification" in window) {
-      Notification.requestPermission().then((permission) => {
-        if (permission === "granted") {
-          toast({ title: "Notificações ativadas!", description: "Você receberá alertas de novos cadastros." });
-        }
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -131,16 +125,14 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="p-4 border-t border-border space-y-2">
-          {"Notification" in window && Notification.permission !== "granted" && (
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-3 text-muted-foreground text-xs"
-              onClick={handleEnableNotifications}
-            >
-              <Bell className="h-4 w-4" />
-              Ativar notificações
-            </Button>
-          )}
+          <Button
+            variant={pushEnabled ? "default" : "outline"}
+            className="w-full justify-start gap-3 text-muted-foreground text-xs"
+            onClick={togglePush}
+          >
+            {pushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+            {pushEnabled ? "Desativar notificações" : "Ativar notificações"}
+          </Button>
           <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={signOut}>
             <LogOut className="h-5 w-5" />
             Sair
