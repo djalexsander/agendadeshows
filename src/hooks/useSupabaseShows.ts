@@ -122,6 +122,7 @@ export function useSupabaseShows() {
     updateShow,
     deleteShow,
     getShowByDate,
+    getShowsByDate,
     getShowDates,
     getShowsInMonth,
     refetch: fetchShows,
