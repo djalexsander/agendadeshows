@@ -22,7 +22,7 @@ export default function Dashboard() {
   const [exportOpen, setExportOpen] = useState(false);
   const { profile, signOut } = useAuth();
 
-  const { shows, addShow, updateShow, deleteShow, getShowByDate, getShowDates, getShowsInMonth } =
+  const { shows, addShow, updateShow, deleteShow, getShowsByDate, getShowDates, getShowsInMonth } =
     useSupabaseShows();
 
   const showDates = getShowDates();
