@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Pencil, Trash2, Music, AlertTriangle, Users, Image } from "lucide-react";
+import { MapPin, Pencil, Trash2, Music, AlertTriangle, Users, Image, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -63,8 +63,8 @@ interface ShowDialogProps {
   onClose: () => void;
   selectedDate: string | null;
   existingShow: Show | undefined;
-  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => void;
-  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => void;
+  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string, horario?: string) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento" | "horario">>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -81,6 +81,7 @@ export function ShowDialog({
   const [estado, setEstado] = useState("");
   const [status, setStatus] = useState<ShowStatus>("pendente");
   const [comQuemEvento, setComQuemEvento] = useState("");
+  const [horario, setHorario] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -90,6 +91,7 @@ export function ShowDialog({
       setEstado(existingShow.estado || "");
       setStatus(existingShow.status || "pendente");
       setComQuemEvento(existingShow.com_quem_evento || "");
+      setHorario(existingShow.horario || "");
       setIsEditing(false);
       setConfirmDelete(false);
     } else {
@@ -97,6 +99,7 @@ export function ShowDialog({
       setEstado("");
       setStatus("pendente");
       setComQuemEvento("");
+      setHorario("");
       setIsEditing(true);
     }
   }, [existingShow, selectedDate, open]);
@@ -113,9 +116,10 @@ export function ShowDialog({
         estado,
         status,
         com_quem_evento: comQuemEvento.trim() || "",
+        horario: horario.trim() || "",
       });
     } else {
-      onSave(selectedDate, cidade.trim(), estado, status, comQuemEvento.trim() || undefined);
+      onSave(selectedDate, cidade.trim(), estado, status, comQuemEvento.trim() || undefined, horario.trim() || undefined);
     }
     onClose();
   };
@@ -163,6 +167,16 @@ export function ShowDialog({
                 <div>
                   <p className="text-xs text-muted-foreground">Com quem será o evento</p>
                   <p className="font-medium">{existingShow.com_quem_evento}</p>
+                </div>
+              </div>
+            )}
+
+            {existingShow.horario && (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
+                <Clock className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Horário</p>
+                  <p className="font-medium">{existingShow.horario}</p>
                 </div>
               </div>
             )}
@@ -242,6 +256,16 @@ export function ShowDialog({
                 value={comQuemEvento}
                 onChange={(e) => setComQuemEvento(e.target.value)}
                 placeholder="Artista, empresa, contratante..."
+                className="h-12 text-base bg-secondary/50 border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="horario" className="text-base">Horário</Label>
+              <Input
+                id="horario"
+                type="time"
+                value={horario}
+                onChange={(e) => setHorario(e.target.value)}
                 className="h-12 text-base bg-secondary/50 border-border"
               />
             </div>

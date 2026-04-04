@@ -57,11 +57,11 @@ export default function Dashboard() {
 
   const dayShows = selectedDate ? getShowsByDate(selectedDate) : [];
 
-  const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => {
-    await addShow(date, cidade, estado, status, comQuem);
+  const handleSave = async (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string, horario?: string) => {
+    await addShow(date, cidade, estado, status, comQuem, horario);
   };
 
-  const handleUpdate = async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => {
+  const handleUpdate = async (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento" | "horario">>) => {
     await updateShow(id, updates);
   };
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Plus, Music, Users } from "lucide-react";
+import { MapPin, Plus, Music, Users, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,8 +24,8 @@ interface DayEventsDialogProps {
   onClose: () => void;
   selectedDate: string | null;
   dayShows: Show[];
-  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string) => void;
-  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento">>) => void;
+  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string, horario?: string) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento" | "horario">>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -107,6 +107,12 @@ export function DayEventsDialog({
                   <p className="font-semibold text-foreground truncate">{show.cidade}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-sm text-muted-foreground">{show.estado}</span>
+                    {show.horario && (
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {show.horario}
+                      </span>
+                    )}
                     {show.com_quem_evento && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <Users className="h-3 w-3" />
