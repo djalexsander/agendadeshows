@@ -82,7 +82,7 @@ export function DayEventsDialog({
   return (
     <>
       <Dialog open={open && !showDialogOpen} onOpenChange={(o) => !o && onClose()}>
-        <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
+        <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
               <Music className="h-5 w-5 text-primary" />
