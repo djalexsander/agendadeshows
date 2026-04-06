@@ -22,6 +22,7 @@ import {
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { exportShowPNG } from "@/lib/exportPNG";
 import { toast } from "sonner";
+import { RoutePickerSheet } from "./RoutePickerSheet";
 
 const ESTADOS_BR = [
   { sigla: "AC", nome: "Acre" },
@@ -68,11 +69,6 @@ function buildAddressString(show: { local?: string; endereco?: string; cidade: s
   return parts.join(", ");
 }
 
-function openRoute(address: string) {
-  const encoded = encodeURIComponent(address);
-  const url = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
-  window.open(url, "_blank", "noopener");
-}
 
 function copyAddress(address: string) {
   navigator.clipboard.writeText(address).then(() => {
@@ -110,6 +106,7 @@ export function ShowDialog({
   const [endereco, setEndereco] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [routePickerOpen, setRoutePickerOpen] = useState(false);
 
   useEffect(() => {
     if (existingShow) {
@@ -237,24 +234,31 @@ export function ShowDialog({
 
             {/* GPS / Copy buttons */}
             {hasLocation && (
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => openRoute(fullAddress)}
-                  className="flex-1 h-11 text-sm gap-2"
-                  variant="default"
-                >
-                  <Navigation className="h-4 w-4" />
-                  Traçar rota
-                </Button>
-                <Button
-                  onClick={() => copyAddress(fullAddress)}
-                  className="flex-1 h-11 text-sm gap-2"
-                  variant="outline"
-                >
-                  <Copy className="h-4 w-4" />
-                  Copiar endereço
-                </Button>
-              </div>
+              <>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setRoutePickerOpen(true)}
+                    className="flex-1 h-11 text-sm gap-2"
+                    variant="default"
+                  >
+                    <Navigation className="h-4 w-4" />
+                    Traçar rota
+                  </Button>
+                  <Button
+                    onClick={() => copyAddress(fullAddress)}
+                    className="flex-1 h-11 text-sm gap-2"
+                    variant="outline"
+                  >
+                    <Copy className="h-4 w-4" />
+                    Copiar endereço
+                  </Button>
+                </div>
+                <RoutePickerSheet
+                  open={routePickerOpen}
+                  onClose={() => setRoutePickerOpen(false)}
+                  destination={fullAddress}
+                />
+              </>
             )}
 
             <div className="flex gap-3">
