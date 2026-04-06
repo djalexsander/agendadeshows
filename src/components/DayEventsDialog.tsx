@@ -140,8 +140,8 @@ export function DayEventsDialog({
         onClose={handleShowDialogClose}
         selectedDate={selectedDate}
         existingShow={isCreating ? undefined : selectedShow}
-        onSave={(date, cidade, estado, status, comQuem) => {
-          onSave(date, cidade, estado, status, comQuem);
+        onSave={(date, cidade, estado, status, comQuem, horario, local, endereco) => {
+          onSave(date, cidade, estado, status, comQuem, horario, local, endereco);
           handleShowDialogClose();
         }}
         onUpdate={(id, updates) => {
