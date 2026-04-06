@@ -309,7 +309,7 @@ export default function AdminDashboard() {
 
       {/* Pending payment proofs */}
       {proofs.length > 0 && (
-        <div className="space-y-4">
+        <div id="pending-proofs-section" className="space-y-4">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-orange-400" />
             <h2 className="text-lg font-semibold">Comprovantes Pendentes ({proofs.length})</h2>
