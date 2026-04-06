@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Music, LogIn, Eye, EyeOff, UserCheck, UserPlus } from "lucide-react";
+import { Music, LogIn, Eye, EyeOff, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { APP_VERSION } from "@/lib/version";
 
 export default function Login() {
-  const [mode, setMode] = useState<"login" | "activate" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,7 +28,6 @@ export default function Login() {
     });
   }, []);
 
-  const isActivate = mode === "activate";
   const isSignup = mode === "signup";
 
   const resetForm = () => {
@@ -41,7 +40,7 @@ export default function Login() {
     setSignupSuccess(false);
   };
 
-  const switchMode = (nextMode: "login" | "activate" | "signup") => {
+  const switchMode = (nextMode: "login" | "signup") => {
     setMode(nextMode);
     resetForm();
   };
@@ -84,37 +83,8 @@ export default function Login() {
         return;
       }
 
-      // Sign out immediately so user sees pending screen on next login
       await supabase.auth.signOut();
       setSignupSuccess(true);
-      return;
-    }
-
-    if (isActivate) {
-      if (!email || !password || !confirmPassword) return;
-      if (password.length < 6) {
-        toast({ title: "Erro", description: "A senha deve ter pelo menos 6 caracteres.", variant: "destructive" });
-        return;
-      }
-      if (password !== confirmPassword) {
-        toast({ title: "Erro", description: "As senhas não coincidem.", variant: "destructive" });
-        return;
-      }
-
-      setLoading(true);
-      const response = await supabase.functions.invoke("activate-account", {
-        body: { email, password },
-      });
-      setLoading(false);
-
-      if (response.error || response.data?.error) {
-        toast({ title: "Erro", description: response.data?.error || response.error?.message, variant: "destructive" });
-        return;
-      }
-
-      toast({ title: "Conta ativada!", description: "Agora faça login com seu e-mail e senha." });
-      switchMode("login");
-      setEmail(email);
       return;
     }
 
@@ -135,21 +105,16 @@ export default function Login() {
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-3">
             <div className="h-16 w-16 rounded-2xl bg-[hsl(140_60%_45%)]/20 flex items-center justify-center mx-auto">
-              <UserCheck className="h-8 w-8 text-[hsl(140_60%_55%)]" />
+              <UserPlus className="h-8 w-8 text-[hsl(140_60%_55%)]" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Cadastro Enviado!</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Cadastro Realizado!</h1>
               <p className="text-muted-foreground mt-2">
-                Seu cadastro foi recebido com sucesso. O administrador irá analisar e aprovar sua conta em breve.
+                Sua conta foi criada com sucesso. Faça login para continuar.
               </p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
-            <div className="space-y-2 text-center">
-              <p className="text-sm text-muted-foreground">
-                Você receberá acesso assim que o administrador aprovar seu cadastro e o pagamento for confirmado.
-              </p>
-            </div>
+          <div className="rounded-2xl bg-card border border-border p-6">
             <Button onClick={() => switchMode("login")} className="w-full h-11 gap-2">
               <LogIn className="h-4 w-4" /> Ir para Login
             </Button>
@@ -175,7 +140,7 @@ export default function Login() {
 
         <div className="rounded-2xl bg-card border border-border p-6 space-y-6">
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-1 rounded-xl bg-secondary/40 p-1">
+            <div className="grid grid-cols-2 gap-1 rounded-xl bg-secondary/40 p-1">
               <button
                 type="button"
                 onClick={() => switchMode("login")}
@@ -194,28 +159,17 @@ export default function Login() {
               >
                 Criar Conta
               </button>
-              <button
-                type="button"
-                onClick={() => switchMode("activate")}
-                className={`h-10 rounded-lg text-sm font-medium transition-colors ${
-                  mode === "activate" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Ativar
-              </button>
             </div>
 
             <div className="text-center">
               <h2 className="text-lg font-semibold">
-                {isSignup ? "Criar Conta" : isActivate ? "Primeiro acesso" : "Entrar"}
+                {isSignup ? "Criar Conta" : "Entrar"}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {isSignup
                   ? signupConfig?.cadastro_ativo === false
                     ? "Cadastro público desativado no momento."
-                    : "Preencha seus dados para solicitar acesso"
-                  : isActivate
-                  ? "Defina sua senha para ativar sua conta"
+                    : "Preencha seus dados para criar sua conta"
                   : "Acesse sua conta"}
               </p>
               {isSignup && signupConfig?.cadastro_ativo !== false && signupConfig?.valor_padrao != null && signupConfig.valor_padrao > 0 && (
@@ -267,16 +221,16 @@ export default function Login() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">{isActivate || isSignup ? "Senha *" : "Senha"}</Label>
+              <Label htmlFor="password">{isSignup ? "Senha *" : "Senha"}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={isActivate || isSignup ? "Mínimo 6 caracteres" : "••••••••"}
+                  placeholder={isSignup ? "Mínimo 6 caracteres" : "••••••••"}
                   className="h-12 bg-secondary/50 border-border pr-12"
-                  autoComplete={isActivate || isSignup ? "new-password" : "current-password"}
+                  autoComplete={isSignup ? "new-password" : "current-password"}
                 />
                 <button
                   type="button"
@@ -288,7 +242,7 @@ export default function Login() {
               </div>
             </div>
 
-            {(isActivate || isSignup) && (
+            {isSignup && (
               <div className="space-y-2">
                 <Label htmlFor="confirm-password">Confirmar senha *</Label>
                 <Input
@@ -305,22 +259,20 @@ export default function Login() {
 
             <Button
               type="submit"
-              disabled={loading || !email || !password || ((isActivate || isSignup) && !confirmPassword) || (isSignup && (!nome || !telefone)) || (isSignup && signupConfig?.cadastro_ativo === false)}
+              disabled={loading || !email || !password || (isSignup && !confirmPassword) || (isSignup && (!nome || !telefone)) || (isSignup && signupConfig?.cadastro_ativo === false)}
               className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
             >
-              {isSignup ? <UserPlus className="h-5 w-5" /> : isActivate ? <UserCheck className="h-5 w-5" /> : <LogIn className="h-5 w-5" />}
+              {isSignup ? <UserPlus className="h-5 w-5" /> : <LogIn className="h-5 w-5" />}
               {loading
-                ? isSignup ? "Criando..." : isActivate ? "Ativando..." : "Entrando..."
-                : isSignup ? "Criar Conta" : isActivate ? "Ativar conta" : "Entrar"}
+                ? isSignup ? "Criando..." : "Entrando..."
+                : isSignup ? "Criar Conta" : "Entrar"}
             </Button>
           </form>
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
           {isSignup
-            ? "Após o cadastro, aguarde a aprovação do administrador."
-            : isActivate
-            ? "Use o e-mail informado pelo administrador."
+            ? "Após o cadastro, efetue o pagamento para liberar o acesso."
             : "Acesso fornecido pelo administrador"}
         </p>
         <p className="text-center text-[10px] text-muted-foreground/50">{APP_VERSION}</p>

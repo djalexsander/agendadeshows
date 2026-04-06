@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
-import PendingApproval from "./pages/PendingApproval";
 import PaymentPending from "./pages/PaymentPending";
 import PaymentReview from "./pages/PaymentReview";
 import RejectedPage from "./pages/RejectedPage";
@@ -44,14 +43,6 @@ function AppRoutes() {
 
   // Status-based routing for clients
   if (role === "client") {
-    if (status === "pendente_aprovacao") {
-      return (
-        <Routes>
-          <Route path="*" element={<PendingApproval />} />
-        </Routes>
-      );
-    }
-
     if (status === "aguardando_pagamento" || status === "pendente_pagamento") {
       return (
         <Routes>

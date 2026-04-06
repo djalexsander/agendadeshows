@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, Pencil, Search, Trash2, Globe, Shield } from "lucide-react";
+import { Pencil, Search, Trash2, Globe, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,11 +43,10 @@ export default function AdminClients() {
   const [deleteTarget, setDeleteTarget] = useState<ClientProfile | null>(null);
   const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(false);
-  const [defaultPrice, setDefaultPrice] = useState(0);
   const { toast } = useToast();
 
   const [form, setForm] = useState({
-    nome: "", email: "", telefone: "", cidade: "", estado: "",
+    nome: "", telefone: "", cidade: "", estado: "",
     status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
   });
 
@@ -56,31 +55,14 @@ export default function AdminClients() {
     if (data) setClients(data as ClientProfile[]);
   };
 
-  const fetchDefaultPrice = async () => {
-    const { data } = await (supabase.from("signup_config") as any).select("valor_padrao").limit(1);
-    if (data && data.length > 0) setDefaultPrice(data[0].valor_padrao || 0);
-  };
-
   useEffect(() => {
     fetchClients();
-    fetchDefaultPrice();
   }, []);
-
-  const resetForm = () => {
-    setForm({
-      nome: "", email: "", telefone: "", cidade: "", estado: "",
-      status_plano: "pendente_pagamento", valor_plano: String(defaultPrice || ""),
-      vencimento: "", observacoes: "",
-    });
-    setEditingClient(null);
-  };
-
-  const openNew = () => { resetForm(); setDialogOpen(true); };
 
   const openEdit = (c: ClientProfile) => {
     setEditingClient(c);
     setForm({
-      nome: c.nome, email: c.email,
+      nome: c.nome,
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo", valor_plano: String(c.valor_plano || ""),
       vencimento: c.vencimento || "", observacoes: c.observacoes || "",
@@ -89,64 +71,23 @@ export default function AdminClients() {
   };
 
   const handleSave = async () => {
-    if (!form.nome || !form.email) {
-      toast({ title: "Erro", description: "Nome e e-mail são obrigatórios.", variant: "destructive" });
+    if (!form.nome) {
+      toast({ title: "Erro", description: "Nome é obrigatório.", variant: "destructive" });
       return;
     }
     setLoading(true);
 
-    if (editingClient) {
-      await supabase.from("profiles").update({
-        nome: form.nome, telefone: form.telefone,
-        cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
-        valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
-        vencimento: form.vencimento || null, observacoes: form.observacoes,
-      }).eq("id", editingClient.id);
-      toast({ title: "Sucesso", description: "Cliente atualizado." });
-    } else {
-      const response = await supabase.functions.invoke("create-user", {
-        body: { email: form.email, nome: form.nome },
-      });
-
-      if (response.error || response.data?.error) {
-        toast({ title: "Erro", description: response.data?.error || response.error?.message, variant: "destructive" });
-        setLoading(false);
-        return;
-      }
-
-      const newUserId = response.data?.user?.id;
-      if (newUserId) {
-        await new Promise((r) => setTimeout(r, 1000));
-
-        const valor = form.valor_plano ? parseFloat(form.valor_plano) : 0;
-
-        await supabase.from("profiles").update({
-          nome: form.nome, telefone: form.telefone,
-          cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
-          valor_plano: valor,
-          valor_padrao_na_data: valor,
-          origem_cadastro: "admin_manual",
-          vencimento: form.vencimento || null, observacoes: form.observacoes,
-          primeiro_acesso: true,
-        } as any).eq("user_id", newUserId);
-
-        if (valor > 0) {
-          await supabase.from("payments").insert({
-            client_user_id: newUserId,
-            valor,
-            status: "pendente",
-            forma_pagamento: "pix",
-            data_vencimento: form.vencimento || null,
-          });
-        }
-
-        toast({ title: "Sucesso", description: "Cliente criado. Ele definirá a senha no primeiro acesso." });
-      }
-    }
+    await supabase.from("profiles").update({
+      nome: form.nome, telefone: form.telefone,
+      cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
+      valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
+      vencimento: form.vencimento || null, observacoes: form.observacoes,
+    }).eq("id", editingClient!.id);
+    toast({ title: "Sucesso", description: "Cliente atualizado." });
 
     setLoading(false);
     setDialogOpen(false);
-    resetForm();
+    setEditingClient(null);
     fetchClients();
   };
 
@@ -177,9 +118,9 @@ export default function AdminClients() {
 
   const statusLabel = (s: string | null) => {
     switch (s) {
-      case "pendente_aprovacao": return "Pend. Aprovação";
       case "aguardando_pagamento": return "Aguard. Pagamento";
       case "pagamento_em_analise": return "Pagto. em Análise";
+      case "pendente_pagamento": return "Pendente Pagamento";
       default: return s || "ativo";
     }
   };
@@ -189,7 +130,6 @@ export default function AdminClients() {
       case "ativo": return "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]";
       case "pendente_pagamento":
       case "aguardando_pagamento": return "bg-orange-500/20 text-orange-400";
-      case "pendente_aprovacao": return "bg-yellow-500/20 text-yellow-400";
       case "pagamento_em_analise": return "bg-blue-500/20 text-blue-400";
       case "rejeitado":
       case "inativo": return "bg-destructive/20 text-destructive";
@@ -204,9 +144,6 @@ export default function AdminClients() {
           <h1 className="text-2xl font-bold">Clientes</h1>
           <p className="text-muted-foreground text-sm">{clients.length} cadastrado(s)</p>
         </div>
-        <Button onClick={openNew} className="gap-2 rounded-xl">
-          <UserPlus className="h-4 w-4" /> Novo Cliente
-        </Button>
       </div>
 
       <div className="relative max-w-md">
@@ -258,10 +195,8 @@ export default function AdminClients() {
       <Dialog open={dialogOpen} onOpenChange={(o) => !o && setDialogOpen(false)}>
         <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingClient ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
-            <DialogDescription>
-              {editingClient ? "Atualize os dados do cliente" : "Cadastre um novo cliente na plataforma"}
-            </DialogDescription>
+            <DialogTitle>Editar Cliente</DialogTitle>
+            <DialogDescription>Atualize os dados do cliente</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
@@ -270,32 +205,26 @@ export default function AdminClients() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>E-mail *</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} disabled={!!editingClient} className="h-10 bg-secondary/50 border-border" />
-              </div>
-              <div className="space-y-1.5">
                 <Label>Telefone</Label>
                 <Input value={form.telefone} onChange={(e) => setForm({ ...form, telefone: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Cidade</Label>
                 <Input value={form.cidade} onChange={(e) => setForm({ ...form, cidade: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
-              <div className="space-y-1.5">
-                <Label>Estado</Label>
-                <Select value={form.estado} onValueChange={(v) => setForm({ ...form, estado: v })}>
-                  <SelectTrigger className="h-10 bg-secondary/50 border-border">
-                    <SelectValue placeholder="UF" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    {ESTADOS_BR.map((e) => (
-                      <SelectItem key={e} value={e}>{e}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Estado</Label>
+              <Select value={form.estado} onValueChange={(v) => setForm({ ...form, estado: v })}>
+                <SelectTrigger className="h-10 bg-secondary/50 border-border">
+                  <SelectValue placeholder="UF" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {ESTADOS_BR.map((e) => (
+                    <SelectItem key={e} value={e}>{e}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
@@ -305,7 +234,6 @@ export default function AdminClients() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                    <SelectItem value="pendente_aprovacao">Pend. Aprovação</SelectItem>
                     <SelectItem value="aguardando_pagamento">Aguard. Pagamento</SelectItem>
                     <SelectItem value="pagamento_em_analise">Pagto. em Análise</SelectItem>
                     <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
@@ -317,24 +245,19 @@ export default function AdminClients() {
               </div>
               <div className="space-y-1.5">
                 <Label>Valor (R$)</Label>
-                <Input type="number" step="0.01" value={form.valor_plano} onChange={(e) => setForm({ ...form, valor_plano: e.target.value })} className="h-10 bg-secondary/50 border-border" placeholder={defaultPrice ? `Padrão: ${defaultPrice}` : "0.00"} />
+                <Input type="number" step="0.01" value={form.valor_plano} onChange={(e) => setForm({ ...form, valor_plano: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
               <div className="space-y-1.5">
                 <Label>Vencimento</Label>
                 <Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
             </div>
-            {!editingClient && defaultPrice > 0 && (
-              <p className="text-xs text-muted-foreground">
-                💡 Valor padrão configurado: <strong>R$ {defaultPrice.toFixed(2)}</strong>. Altere acima se quiser um valor personalizado.
-              </p>
-            )}
             <div className="space-y-1.5">
               <Label>Observações</Label>
               <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
             </div>
             <Button onClick={handleSave} disabled={loading} className="w-full h-11 bg-primary hover:bg-primary/90">
-              {loading ? "Salvando..." : editingClient ? "Salvar Alterações" : "Cadastrar Cliente"}
+              {loading ? "Salvando..." : "Salvar Alterações"}
             </Button>
           </div>
         </DialogContent>
