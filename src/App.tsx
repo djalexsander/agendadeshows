@@ -43,7 +43,7 @@ function AppRoutes() {
 
   // Status-based routing for clients
   if (role === "client") {
-    if (status === "aguardando_pagamento" || status === "pendente_pagamento") {
+    if (status === "aguardando_pagamento" || status === "pendente_pagamento" || status === "pendente_aprovacao") {
       return (
         <Routes>
           <Route path="*" element={<PaymentPending />} />

@@ -17,7 +17,6 @@ export default function Login() {
   const [telefone, setTelefone] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [signupSuccess, setSignupSuccess] = useState(false);
   const [signupConfig, setSignupConfig] = useState<{ valor_padrao: number; cadastro_ativo: boolean; instrucoes_pagamento: string } | null>(null);
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
@@ -37,7 +36,6 @@ export default function Login() {
     setNome("");
     setTelefone("");
     setShowPassword(false);
-    setSignupSuccess(false);
   };
 
   const switchMode = (nextMode: "login" | "signup") => {
@@ -75,7 +73,7 @@ export default function Login() {
       }
 
       setLoading(true);
-      const { error } = await signUp(email, password, nome, telefone);
+      const { error, needsEmailConfirmation } = await signUp(email, password, nome, telefone);
       setLoading(false);
 
       if (error) {
@@ -83,8 +81,14 @@ export default function Login() {
         return;
       }
 
-      await supabase.auth.signOut();
-      setSignupSuccess(true);
+      if (needsEmailConfirmation) {
+        toast({ title: "Cadastro realizado!", description: "Verifique seu e-mail para confirmar a conta e depois faça login." });
+        switchMode("login");
+        return;
+      }
+
+      // Auto-logged in — auth state will redirect to payment page
+      toast({ title: "Cadastro realizado!", description: "Redirecionando para o pagamento..." });
       return;
     }
 
@@ -99,31 +103,6 @@ export default function Login() {
     }
   };
 
-  if (signupSuccess) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-md space-y-6">
-          <div className="text-center space-y-3">
-            <div className="h-16 w-16 rounded-2xl bg-[hsl(140_60%_45%)]/20 flex items-center justify-center mx-auto">
-              <UserPlus className="h-8 w-8 text-[hsl(140_60%_55%)]" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Cadastro Realizado!</h1>
-              <p className="text-muted-foreground mt-2">
-                Sua conta foi criada com sucesso. Faça login para continuar.
-              </p>
-            </div>
-          </div>
-          <div className="rounded-2xl bg-card border border-border p-6">
-            <Button onClick={() => switchMode("login")} className="w-full h-11 gap-2">
-              <LogIn className="h-4 w-4" /> Ir para Login
-            </Button>
-          </div>
-          <p className="text-center text-[10px] text-muted-foreground/50">{APP_VERSION}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
