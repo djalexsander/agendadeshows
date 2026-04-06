@@ -211,11 +211,34 @@ export default function AdminDashboard() {
 
       {/* Notification badge */}
       {notifications.length > 0 && (
-        <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-4 flex items-center gap-3">
+        <div
+          className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-4 flex items-center gap-3 cursor-pointer hover:bg-yellow-500/15 transition-colors"
+          onClick={() => {
+            const section = document.getElementById("pending-users-section") || document.getElementById("pending-proofs-section");
+            if (section) {
+              section.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+        >
           <Bell className="h-5 w-5 text-yellow-400 shrink-0" />
-          <p className="text-sm">
-            <strong>{notifications.length}</strong> notificação(ões) não lida(s) — novos cadastros aguardando aprovação.
+          <p className="text-sm flex-1">
+            <strong>{notifications.length}</strong> notificação(ões) não lida(s)
           </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/20"
+            onClick={async (e) => {
+              e.stopPropagation();
+              await (supabase.from("admin_notifications") as any)
+                .update({ lida: true })
+                .eq("lida", false);
+              toast({ title: "Notificações limpas" });
+              load();
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
         </div>
       )}
 
