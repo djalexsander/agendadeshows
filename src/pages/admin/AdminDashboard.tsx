@@ -258,7 +258,7 @@ export default function AdminDashboard() {
 
       {/* Pending user approvals */}
       {pendingUsers.length > 0 && (
-        <div className="space-y-4">
+        <div id="pending-users-section" className="space-y-4">
           <div className="flex items-center gap-2">
             <UserPlus className="h-5 w-5 text-yellow-400" />
             <h2 className="text-lg font-semibold">Novos Cadastros Pendentes ({pendingUsers.length})</h2>
