@@ -8,16 +8,27 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
+function openExternal(url: string) {
+  // Use location.href to avoid blank WebView / white screen in PWA
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 function openGoogleMaps(destination: string) {
-  window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`, "_blank", "noopener");
+  openExternal(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination)}`);
 }
 
 function openWaze(destination: string) {
-  window.open(`https://waze.com/ul?q=${encodeURIComponent(destination)}`, "_blank", "noopener");
+  openExternal(`https://waze.com/ul?q=${encodeURIComponent(destination)}`);
 }
 
 function openAppleMaps(destination: string) {
-  window.open(`https://maps.apple.com/?q=${encodeURIComponent(destination)}`, "_blank", "noopener");
+  openExternal(`https://maps.apple.com/?q=${encodeURIComponent(destination)}`);
 }
 
 const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
