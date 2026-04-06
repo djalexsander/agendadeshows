@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Pencil, Trash2, Music, AlertTriangle, Users, Image, Clock } from "lucide-react";
+import { MapPin, Pencil, Trash2, Music, AlertTriangle, Users, Image, Clock, Navigation, Copy, Building2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { exportShowPNG } from "@/lib/exportPNG";
+import { toast } from "sonner";
 
 const ESTADOS_BR = [
   { sigla: "AC", nome: "Acre" },
@@ -58,13 +59,36 @@ const STATUS_OPTIONS: { value: ShowStatus; label: string; color: string }[] = [
   { value: "finalizado", label: "Finalizado", color: "bg-blue-500" },
 ];
 
+function buildAddressString(show: { local?: string; endereco?: string; cidade: string; estado: string }) {
+  const parts: string[] = [];
+  if (show.local?.trim()) parts.push(show.local.trim());
+  if (show.endereco?.trim()) parts.push(show.endereco.trim());
+  if (show.cidade?.trim()) parts.push(show.cidade.trim());
+  if (show.estado?.trim()) parts.push(show.estado.trim());
+  return parts.join(", ");
+}
+
+function openRoute(address: string) {
+  const encoded = encodeURIComponent(address);
+  const url = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+  window.open(url, "_blank", "noopener");
+}
+
+function copyAddress(address: string) {
+  navigator.clipboard.writeText(address).then(() => {
+    toast.success("Endereço copiado!");
+  }).catch(() => {
+    toast.error("Não foi possível copiar");
+  });
+}
+
 interface ShowDialogProps {
   open: boolean;
   onClose: () => void;
   selectedDate: string | null;
   existingShow: Show | undefined;
-  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string, horario?: string) => void;
-  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento" | "horario">>) => void;
+  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string, horario?: string, local?: string, endereco?: string) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento" | "horario" | "local" | "endereco">>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -82,6 +106,8 @@ export function ShowDialog({
   const [status, setStatus] = useState<ShowStatus>("pendente");
   const [comQuemEvento, setComQuemEvento] = useState("");
   const [horario, setHorario] = useState("");
+  const [local, setLocal] = useState("");
+  const [endereco, setEndereco] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -92,6 +118,8 @@ export function ShowDialog({
       setStatus(existingShow.status || "pendente");
       setComQuemEvento(existingShow.com_quem_evento || "");
       setHorario(existingShow.horario || "");
+      setLocal(existingShow.local || "");
+      setEndereco(existingShow.endereco || "");
       setIsEditing(false);
       setConfirmDelete(false);
     } else {
@@ -100,6 +128,8 @@ export function ShowDialog({
       setStatus("pendente");
       setComQuemEvento("");
       setHorario("");
+      setLocal("");
+      setEndereco("");
       setIsEditing(true);
     }
   }, [existingShow, selectedDate, open]);
@@ -117,9 +147,11 @@ export function ShowDialog({
         status,
         com_quem_evento: comQuemEvento.trim() || "",
         horario: horario.trim() || "",
+        local: local.trim() || "",
+        endereco: endereco.trim() || "",
       });
     } else {
-      onSave(selectedDate, cidade.trim(), estado, status, comQuemEvento.trim() || undefined, horario.trim() || undefined);
+      onSave(selectedDate, cidade.trim(), estado, status, comQuemEvento.trim() || undefined, horario.trim() || undefined, local.trim() || undefined, endereco.trim() || undefined);
     }
     onClose();
   };
@@ -137,6 +169,9 @@ export function ShowDialog({
     }
   };
 
+  const fullAddress = existingShow ? buildAddressString(existingShow) : "";
+  const hasLocation = existingShow && (existingShow.cidade?.trim() || existingShow.endereco?.trim());
+
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
@@ -151,7 +186,6 @@ export function ShowDialog({
         </DialogHeader>
 
         {existingShow && !isEditing ? (
-          /* VIEW MODE — no status, just info + edit/delete/export */
           <div className="space-y-4 py-2">
             <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
               <MapPin className="h-5 w-5 text-primary shrink-0" />
@@ -160,6 +194,26 @@ export function ShowDialog({
                 {existingShow.estado && <span className="text-muted-foreground"> — {existingShow.estado}</span>}
               </span>
             </div>
+
+            {existingShow.local && (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
+                <Building2 className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Local</p>
+                  <p className="font-medium">{existingShow.local}</p>
+                </div>
+              </div>
+            )}
+
+            {existingShow.endereco && (
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
+                <MapPin className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Endereço</p>
+                  <p className="font-medium">{existingShow.endereco}</p>
+                </div>
+              </div>
+            )}
 
             {existingShow.com_quem_evento && (
               <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50">
@@ -178,6 +232,28 @@ export function ShowDialog({
                   <p className="text-xs text-muted-foreground">Horário</p>
                   <p className="font-medium">{existingShow.horario}</p>
                 </div>
+              </div>
+            )}
+
+            {/* GPS / Copy buttons */}
+            {hasLocation && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => openRoute(fullAddress)}
+                  className="flex-1 h-11 text-sm gap-2"
+                  variant="default"
+                >
+                  <Navigation className="h-4 w-4" />
+                  Traçar rota
+                </Button>
+                <Button
+                  onClick={() => copyAddress(fullAddress)}
+                  className="flex-1 h-11 text-sm gap-2"
+                  variant="outline"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copiar endereço
+                </Button>
               </div>
             )}
 
@@ -220,7 +296,6 @@ export function ShowDialog({
             </div>
           </div>
         ) : (
-          /* EDIT MODE — includes status */
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="cidade" className="text-base">Cidade</Label>
@@ -248,6 +323,26 @@ export function ShowDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="local" className="text-base">Nome do local</Label>
+              <Input
+                id="local"
+                value={local}
+                onChange={(e) => setLocal(e.target.value)}
+                placeholder="Ex: Arena Show, Espaço Cultural..."
+                className="h-12 text-base bg-secondary/50 border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endereco" className="text-base">Endereço</Label>
+              <Input
+                id="endereco"
+                value={endereco}
+                onChange={(e) => setEndereco(e.target.value)}
+                placeholder="Ex: Rua das Flores, 123"
+                className="h-12 text-base bg-secondary/50 border-border"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="comQuem" className="text-base">Com quem será o evento</Label>
