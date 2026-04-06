@@ -257,6 +257,7 @@ export type Database = {
           com_quem_evento: string | null
           created_at: string
           date: string
+          endereco: string | null
           estado: string
           evento: string | null
           horario: string | null
@@ -272,6 +273,7 @@ export type Database = {
           com_quem_evento?: string | null
           created_at?: string
           date: string
+          endereco?: string | null
           estado?: string
           evento?: string | null
           horario?: string | null
@@ -287,6 +289,7 @@ export type Database = {
           com_quem_evento?: string | null
           created_at?: string
           date?: string
+          endereco?: string | null
           estado?: string
           evento?: string | null
           horario?: string | null

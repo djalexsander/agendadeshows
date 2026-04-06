@@ -24,8 +24,8 @@ interface DayEventsDialogProps {
   onClose: () => void;
   selectedDate: string | null;
   dayShows: Show[];
-  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string, horario?: string) => void;
-  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento" | "horario">>) => void;
+  onSave: (date: string, cidade: string, estado: string, status: ShowStatus, comQuem?: string, horario?: string, local?: string, endereco?: string) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Show, "cidade" | "estado" | "status" | "com_quem_evento" | "horario" | "local" | "endereco">>) => void;
   onDelete: (id: string) => void;
 }
 
@@ -140,8 +140,8 @@ export function DayEventsDialog({
         onClose={handleShowDialogClose}
         selectedDate={selectedDate}
         existingShow={isCreating ? undefined : selectedShow}
-        onSave={(date, cidade, estado, status, comQuem) => {
-          onSave(date, cidade, estado, status, comQuem);
+        onSave={(date, cidade, estado, status, comQuem, horario, local, endereco) => {
+          onSave(date, cidade, estado, status, comQuem, horario, local, endereco);
           handleShowDialogClose();
         }}
         onUpdate={(id, updates) => {
