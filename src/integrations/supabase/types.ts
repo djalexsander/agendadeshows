@@ -163,13 +163,18 @@ export type Database = {
           email: string
           estado: string | null
           id: string
+          is_paid: boolean | null
           nome: string
           nome_artistico: string | null
           observacoes: string | null
           origem_cadastro: string | null
+          paid_at: string | null
+          plan_type: string | null
           primeiro_acesso: boolean | null
           status_plano: string | null
           telefone: string | null
+          trial_ends_at: string | null
+          trial_started_at: string | null
           updated_at: string
           user_id: string
           valor_padrao_na_data: number | null
@@ -186,13 +191,18 @@ export type Database = {
           email?: string
           estado?: string | null
           id?: string
+          is_paid?: boolean | null
           nome?: string
           nome_artistico?: string | null
           observacoes?: string | null
           origem_cadastro?: string | null
+          paid_at?: string | null
+          plan_type?: string | null
           primeiro_acesso?: boolean | null
           status_plano?: string | null
           telefone?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id: string
           valor_padrao_na_data?: number | null
@@ -209,13 +219,18 @@ export type Database = {
           email?: string
           estado?: string | null
           id?: string
+          is_paid?: boolean | null
           nome?: string
           nome_artistico?: string | null
           observacoes?: string | null
           origem_cadastro?: string | null
+          paid_at?: string | null
+          plan_type?: string | null
           primeiro_acesso?: boolean | null
           status_plano?: string | null
           telefone?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id?: string
           valor_padrao_na_data?: number | null
