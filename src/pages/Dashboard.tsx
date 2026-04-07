@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
