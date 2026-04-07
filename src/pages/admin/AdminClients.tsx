@@ -34,6 +34,10 @@ interface ClientProfile {
   vencimento: string | null;
   observacoes: string | null;
   origem_cadastro: string | null;
+  plan_type: string | null;
+  trial_started_at: string | null;
+  trial_ends_at: string | null;
+  is_paid: boolean | null;
 }
 
 export default function AdminClients() {
@@ -116,24 +120,25 @@ export default function AdminClients() {
     );
   });
 
-  const statusLabel = (s: string | null) => {
-    switch (s) {
-      case "aguardando_pagamento": return "Aguard. Pagamento";
-      case "pagamento_em_analise": return "Pagto. em Análise";
-      case "pendente_pagamento": return "Pendente Pagamento";
-      default: return s || "ativo";
+  const getDisplayStatus = (c: ClientProfile) => {
+    if (c.plan_type === "free_trial_7_days") {
+      const trialEnd = c.trial_ends_at ? new Date(c.trial_ends_at) : null;
+      const isExpired = trialEnd && new Date() > trialEnd;
+      if (isExpired) return { label: "Trial Expirado", color: "bg-destructive/20 text-destructive" };
+      const daysLeft = trialEnd ? Math.ceil((trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
+      return { label: `Trial (${daysLeft}d)`, color: "bg-blue-500/20 text-blue-400" };
     }
-  };
-
-  const statusColor = (s: string | null) => {
-    switch (s) {
-      case "ativo": return "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]";
-      case "pendente_pagamento":
-      case "aguardando_pagamento": return "bg-orange-500/20 text-orange-400";
-      case "pagamento_em_analise": return "bg-blue-500/20 text-blue-400";
+    if (c.plan_type === "lifetime" && c.is_paid) {
+      return { label: "Vitalício", color: "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]" };
+    }
+    switch (c.status_plano) {
+      case "aguardando_pagamento": return { label: "Aguard. Pagamento", color: "bg-orange-500/20 text-orange-400" };
+      case "pagamento_em_analise": return { label: "Pagto. em Análise", color: "bg-blue-500/20 text-blue-400" };
+      case "pending_plan_choice": return { label: "Escolhendo Plano", color: "bg-yellow-500/20 text-yellow-400" };
+      case "ativo": return { label: "Ativo", color: "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]" };
       case "rejeitado":
-      case "inativo": return "bg-destructive/20 text-destructive";
-      default: return "bg-yellow-500/20 text-yellow-400";
+      case "inativo": return { label: c.status_plano === "rejeitado" ? "Rejeitado" : "Inativo", color: "bg-destructive/20 text-destructive" };
+      default: return { label: c.status_plano || "ativo", color: "bg-yellow-500/20 text-yellow-400" };
     }
   };
 
@@ -172,13 +177,23 @@ export default function AdminClients() {
                 <p className="text-sm text-primary truncate">{c.nome_artistico}</p>
               )}
               <p className="text-sm text-muted-foreground">{c.email}</p>
-              {c.valor_plano != null && c.valor_plano > 0 && (
+              {c.plan_type === "free_trial_7_days" && c.trial_ends_at && (
+                <p className="text-xs text-muted-foreground">
+                  Expira: {new Date(c.trial_ends_at).toLocaleDateString("pt-BR")}
+                </p>
+              )}
+              {c.plan_type === "lifetime" && c.is_paid && (
+                <p className="text-xs text-muted-foreground">Plano vitalício</p>
+              )}
+              {c.plan_type !== "free_trial_7_days" && !(c.plan_type === "lifetime" && c.is_paid) && c.valor_plano != null && c.valor_plano > 0 && (
                 <p className="text-xs text-muted-foreground">R$ {c.valor_plano.toFixed(2)}</p>
               )}
             </div>
-            <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(c.status_plano)}`}>
-              {statusLabel(c.status_plano)}
-            </span>
+            {(() => { const s = getDisplayStatus(c); return (
+              <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${s.color}`}>
+                {s.label}
+              </span>
+            ); })()}
             <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(c)}>
               <Pencil className="h-4 w-4" />
             </Button>
