@@ -197,6 +197,34 @@ export default function Login() {
               </div>
             )}
 
+            {isSignup && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="cidade">Cidade</Label>
+                  <Input
+                    id="cidade"
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
+                    placeholder="Sua cidade"
+                    className="h-12 bg-secondary/50 border-border"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="estado">Estado</Label>
+                  <Select value={estado} onValueChange={setEstado}>
+                    <SelectTrigger className="h-12 bg-secondary/50 border-border">
+                      <SelectValue placeholder="UF" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border">
+                      {ESTADOS_BR.map((uf) => (
+                        <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">E-mail{isSignup ? " *" : ""}</Label>
               <Input
