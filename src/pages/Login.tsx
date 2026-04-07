@@ -15,6 +15,8 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [signupConfig, setSignupConfig] = useState<{ valor_padrao: number; cadastro_ativo: boolean; instrucoes_pagamento: string } | null>(null);
