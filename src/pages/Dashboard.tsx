@@ -90,6 +90,15 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-2">
               <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 rounded-xl"
+                onClick={() => window.location.reload()}
+                title="Atualizar página"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 className="gap-2 rounded-xl border-border"
