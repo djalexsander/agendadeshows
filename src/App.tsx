@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Login from "./pages/Login";
+import PlanChoice from "./pages/PlanChoice";
+import TrialExpired from "./pages/TrialExpired";
 import PaymentPending from "./pages/PaymentPending";
 import PaymentReview from "./pages/PaymentReview";
 import RejectedPage from "./pages/RejectedPage";
