@@ -37,6 +37,8 @@ export default function Login() {
     setConfirmPassword("");
     setNome("");
     setTelefone("");
+    setCidade("");
+    setEstado("");
     setShowPassword(false);
   };
 
