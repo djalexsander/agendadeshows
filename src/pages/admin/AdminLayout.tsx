@@ -13,6 +13,7 @@ import {
   Bell,
   BellOff,
   Settings,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -148,7 +149,14 @@ export default function AdminLayout() {
             <Music className="h-5 w-5 text-primary" />
             <span className="font-bold text-sm">Admin</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto">
+            <button
+              onClick={() => window.location.reload()}
+              className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50"
+              title="Atualizar"
+            >
+              <RefreshCw className="h-5 w-5" />
+            </button>
             {navItems.map((item) => (
               <NavLink
                 key={item.to}

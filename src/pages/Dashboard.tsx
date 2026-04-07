@@ -154,49 +154,49 @@ export default function Dashboard() {
           </div>
         )}
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <CalendarDays className="h-6 w-6 text-primary" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{monthShows.length}</p>
-              <p className="text-sm text-muted-foreground">Eventos no mês</p>
-            </div>
-          </div>
-          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
-              <BarChart3 className="h-6 w-6 text-accent-foreground" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{shows.length}</p>
-              <p className="text-sm text-muted-foreground">Total de shows</p>
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold">{monthShows.length}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Eventos no mês</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <Clock className="h-6 w-6 text-primary" />
+          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
             </div>
-            <div>
-              <p className="text-lg font-bold truncate">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold">{shows.length}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Total de shows</p>
+            </div>
+          </div>
+          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm sm:text-lg font-bold truncate">
                 {nextShow
                   ? format(parseISO(nextShow.date), "dd/MM/yyyy")
                   : "—"}
               </p>
-              <p className="text-sm text-muted-foreground">
-                {nextShow ? "Próximo show" : "Nenhum próximo show"}
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {nextShow ? "Próximo show" : "Sem próximo"}
               </p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
-              <Navigation className="h-6 w-6 text-accent-foreground" />
+          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <Navigation className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
             </div>
-            <div>
-              <p className="text-lg font-bold truncate">
+            <div className="min-w-0">
+              <p className="text-sm sm:text-lg font-bold truncate">
                 {nextShow ? nextShow.cidade : "—"}
               </p>
-              <p className="text-sm text-muted-foreground">Cidade próximo show</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Cidade próximo</p>
             </div>
           </div>
         </div>
