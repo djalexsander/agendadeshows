@@ -3,6 +3,13 @@ import { Music, LogIn, Eye, EyeOff, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+
+const ESTADOS_BR = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
+];
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -77,7 +84,7 @@ export default function Login() {
       }
 
       setLoading(true);
-      const { error, needsEmailConfirmation } = await signUp(email, password, nome, telefone);
+      const { error, needsEmailConfirmation } = await signUp(email, password, nome, telefone, cidade, estado);
       setLoading(false);
 
       if (error) {
