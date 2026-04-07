@@ -65,10 +65,12 @@ export default function AdminClients() {
 
   const openEdit = (c: ClientProfile) => {
     setEditingClient(c);
+    const isTrialOrLifetime = c.plan_type === "free_trial_7_days" || (c.plan_type === "lifetime" && c.is_paid);
     setForm({
       nome: c.nome,
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
-      status_plano: c.status_plano || "ativo", valor_plano: String(c.valor_plano || ""),
+      status_plano: c.status_plano || "ativo",
+      valor_plano: isTrialOrLifetime ? "" : String(c.valor_plano || ""),
       vencimento: c.vencimento || "", observacoes: c.observacoes || "",
     });
     setDialogOpen(true);

@@ -3,6 +3,13 @@ import { Music, LogIn, Eye, EyeOff, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+
+const ESTADOS_BR = [
+  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
+];
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +22,8 @@ export default function Login() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [signupConfig, setSignupConfig] = useState<{ valor_padrao: number; cadastro_ativo: boolean; instrucoes_pagamento: string } | null>(null);
@@ -35,6 +44,8 @@ export default function Login() {
     setConfirmPassword("");
     setNome("");
     setTelefone("");
+    setCidade("");
+    setEstado("");
     setShowPassword(false);
   };
 
@@ -73,7 +84,7 @@ export default function Login() {
       }
 
       setLoading(true);
-      const { error, needsEmailConfirmation } = await signUp(email, password, nome, telefone);
+      const { error, needsEmailConfirmation } = await signUp(email, password, nome, telefone, cidade, estado);
       setLoading(false);
 
       if (error) {
@@ -183,6 +194,34 @@ export default function Login() {
                   placeholder="(00) 00000-0000"
                   className="h-12 bg-secondary/50 border-border"
                 />
+              </div>
+            )}
+
+            {isSignup && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="cidade">Cidade</Label>
+                  <Input
+                    id="cidade"
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
+                    placeholder="Sua cidade"
+                    className="h-12 bg-secondary/50 border-border"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="estado">Estado</Label>
+                  <Select value={estado} onValueChange={setEstado}>
+                    <SelectTrigger className="h-12 bg-secondary/50 border-border">
+                      <SelectValue placeholder="UF" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border">
+                      {ESTADOS_BR.map((uf) => (
+                        <SelectItem key={uf} value={uf}>{uf}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             )}
 
