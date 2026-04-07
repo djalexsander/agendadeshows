@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
@@ -89,6 +89,15 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 rounded-xl"
+                onClick={() => window.location.reload()}
+                title="Atualizar página"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
