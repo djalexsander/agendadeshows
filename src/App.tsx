@@ -45,6 +45,27 @@ function AppRoutes() {
 
   // Status-based routing for clients
   if (role === "client") {
+    // Check trial expiration
+    const planType = profile?.plan_type;
+    const trialEndsAt = profile?.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+    const isTrialExpired = planType === "free_trial_7_days" && trialEndsAt && new Date() > trialEndsAt;
+
+    if (status === "pending_plan_choice") {
+      return (
+        <Routes>
+          <Route path="*" element={<PlanChoice />} />
+        </Routes>
+      );
+    }
+
+    if (isTrialExpired && !profile?.is_paid) {
+      return (
+        <Routes>
+          <Route path="*" element={<TrialExpired />} />
+        </Routes>
+      );
+    }
+
     if (status === "aguardando_pagamento" || status === "pendente_pagamento" || status === "pendente_aprovacao") {
       return (
         <Routes>
@@ -77,7 +98,7 @@ function AppRoutes() {
       );
     }
 
-    // ativo — full access
+    // ativo — full access (trial active or lifetime paid)
     return (
       <Routes>
         <Route path="/" element={<Dashboard />} />
