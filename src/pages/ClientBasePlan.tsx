@@ -254,7 +254,7 @@ export default function ClientBasePlan() {
               disabled={showForm}
             >
               <Send className="h-4 w-4" />
-              {status === "active" ? "Renovar antecipadamente" : status === "trial" ? "Assinar plano" : "Enviar pagamento"}
+              {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Enviar pagamento"}
             </Button>
           )}
         </div>
