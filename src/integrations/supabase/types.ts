@@ -197,6 +197,54 @@ export type Database = {
         }
         Relationships: []
       }
+      module_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          module_name: string
+          notes: string | null
+          receipt_url: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          module_name: string
+          notes?: string | null
+          receipt_url?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          module_name?: string
+          notes?: string | null
+          receipt_url?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       module_requests: {
         Row: {
           created_at: string
