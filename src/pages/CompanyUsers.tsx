@@ -78,7 +78,7 @@ export default function CompanyUsers() {
           </Button>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">Usuários da Empresa</h1>
+            <h1 className="text-xl font-bold tracking-tight">Equipe da Empresa</h1>
           </div>
         </div>
       </header>
@@ -87,7 +87,7 @@ export default function CompanyUsers() {
         <ModuleGate
           moduleName="agenda_compartilhada"
           title="Agenda Compartilhada"
-          description="Adicione múltiplos usuários à sua empresa com níveis de acesso. Ative o módulo para liberar."
+          description="Sua empresa contrata e compartilha a agenda com a equipe. Ative o módulo para adicionar usuários sem que cada membro precise de assinatura própria."
         >
         {/* Company name */}
         {company && (
@@ -100,9 +100,12 @@ export default function CompanyUsers() {
         {/* Members */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">{members.length} membro{members.length !== 1 ? "s" : ""}</p>
+            <div>
+              <p className="text-sm font-medium text-foreground">{members.length} membro{members.length !== 1 ? "s" : ""}</p>
+              <p className="text-xs text-muted-foreground">Membros acessam a agenda sem assinatura própria</p>
+            </div>
             <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)}>
-              <UserPlus className="h-4 w-4" /> Adicionar
+              <UserPlus className="h-4 w-4" /> Adicionar membro
             </Button>
           </div>
 
@@ -201,10 +204,10 @@ export default function CompanyUsers() {
 
       {/* Add member dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
+         <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
           <DialogHeader>
-            <DialogTitle>Adicionar usuário</DialogTitle>
-            <DialogDescription>Convide ou vincule um usuário à empresa</DialogDescription>
+            <DialogTitle>Adicionar membro à empresa</DialogTitle>
+            <DialogDescription>Convide ou vincule um membro da equipe. Ele terá acesso à agenda da empresa sem precisar de assinatura própria.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="flex gap-2">
