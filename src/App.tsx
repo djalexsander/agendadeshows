@@ -85,6 +85,7 @@ function AppRoutes() {
         return (
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/meu-plano" element={<ClientBasePlan />} />
             <Route path="/modulos" element={<ModulesUpgrade />} />
             <Route path="/financeiro" element={<Financeiro />} />
             <Route path="/equipe" element={<Equipe />} />
