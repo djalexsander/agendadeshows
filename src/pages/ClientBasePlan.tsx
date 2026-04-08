@@ -2,13 +2,14 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut, Puzzle,
+  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientBasePlan } from "@/hooks/useClientBasePlan";
 import { useSubscriptionSummary } from "@/hooks/useSubscriptionSummary";
