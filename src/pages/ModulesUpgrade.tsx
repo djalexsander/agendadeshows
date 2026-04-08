@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   Puzzle, DollarSign, Users, FileBarChart, ImageDown, MapPinned, ArrowLeft,
-  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Upload, Send,
+  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Upload, Send, Plus, Minus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,9 @@ import { useModules, type ModuleName } from "@/hooks/useModules";
 import { useModuleRequests } from "@/hooks/useModuleRequests";
 import { useModuleCatalog, type CatalogModule } from "@/hooks/useModuleCatalog";
 import { useClientModulePayments } from "@/hooks/useClientModulePayments";
+import { useTrialModuleSelections } from "@/hooks/useTrialModuleSelections";
 import { useAuth } from "@/hooks/useAuth";
+import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,21 +41,40 @@ export default function ModulesUpgrade() {
   const { hasPendingRequest, loading: requestsLoading } = useModuleRequests();
   const { modules: catalog, loading: catalogLoading } = useModuleCatalog();
   const { hasPendingPayment, getLatestPayment, createModulePayment, loading: paymentsLoading } = useClientModulePayments();
+  const { isSelected, toggleModule, loading: selectionsLoading } = useTrialModuleSelections();
   const navigate = useNavigate();
+
+  const planStatus = getEffectivePlanStatus(profile);
+  const isPreSubscription =
+    planStatus === "trial" ||
+    planStatus === "trial_expired" ||
+    planStatus === "pending_plan_choice" ||
+    planStatus === "pending_payment" ||
+    planStatus === "expired";
 
   const [selectedModule, setSelectedModule] = useState<CatalogModule | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [toggling, setToggling] = useState<string | null>(null);
 
-  const loading = modulesLoading || requestsLoading || catalogLoading || paymentsLoading;
+  const loading = modulesLoading || requestsLoading || catalogLoading || paymentsLoading || selectionsLoading;
 
-  const getModuleStatus = (mod: CatalogModule): "active" | "pending" | "rejected" | "available" => {
+  const getModuleStatus = (mod: CatalogModule): "active" | "pending" | "rejected" | "selected" | "available" => {
     if (hasModule(mod.module_name as ModuleName)) return "active";
+    if (isPreSubscription && isSelected(mod.module_name)) return "selected";
     if (hasPendingPayment(mod.module_name) || hasPendingRequest(mod.module_name as ModuleName)) return "pending";
     const latest = getLatestPayment(mod.module_name);
     if (latest && latest.status === "rejected") return "rejected";
     return "available";
+  };
+
+  const handleToggleTrialModule = async (mod: CatalogModule) => {
+    setToggling(mod.module_name);
+    await toggleModule(mod.module_name);
+    const wasSelected = isSelected(mod.module_name);
+    toast.success(wasSelected ? `"${mod.display_name}" removido do plano` : `"${mod.display_name}" adicionado ao plano`);
+    setToggling(null);
   };
 
   const handleSubmit = async () => {
@@ -114,8 +135,17 @@ export default function ModulesUpgrade() {
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4">
         <p className="text-sm text-muted-foreground">
-          Amplie seu app com funcionalidades extras. Ative apenas o que precisar.
+          {isPreSubscription
+            ? "Monte seu plano ideal. Selecione os módulos que deseja incluir na sua assinatura."
+            : "Amplie seu app com funcionalidades extras. Ative apenas o que precisar."}
         </p>
+
+        {isPreSubscription && (
+          <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-blue-400 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 shrink-0" />
+            Os módulos selecionados serão somados ao plano base na sua assinatura.
+          </div>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
@@ -126,6 +156,7 @@ export default function ModulesUpgrade() {
             {catalog.map((mod) => {
               const status = getModuleStatus(mod);
               const Icon = ICON_MAP[mod.module_name] || Puzzle;
+              const isTogglingThis = toggling === mod.module_name;
 
               return (
                 <div
@@ -133,6 +164,8 @@ export default function ModulesUpgrade() {
                   className={`rounded-2xl border p-5 flex flex-col gap-4 transition-colors ${
                     status === "active"
                       ? "border-primary/40 bg-primary/5"
+                      : status === "selected"
+                      ? "border-primary/40 bg-primary/10"
                       : status === "pending"
                       ? "border-yellow-500/30 bg-yellow-500/5"
                       : status === "rejected"
@@ -142,16 +175,17 @@ export default function ModulesUpgrade() {
                 >
                   <div className="flex items-start gap-3">
                     <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      status === "active" ? "bg-primary/20" : status === "pending" ? "bg-yellow-500/15" : status === "rejected" ? "bg-red-500/15" : "bg-secondary"
+                      status === "active" || status === "selected" ? "bg-primary/20" : status === "pending" ? "bg-yellow-500/15" : status === "rejected" ? "bg-red-500/15" : "bg-secondary"
                     }`}>
                       <Icon className={`h-5 w-5 ${
-                        status === "active" ? "text-primary" : status === "pending" ? "text-yellow-500" : status === "rejected" ? "text-red-500" : "text-muted-foreground"
+                        status === "active" || status === "selected" ? "text-primary" : status === "pending" ? "text-yellow-500" : status === "rejected" ? "text-red-500" : "text-muted-foreground"
                       }`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-foreground">{mod.display_name}</h3>
                         {status === "active" && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
+                        {status === "selected" && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
                         {status === "pending" && <Clock className="h-4 w-4 text-yellow-500 shrink-0" />}
                         {status === "rejected" && <XCircle className="h-4 w-4 text-red-500 shrink-0" />}
                       </div>
@@ -163,13 +197,44 @@ export default function ModulesUpgrade() {
                     <span className="text-sm font-bold text-foreground">
                       {formatPrice(mod.price, mod.billing_period)}
                     </span>
+
                     {status === "active" ? (
                       <Button size="sm" variant="secondary" disabled className="rounded-xl gap-1.5 text-xs">
                         <CheckCircle2 className="h-3.5 w-3.5" /> Ativo
                       </Button>
+                    ) : status === "selected" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-xl gap-1.5 text-xs border-primary/30 text-primary"
+                        onClick={() => handleToggleTrialModule(mod)}
+                        disabled={isTogglingThis}
+                      >
+                        {isTogglingThis ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Minus className="h-3.5 w-3.5" />
+                        )}
+                        Selecionado
+                      </Button>
                     ) : status === "pending" ? (
                       <Button size="sm" variant="outline" disabled className="rounded-xl gap-1.5 text-xs border-yellow-500/30 text-yellow-500">
                         <Clock className="h-3.5 w-3.5" /> Em análise
+                      </Button>
+                    ) : isPreSubscription ? (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="rounded-xl gap-1.5 text-xs"
+                        onClick={() => handleToggleTrialModule(mod)}
+                        disabled={isTogglingThis}
+                      >
+                        {isTogglingThis ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Plus className="h-3.5 w-3.5" />
+                        )}
+                        Adicionar ao plano
                       </Button>
                     ) : (
                       <Button
@@ -190,7 +255,7 @@ export default function ModulesUpgrade() {
         )}
       </div>
 
-      {/* Payment dialog */}
+      {/* Payment dialog — only for active plan users */}
       <Dialog open={!!selectedModule} onOpenChange={(o) => { if (!o) { setSelectedModule(null); setFile(null); setNotes(""); } }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -201,7 +266,6 @@ export default function ModulesUpgrade() {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Pix payment info */}
             {selectedModule && (
               <PixPaymentCard amount={selectedModule.price} title="Pague via Pix" />
             )}
