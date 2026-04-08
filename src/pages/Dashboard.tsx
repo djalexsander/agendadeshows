@@ -110,16 +110,28 @@ export default function Dashboard() {
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 rounded-xl border-border"
-                onClick={() => setExportOpen(true)}
-                disabled={shows.length === 0}
-              >
-                <Image className="h-4 w-4" />
-                <span className="hidden sm:inline">Exportar</span>
-              </Button>
+              {hasModule("export_png") ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 rounded-xl border-border"
+                  onClick={() => setExportOpen(true)}
+                  disabled={shows.length === 0}
+                >
+                  <Image className="h-4 w-4" />
+                  <span className="hidden sm:inline">Exportar</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 rounded-xl border-border opacity-70"
+                  onClick={() => navigate("/modulos")}
+                >
+                  <Lock className="h-4 w-4" />
+                  <span className="hidden sm:inline">Exportar</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
