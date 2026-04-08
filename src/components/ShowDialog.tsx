@@ -241,14 +241,25 @@ export function ShowDialog({
             {hasLocation && (
               <>
                 <div className="flex gap-2">
-                  <Button
-                    onClick={() => setRoutePickerOpen(true)}
-                    className="flex-1 h-11 text-sm gap-2"
-                    variant="default"
-                  >
-                    <Navigation className="h-4 w-4" />
-                    Traçar rota
-                  </Button>
+                  {hasModule("gps") ? (
+                    <Button
+                      onClick={() => setRoutePickerOpen(true)}
+                      className="flex-1 h-11 text-sm gap-2"
+                      variant="default"
+                    >
+                      <Navigation className="h-4 w-4" />
+                      Traçar rota
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => navigate("/modulos")}
+                      className="flex-1 h-11 text-sm gap-2 opacity-70"
+                      variant="outline"
+                    >
+                      <Lock className="h-4 w-4" />
+                      Rotas / GPS
+                    </Button>
+                  )}
                   <Button
                     onClick={() => copyAddress(fullAddress)}
                     className="flex-1 h-11 text-sm gap-2"
@@ -275,14 +286,25 @@ export function ShowDialog({
                 <Pencil className="h-4 w-4" />
                 Editar
               </Button>
-              <Button
-                onClick={handleExportPNG}
-                className="h-12 text-base gap-2"
-                variant="outline"
-              >
-                <Image className="h-4 w-4" />
-                PNG
-              </Button>
+              {hasModule("export_png") ? (
+                <Button
+                  onClick={handleExportPNG}
+                  className="h-12 text-base gap-2"
+                  variant="outline"
+                >
+                  <Image className="h-4 w-4" />
+                  PNG
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => navigate("/modulos")}
+                  className="h-12 text-base gap-2 opacity-70"
+                  variant="outline"
+                >
+                  <Lock className="h-4 w-4" />
+                  PNG
+                </Button>
+              )}
               {!confirmDelete ? (
                 <Button
                   onClick={() => setConfirmDelete(true)}
