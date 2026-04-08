@@ -5,6 +5,7 @@ import { ptBR } from "date-fns/locale";
 import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, FileBarChart, Crown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { DayEventsDialog } from "@/components/DayEventsDialog";
 import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [allShowsOpen, setAllShowsOpen] = useState(false);
   const { profile, signOut } = useAuth();
   const { pushEnabled, togglePush } = usePushSubscription();
   const { hasModule } = useModules();
@@ -212,7 +214,14 @@ export default function Dashboard() {
         )}
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => {
+              // Show all events this month — scroll to the list
+              const el = document.getElementById("month-shows-list");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
@@ -221,7 +230,10 @@ export default function Dashboard() {
               <p className="text-xs sm:text-sm text-muted-foreground">Eventos no mês</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => setAllShowsOpen(true)}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
               <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
             </div>
@@ -230,7 +242,10 @@ export default function Dashboard() {
               <p className="text-xs sm:text-sm text-muted-foreground">Total de shows</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
@@ -245,7 +260,10 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
               <Navigation className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
             </div>
@@ -350,7 +368,7 @@ export default function Dashboard() {
           </div>
 
           {/* Shows List */}
-          <div className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
+          <div id="month-shows-list" className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Shows em{" "}
               <span className="capitalize text-foreground">
@@ -431,6 +449,53 @@ export default function Dashboard() {
         onClose={() => setExportOpen(false)}
         shows={shows}
       />
+
+      {/* All shows dialog */}
+      <Dialog open={allShowsOpen} onOpenChange={setAllShowsOpen}>
+        <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Todos os shows ({shows.length})
+            </DialogTitle>
+            <DialogDescription>Lista completa de eventos cadastrados</DialogDescription>
+          </DialogHeader>
+          {shows.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">Nenhum evento cadastrado</p>
+          ) : (
+            <div className="space-y-2 py-2">
+              {[...shows].sort((a, b) => b.date.localeCompare(a.date)).map((s) => (
+                <button
+                  key={s.id}
+                  className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-3 flex items-center gap-3 transition-colors"
+                  onClick={() => { setAllShowsOpen(false); handleShowClick(s.date); }}
+                >
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Music className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-foreground truncate">{s.evento || s.cidade}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                        <MapPin className="h-2.5 w-2.5" />{s.cidade}/{s.estado}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {format(parseISO(s.date), "dd/MM/yyyy")}
+                      </span>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                    s.status === "confirmado" ? "bg-green-500/20 text-green-500" :
+                    s.status === "finalizado" ? "bg-blue-500/20 text-blue-400" :
+                    "bg-yellow-500/20 text-yellow-400"
+                  }`}>{s.status || "pendente"}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {!isEmbedded && (
         <p className="text-center text-[10px] text-muted-foreground/50 py-2">{APP_VERSION}</p>
       )}
