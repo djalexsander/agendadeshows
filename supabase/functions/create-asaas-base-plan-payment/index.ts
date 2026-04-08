@@ -2,36 +2,19 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY")!;
-const ASAAS_BASE_URL = Deno.env.get("ASAAS_BASE_URL")!; // e.g. https://sandbox.asaas.com/api/v3
+const ASAAS_BASE_URL = Deno.env.get("ASAAS_BASE_URL") || Deno.env.get("URL_BASE_ASAAS") || "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-interface AsaasCustomerResponse {
-  id: string;
-  name: string;
-  email: string;
-}
-
-interface AsaasPaymentResponse {
-  id: string;
-  status: string;
-  value: number;
-  dueDate: string;
-  invoiceUrl: string;
-}
-
-interface AsaasPixResponse {
-  encodedImage: string;
-  payload: string;
-  expirationDate: string;
-}
-
 async function asaasFetch(path: string, options: RequestInit = {}) {
-  const url = `${ASAAS_BASE_URL.replace(/\/$/, "")}${path}`;
+  const base = ASAAS_BASE_URL.replace(/\/$/, "");
+  const url = `${base}${path}`;
+  console.log(`Asaas request: ${options.method || "GET"} ${url}`);
   const res = await fetch(url, {
     ...options,
     headers: {
@@ -41,26 +24,19 @@ async function asaasFetch(path: string, options: RequestInit = {}) {
     },
   });
   const body = await res.text();
+  console.log(`Asaas response ${res.status}: ${body.substring(0, 500)}`);
   if (!res.ok) {
-    console.error(`Asaas error ${res.status}: ${body}`);
-    throw new Error(`Asaas API error: ${res.status}`);
+    throw new Error(`Asaas API error ${res.status}: ${body}`);
   }
   return JSON.parse(body);
 }
 
-async function findOrCreateCustomer(
-  email: string,
-  name: string,
-  cpfCnpj?: string
-): Promise<string> {
-  // Try to find existing customer by email
+async function findOrCreateCustomer(email: string, name: string, cpfCnpj?: string): Promise<string> {
   const search = await asaasFetch(`/customers?email=${encodeURIComponent(email)}`);
   if (search.data && search.data.length > 0) {
     return search.data[0].id;
   }
-
-  // Create new customer
-  const customer: AsaasCustomerResponse = await asaasFetch("/customers", {
+  const customer = await asaasFetch("/customers", {
     method: "POST",
     body: JSON.stringify({
       name: name || email,
@@ -69,18 +45,12 @@ async function findOrCreateCustomer(
       notificationDisabled: false,
     }),
   });
-
   return customer.id;
 }
 
-async function createPixPayment(
-  customerId: string,
-  amount: number,
-  description: string
-): Promise<AsaasPaymentResponse> {
+async function createPixPayment(customerId: string, amount: number, description: string) {
   const dueDate = new Date();
-  dueDate.setDate(dueDate.getDate() + 1); // Due tomorrow
-
+  dueDate.setDate(dueDate.getDate() + 1);
   return await asaasFetch("/payments", {
     method: "POST",
     body: JSON.stringify({
@@ -93,14 +63,14 @@ async function createPixPayment(
   });
 }
 
-async function getPixQrCode(paymentId: string): Promise<AsaasPixResponse> {
-  // Asaas may take a moment to generate the PIX QR code
+async function getPixQrCode(paymentId: string) {
   let attempts = 0;
   while (attempts < 5) {
     try {
       return await asaasFetch(`/payments/${paymentId}/pixQrCode`);
-    } catch {
+    } catch (err) {
       attempts++;
+      console.log(`QR code attempt ${attempts} failed, retrying...`);
       if (attempts >= 5) throw new Error("Failed to get PIX QR code after retries");
       await new Promise((r) => setTimeout(r, 2000));
     }
@@ -114,7 +84,16 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate auth
+    // Validate config
+    if (!ASAAS_API_KEY || !ASAAS_BASE_URL) {
+      console.error("Missing ASAAS_API_KEY or ASAAS_BASE_URL");
+      return new Response(JSON.stringify({ error: "Gateway de pagamento não configurado" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), {
@@ -123,15 +102,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    // Get user from JWT
-    const token = authHeader.replace("Bearer ", "");
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!);
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAuth.auth.getUser(token);
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token);
 
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Usuário não autenticado" }), {
@@ -140,8 +114,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check for existing pending Asaas payment (avoid duplicates)
-    const { data: existingPayment } = await supabase
+    // Check for existing valid pending Asaas payment
+    const { data: existingPayment } = await supabaseAdmin
       .from("base_plan_payments")
       .select("*")
       .eq("user_id", user.id)
@@ -155,27 +129,24 @@ Deno.serve(async (req) => {
     if (existingPayment && existingPayment.pix_expiration_date) {
       const expiration = new Date(existingPayment.pix_expiration_date);
       if (expiration > new Date()) {
-        // Return existing valid payment
-        return new Response(
-          JSON.stringify({
-            paymentId: existingPayment.id,
-            asaasPaymentId: existingPayment.asaas_payment_id,
-            payload: existingPayment.pix_payload,
-            qrCodeImage: existingPayment.pix_qr_code_image,
-            expirationDate: existingPayment.pix_expiration_date,
-            amount: existingPayment.amount,
-            reused: true,
-          }),
-          {
-            status: 200,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
+        console.log("Reusing existing payment:", existingPayment.id);
+        return new Response(JSON.stringify({
+          paymentId: existingPayment.id,
+          asaasPaymentId: existingPayment.asaas_payment_id,
+          payload: existingPayment.pix_payload,
+          qrCodeImage: existingPayment.pix_qr_code_image,
+          expirationDate: existingPayment.pix_expiration_date,
+          amount: existingPayment.amount,
+          reused: true,
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
     }
 
     // Get profile
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from("profiles")
       .select("nome, email")
       .eq("user_id", user.id)
@@ -188,8 +159,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get base plan config
-    const { data: planConfig } = await supabase
+    // Get plan config
+    const { data: planConfig } = await supabaseAdmin
       .from("base_plan_config")
       .select("*")
       .eq("active", true)
@@ -204,17 +175,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Calculate total (base plan + pending/trial modules)
+    // Calculate total (base + modules)
     let totalAmount = planConfig.price;
 
-    // Get trial module selections
-    const { data: trialModules } = await supabase
+    const { data: trialModules } = await supabaseAdmin
       .from("trial_module_selections")
       .select("module_name")
       .eq("user_id", user.id);
 
-    // Get pending module requests
-    const { data: pendingRequests } = await supabase
+    const { data: pendingRequests } = await supabaseAdmin
       .from("module_requests")
       .select("module_name")
       .eq("user_id", user.id)
@@ -225,7 +194,7 @@ Deno.serve(async (req) => {
     (pendingRequests || []).forEach((m: any) => moduleNames.add(m.module_name));
 
     if (moduleNames.size > 0) {
-      const { data: catalog } = await supabase
+      const { data: catalog } = await supabaseAdmin
         .from("module_catalog")
         .select("module_name, price")
         .eq("active", true)
@@ -238,33 +207,32 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Parse optional body
-    let bodyData: any = {};
+    // Parse body for cpfCnpj
+    let cpfCnpj: string | undefined;
     try {
-      bodyData = await req.json();
+      const body = await req.json();
+      cpfCnpj = body.cpfCnpj;
     } catch {
-      // No body is fine
+      // no body
     }
 
-    // Find or create Asaas customer
+    console.log(`Creating Asaas payment for user ${user.id}, amount: ${totalAmount}`);
+
+    // Create/find customer
     const customerId = await findOrCreateCustomer(
       profile.email || user.email || "",
       profile.nome || "",
-      bodyData.cpfCnpj
+      cpfCnpj
     );
 
     // Create PIX payment
-    const payment = await createPixPayment(
-      customerId,
-      totalAmount,
-      `Plano Base - ${planConfig.name}`
-    );
+    const payment = await createPixPayment(customerId, totalAmount, `Plano Base - ${planConfig.name}`);
 
     // Get QR code
     const pixData = await getPixQrCode(payment.id);
 
-    // Save to database
-    const { data: savedPayment, error: insertError } = await supabase
+    // Save to DB
+    const { data: savedPayment, error: insertError } = await supabaseAdmin
       .from("base_plan_payments")
       .insert({
         user_id: user.id,
@@ -283,7 +251,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (insertError) {
-      console.error("Insert error:", insertError);
+      console.error("DB insert error:", insertError);
       return new Response(JSON.stringify({ error: "Erro ao salvar pagamento" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -291,26 +259,25 @@ Deno.serve(async (req) => {
     }
 
     // Update profile status
-    await supabase
+    await supabaseAdmin
       .from("profiles")
       .update({ status_plano: "pagamento_em_analise" })
       .eq("user_id", user.id);
 
-    return new Response(
-      JSON.stringify({
-        paymentId: savedPayment.id,
-        asaasPaymentId: payment.id,
-        payload: pixData.payload,
-        qrCodeImage: pixData.encodedImage,
-        expirationDate: pixData.expirationDate,
-        amount: totalAmount,
-        reused: false,
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    console.log("Payment created successfully:", savedPayment.id);
+
+    return new Response(JSON.stringify({
+      paymentId: savedPayment.id,
+      asaasPaymentId: payment.id,
+      payload: pixData.payload,
+      qrCodeImage: pixData.encodedImage,
+      expirationDate: pixData.expirationDate,
+      amount: totalAmount,
+      reused: false,
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error:", error);
     return new Response(
