@@ -47,15 +47,22 @@ export default function CompanyUsers() {
   const [saving, setSaving] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
+  const maxUsers = company?.max_users ?? 1;
+  const atLimit = members.length >= maxUsers;
+
   const handleAdd = async () => {
     if (!email) { toast.error("Preencha o e-mail"); return; }
+    if (atLimit) {
+      toast.error(`Limite de ${maxUsers} usuário(s) atingido. Solicite aumento ao administrador.`);
+      return;
+    }
     setSaving(true);
     const res = mode === "invite"
       ? await inviteMember(email, role)
       : await linkExistingUser(email, role);
     setSaving(false);
     if (res.error) { toast.error(res.error); return; }
-    toast.success(mode === "invite" ? "Convite enviado!" : "Usuário vinculado!");
+    toast.success(mode === "invite" ? "Convite enviado!" : "Membro vinculado!");
     setEmail("");
     setRole("viewer");
     setDialogOpen(false);
@@ -101,13 +108,18 @@ export default function CompanyUsers() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-foreground">{members.length} membro{members.length !== 1 ? "s" : ""}</p>
+              <p className="text-sm font-medium text-foreground">{members.length}/{maxUsers} membro{maxUsers !== 1 ? "s" : ""}</p>
               <p className="text-xs text-muted-foreground">Membros acessam a agenda sem assinatura própria</p>
             </div>
-            <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)}>
+            <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)} disabled={atLimit}>
               <UserPlus className="h-4 w-4" /> Adicionar membro
             </Button>
           </div>
+          {atLimit && (
+            <p className="text-xs text-orange-400 bg-orange-500/10 rounded-lg px-3 py-2">
+              Limite de {maxUsers} usuário(s) atingido. Solicite aumento ao administrador da plataforma.
+            </p>
+          )}
 
           {members.map((m) => {
             const RoleIcon = ROLE_ICONS[m.role as CompanyRole] || Eye;
