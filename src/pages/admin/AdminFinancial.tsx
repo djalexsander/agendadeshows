@@ -246,9 +246,15 @@ export default function AdminFinancial() {
                 </Button>
               </>
             ) : p.hidden ? (
-              <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-primary" title="Reexibir no painel" onClick={() => handleToggleHidden(p, false)}>
-                <Eye className="h-4 w-4" />
-              </Button>
+              <>
+                <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-primary" title="Reexibir no painel" onClick={() => handleToggleHidden(p, false)}>
+                  <Eye className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" title="Excluir permanentemente" onClick={() => setDeleteBpTarget(p)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+
             ) : (
               <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive" title="Ocultar do painel" onClick={() => setHideTarget(p)}>
                 <EyeOff className="h-4 w-4" />
