@@ -30,7 +30,6 @@ export function useAdminBasePlanPayments() {
       .order("submitted_at", { ascending: false });
 
     if (data) {
-      // Enrich with profile names
       const userIds = [...new Set(data.map((p: any) => p.user_id))] as string[];
       const { data: profiles } = await supabase
         .from("profiles")
@@ -53,6 +52,74 @@ export function useAdminBasePlanPayments() {
   }, []);
 
   useEffect(() => { fetchPayments(); }, [fetchPayments]);
+
+  const activateModulesForUser = async (userId: string, reviewerId: string) => {
+    const now = new Date();
+
+    // 1. Activate modules from pending module_requests
+    const { data: pendingRequests } = await (supabase.from("module_requests") as any)
+      .select("module_name")
+      .eq("user_id", userId)
+      .eq("status", "pending");
+
+    const activatedModules = new Set<string>();
+
+    if (pendingRequests && pendingRequests.length > 0) {
+      for (const req of pendingRequests) {
+        await upsertUserModule(userId, req.module_name);
+        activatedModules.add(req.module_name);
+
+        await (supabase.from("module_requests") as any)
+          .update({ status: "approved", reviewed_at: now.toISOString(), reviewed_by: reviewerId })
+          .eq("user_id", userId)
+          .eq("module_name", req.module_name)
+          .eq("status", "pending");
+
+        await (supabase.from("module_payments") as any)
+          .update({ status: "approved", reviewed_at: now.toISOString(), reviewed_by: reviewerId })
+          .eq("user_id", userId)
+          .eq("module_name", req.module_name)
+          .eq("status", "pending_review");
+      }
+    }
+
+    // 2. Activate modules from trial_module_selections
+    const { data: trialSelections } = await (supabase.from("trial_module_selections") as any)
+      .select("id, module_name")
+      .eq("user_id", userId);
+
+    if (trialSelections && trialSelections.length > 0) {
+      for (const sel of trialSelections) {
+        if (!activatedModules.has(sel.module_name)) {
+          await upsertUserModule(userId, sel.module_name);
+        }
+      }
+
+      // Clean up trial selections after conversion
+      await (supabase.from("trial_module_selections") as any)
+        .delete()
+        .eq("user_id", userId);
+    }
+  };
+
+  const upsertUserModule = async (userId: string, moduleName: string) => {
+    const { data: existing } = await supabase
+      .from("user_modules")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("module_name", moduleName)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase.from("user_modules").update({ active: true } as any).eq("id", existing.id);
+    } else {
+      await (supabase.from("user_modules") as any).insert({
+        user_id: userId,
+        module_name: moduleName,
+        active: true,
+      });
+    }
+  };
 
   const approvePayment = async (paymentId: string, userId: string, amount: number) => {
     if (!user) return;
@@ -83,47 +150,8 @@ export function useAdminBasePlanPayments() {
       } as any)
       .eq("user_id", userId);
 
-    // Activate pending modules for this user
-    const { data: pendingRequests } = await (supabase.from("module_requests") as any)
-      .select("module_name")
-      .eq("user_id", userId)
-      .eq("status", "pending");
-
-    if (pendingRequests && pendingRequests.length > 0) {
-      for (const req of pendingRequests) {
-        // Upsert user_modules
-        const { data: existing } = await supabase
-          .from("user_modules")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("module_name", req.module_name)
-          .maybeSingle();
-
-        if (existing) {
-          await supabase.from("user_modules").update({ active: true } as any).eq("id", existing.id);
-        } else {
-          await (supabase.from("user_modules") as any).insert({
-            user_id: userId,
-            module_name: req.module_name,
-            active: true,
-          });
-        }
-
-        // Update request status
-        await (supabase.from("module_requests") as any)
-          .update({ status: "approved", reviewed_at: now.toISOString(), reviewed_by: user.id })
-          .eq("user_id", userId)
-          .eq("module_name", req.module_name)
-          .eq("status", "pending");
-
-        // Update module payment status if exists
-        await (supabase.from("module_payments") as any)
-          .update({ status: "approved", reviewed_at: now.toISOString(), reviewed_by: user.id })
-          .eq("user_id", userId)
-          .eq("module_name", req.module_name)
-          .eq("status", "pending_review");
-      }
-    }
+    // Activate all pending/trial modules
+    await activateModulesForUser(userId, user.id);
 
     await fetchPayments();
   };
@@ -142,7 +170,6 @@ export function useAdminBasePlanPayments() {
       })
       .eq("id", paymentId);
 
-    // Update profile status
     await supabase
       .from("profiles")
       .update({ status_plano: "rejeitado" } as any)
