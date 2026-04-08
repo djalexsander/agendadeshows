@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut,
+  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut, Puzzle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
 import { useClientBasePlan } from "@/hooks/useClientBasePlan";
+import { useSubscriptionSummary } from "@/hooks/useSubscriptionSummary";
 import { getEffectivePlanStatus, formatBillingPeriod } from "@/lib/planStatus";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -20,8 +20,8 @@ import PixPaymentCard from "@/components/payments/PixPaymentCard";
 
 export default function ClientBasePlan() {
   const { user, profile, signOut } = useAuth();
-  const { config } = useBasePlanConfig();
   const { payments, hasPending, createPayment } = useClientBasePlan();
+  const summary = useSubscriptionSummary();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -31,9 +31,11 @@ export default function ClientBasePlan() {
   const [uploading, setUploading] = useState(false);
 
   const status = getEffectivePlanStatus(profile);
-  const price = config?.price ?? 49.9;
-  const planName = config?.name ?? "Plano Base";
-  const period = config?.billing_period ?? "monthly";
+  const price = summary.basePrice;
+  const totalPrice = summary.total;
+  const planName = summary.basePlanName;
+  const period = summary.baseBillingPeriod;
+  const hasModules = summary.modules.length > 0;
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -54,7 +56,18 @@ export default function ClientBasePlan() {
       receiptUrl = urlData.publicUrl;
     }
 
-    const result = await createPayment({ receiptUrl, notes: notes || undefined });
+    // Build notes with module names included
+    const moduleNames = summary.modules.map((m) => m.display_name);
+    const fullNotes = [
+      notes,
+      moduleNames.length > 0 ? `[Módulos incluídos: ${moduleNames.join(", ")}]` : "",
+    ].filter(Boolean).join(" | ");
+
+    const result = await createPayment({
+      receiptUrl,
+      notes: fullNotes || undefined,
+      amount: totalPrice,
+    });
 
     if (result?.error) {
       toast({ title: "Erro", description: "Não foi possível enviar.", variant: "destructive" });
@@ -119,6 +132,33 @@ export default function ClientBasePlan() {
               </p>
             </div>
           </div>
+
+          {/* Modules breakdown */}
+          {hasModules && (
+            <div className="rounded-xl bg-secondary/30 border border-border/50 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <Puzzle className="h-4 w-4" />
+                Módulos incluídos
+              </div>
+              <div className="space-y-2">
+                {summary.modules.map((m) => (
+                  <div key={m.module_name} className="flex items-center justify-between text-sm">
+                    <span className="text-foreground">{m.display_name}</span>
+                    <span className="font-medium text-foreground">
+                      R$ {m.price.toFixed(2)}
+                      <span className="text-xs text-muted-foreground">{formatBillingPeriod(m.billing_period)}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-t border-border/50 pt-2 flex items-center justify-between">
+                <span className="text-sm font-semibold text-foreground">Total mensal</span>
+                <span className="text-lg font-bold text-primary">
+                  R$ {totalPrice.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          )}
 
           {status === "active" && (
             <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-4 flex items-center gap-3">
@@ -192,8 +232,8 @@ export default function ClientBasePlan() {
           )}
         </div>
 
-        {/* Pix payment data — show when form is open or needs payment */}
-        {showForm && <PixPaymentCard amount={price} />}
+        {/* Pix payment data */}
+        {showForm && <PixPaymentCard amount={totalPrice} />}
 
         {/* Payment form */}
         {showForm && (
@@ -201,6 +241,18 @@ export default function ClientBasePlan() {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Enviar Comprovante
             </h3>
+
+            {/* Total reminder */}
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 text-center">
+              <p className="text-xs text-muted-foreground">Valor total a pagar</p>
+              <p className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}</p>
+              {hasModules && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Plano base + {summary.modules.length} módulo{summary.modules.length > 1 ? "s" : ""}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-1.5">
               <Label>Comprovante (imagem/PDF)</Label>
               <Input
