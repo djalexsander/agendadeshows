@@ -26,6 +26,7 @@ import ModulesUpgrade from "./pages/ModulesUpgrade";
 import Financeiro from "./pages/Financeiro";
 import Equipe from "./pages/Equipe";
 import Relatorios from "./pages/Relatorios";
+import ClientBasePlan from "./pages/ClientBasePlan";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ function AppRoutes() {
         return (
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/meu-plano" element={<ClientBasePlan />} />
             <Route path="/modulos" element={<ModulesUpgrade />} />
             <Route path="/financeiro" element={<Financeiro />} />
             <Route path="/equipe" element={<Equipe />} />
