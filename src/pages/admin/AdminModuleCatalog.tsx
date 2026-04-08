@@ -21,6 +21,7 @@ export default function AdminModuleCatalog() {
     price: 0,
     billing_period: "monthly",
     sort_order: 0,
+    max_users_default: 1,
   });
 
   const openEdit = (mod: CatalogModule) => {
@@ -31,19 +32,24 @@ export default function AdminModuleCatalog() {
       price: mod.price,
       billing_period: mod.billing_period,
       sort_order: mod.sort_order,
+      max_users_default: (mod as any).max_users_default ?? 1,
     });
   };
 
   const handleSave = async () => {
     if (!editing) return;
     setSaving(true);
-    const { error } = await updateModule(editing.id, {
+    const updates: any = {
       display_name: form.display_name,
       description: form.description || null,
       price: form.price,
       billing_period: form.billing_period,
       sort_order: form.sort_order,
-    });
+    };
+    if (editing.module_name === "agenda_compartilhada") {
+      updates.max_users_default = form.max_users_default;
+    }
+    const { error } = await updateModule(editing.id, updates);
     setSaving(false);
     if (error) {
       toast.error("Erro ao salvar módulo.");
@@ -155,6 +161,18 @@ export default function AdminModuleCatalog() {
                 onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })}
               />
             </div>
+            {editing?.module_name === "agenda_compartilhada" && (
+              <div>
+                <label className="text-sm font-medium">Limite de usuários por empresa</label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={form.max_users_default}
+                  onChange={(e) => setForm({ ...form, max_users_default: parseInt(e.target.value) || 1 })}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">Máximo de membros que cada empresa pode adicionar com este módulo</p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>Cancelar</Button>

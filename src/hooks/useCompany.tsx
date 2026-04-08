@@ -8,7 +8,6 @@ export interface Company {
   id: string;
   name: string;
   owner_user_id: string;
-  max_users: number;
 }
 
 export interface CompanyMember {

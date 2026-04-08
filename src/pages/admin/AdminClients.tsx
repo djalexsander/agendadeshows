@@ -62,7 +62,6 @@ export default function AdminClients() {
   const [form, setForm] = useState({
     nome: "", telefone: "", cidade: "", estado: "",
     status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
-    max_users: "1",
   });
 
   const fetchClients = async () => {
@@ -74,25 +73,15 @@ export default function AdminClients() {
     fetchClients();
   }, []);
 
-  const openEdit = async (c: ClientProfile) => {
+  const openEdit = (c: ClientProfile) => {
     setEditingClient(c);
     const isTrialOrLifetime = c.plan_type === "free_trial_7_days" || (c.plan_type === "lifetime" && c.is_paid);
-    
-    // Fetch company max_users
-    const { data: companyData } = await supabase
-      .from("companies")
-      .select("max_users")
-      .eq("owner_user_id", c.user_id)
-      .limit(1)
-      .single();
-
     setForm({
       nome: c.nome,
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo",
       valor_plano: isTrialOrLifetime ? "" : String(c.valor_plano || ""),
       vencimento: toDateInputValue(c.current_period_end) || toDateInputValue(c.vencimento), observacoes: c.observacoes || "",
-      max_users: String(companyData?.max_users ?? 1),
     });
     setDialogOpen(true);
   };
@@ -113,10 +102,6 @@ export default function AdminClients() {
       observacoes: form.observacoes,
     } as any).eq("id", editingClient!.id);
 
-    // Update max_users on the company
-    await (supabase.from("companies") as any).update({
-      max_users: parseInt(form.max_users) || 1,
-    }).eq("owner_user_id", editingClient!.user_id);
 
     toast({ title: "Sucesso", description: "Cliente atualizado." });
 
@@ -333,16 +318,9 @@ export default function AdminClients() {
                 <Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Observações</Label>
-                <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Limite de usuários</Label>
-                <Input type="number" min="1" value={form.max_users} onChange={(e) => setForm({ ...form, max_users: e.target.value })} className="h-10 bg-secondary/50 border-border" placeholder="1" />
-                <p className="text-[10px] text-muted-foreground">Máximo de membros na empresa</p>
-              </div>
+            <div className="space-y-1.5">
+              <Label>Observações</Label>
+              <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
             </div>
             <Button onClick={handleSave} disabled={loading} className="w-full h-11 bg-primary hover:bg-primary/90">
               {loading ? "Salvando..." : "Salvar Alterações"}
