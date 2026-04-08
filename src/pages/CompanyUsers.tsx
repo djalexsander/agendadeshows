@@ -51,15 +51,30 @@ export default function CompanyUsers() {
   const [maxUsers, setMaxUsers] = useState(1);
 
   useEffect(() => {
-    supabase
-      .from("module_catalog")
-      .select("max_users_default")
-      .eq("module_name", "agenda_compartilhada")
-      .single()
-      .then(({ data }) => {
-        if (data) setMaxUsers((data as any).max_users_default ?? 1);
-      });
-  }, []);
+    const fetchLimit = async () => {
+      // Check company-level override first
+      if (company) {
+        const { data: companyData } = await supabase
+          .from("companies")
+          .select("max_users")
+          .eq("id", company.id)
+          .single();
+        const override = (companyData as any)?.max_users;
+        if (override && override > 1) {
+          setMaxUsers(override);
+          return;
+        }
+      }
+      // Fall back to catalog default
+      const { data } = await supabase
+        .from("module_catalog")
+        .select("max_users_default")
+        .eq("module_name", "agenda_compartilhada")
+        .single();
+      if (data) setMaxUsers((data as any).max_users_default ?? 1);
+    };
+    fetchLimit();
+  }, [company]);
 
   const atLimit = members.length >= maxUsers;
 
