@@ -41,6 +41,7 @@ export default function AdminFinancial() {
   const [editing, setEditing] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
+  const [deleteBpTarget, setDeleteBpTarget] = useState<Payment | null>(null);
   const [hideTarget, setHideTarget] = useState<Payment | null>(null);
   const [viewFilter, setViewFilter] = useState<ViewFilter>("ativos");
   const { toast } = useToast();
@@ -385,6 +386,36 @@ export default function AdminFinancial() {
               }}
             >
               {loading ? "Ocultando..." : "Ocultar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!deleteBpTarget} onOpenChange={(o) => !o && setDeleteBpTarget(null)}>
+        <AlertDialogContent className="bg-card border-border rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir pagamento do plano base?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir permanentemente o pagamento de <strong>{deleteBpTarget?.client_name}</strong> (R$ {deleteBpTarget?.valor.toFixed(2)})? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={loading}
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={async () => {
+                if (!deleteBpTarget) return;
+                const realId = deleteBpTarget.id.replace("bp_", "");
+                setLoading(true);
+                await (supabase.from("base_plan_payments") as any).delete().eq("id", realId);
+                setLoading(false);
+                setDeleteBpTarget(null);
+                fetchData();
+                toast({ title: "Excluído", description: "Pagamento do plano base removido permanentemente." });
+              }}
+            >
+              {loading ? "Excluindo..." : "Excluir permanentemente"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
