@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
-import { Plus, Pencil, Trash2, DollarSign, Clock, CheckCircle, XCircle, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, DollarSign, Clock, CheckCircle, XCircle, EyeOff, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,9 +27,12 @@ interface Payment {
   data_pagamento: string | null;
   observacoes: string | null;
   client_name?: string;
+  hidden?: boolean;
 }
 
 interface ClientOption { user_id: string; nome: string; }
+
+type ViewFilter = "ativos" | "ocultados" | "todos";
 
 export default function AdminFinancial() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -39,6 +42,7 @@ export default function AdminFinancial() {
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
   const [hideTarget, setHideTarget] = useState<Payment | null>(null);
+  const [viewFilter, setViewFilter] = useState<ViewFilter>("ativos");
   const { toast } = useToast();
 
   const [form, setForm] = useState({
@@ -53,13 +57,12 @@ export default function AdminFinancial() {
 
     // Manual payments
     const { data: pays } = await supabase.from("payments").select("*").order("data_vencimento", { ascending: false });
-    const manualPayments: Payment[] = (pays || []).map((p) => ({ ...p, client_name: nameMap.get(p.client_user_id) || "—" }));
+    const manualPayments: Payment[] = (pays || []).map((p) => ({ ...p, hidden: false, client_name: nameMap.get(p.client_user_id) || "—" }));
 
-    // Approved base plan payments (from Asaas/webhook)
+    // ALL approved base plan payments (fetch both hidden and visible)
     const { data: basePays } = await (supabase.from("base_plan_payments") as any)
       .select("*")
       .eq("status", "approved")
-      .eq("hidden_in_admin", false)
       .order("submitted_at", { ascending: false });
 
     const basePlanPayments: Payment[] = (basePays || []).map((bp: any) => ({
@@ -72,12 +75,19 @@ export default function AdminFinancial() {
       data_pagamento: bp.reviewed_at ? bp.reviewed_at.split("T")[0] : null,
       observacoes: "Plano Base",
       client_name: nameMap.get(bp.user_id) || "—",
+      hidden: !!bp.hidden_in_admin,
     }));
 
     setPayments([...manualPayments, ...basePlanPayments]);
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const filtered = payments.filter((p) => {
+    if (viewFilter === "ativos") return !p.hidden;
+    if (viewFilter === "ocultados") return p.hidden;
+    return true; // todos
+  });
 
   const resetForm = () => {
     setForm({ client_user_id: "", valor: "", status: "pendente", forma_pagamento: "pix", data_vencimento: "", data_pagamento: "", observacoes: "" });
@@ -125,6 +135,17 @@ export default function AdminFinancial() {
     toast({ title: "Sucesso", description: editing ? "Pagamento atualizado." : "Pagamento registrado." });
   };
 
+  const handleToggleHidden = async (p: Payment, hide: boolean) => {
+    const realId = p.id.replace("bp_", "");
+    setLoading(true);
+    await (supabase.from("base_plan_payments") as any)
+      .update({ hidden_in_admin: hide })
+      .eq("id", realId);
+    setLoading(false);
+    fetchData();
+    toast({ title: hide ? "Ocultado" : "Reexibido", description: hide ? "Pagamento ocultado do painel." : "Pagamento restaurado no painel." });
+  };
+
   const statusColor = (s: string | null) => {
     switch (s) {
       case "pago": return "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]";
@@ -134,16 +155,20 @@ export default function AdminFinancial() {
     }
   };
 
-  const totalRecebido = payments.filter(p => p.status === "pago").reduce((s, p) => s + p.valor, 0);
-  const totalPendente = payments.filter(p => p.status === "pendente").reduce((s, p) => s + p.valor, 0);
-  const qtdPago = payments.filter(p => p.status === "pago").length;
-  const qtdPendente = payments.filter(p => p.status === "pendente").length;
+  // Summaries use only visible (non-hidden) payments
+  const activePayments = payments.filter((p) => !p.hidden);
+  const totalRecebido = activePayments.filter(p => p.status === "pago").reduce((s, p) => s + p.valor, 0);
+  const totalPendente = activePayments.filter(p => p.status === "pendente").reduce((s, p) => s + p.valor, 0);
+  const qtdPago = activePayments.filter(p => p.status === "pago").length;
+  const qtdPendente = activePayments.filter(p => p.status === "pendente").length;
 
   const summaryCards = [
     { label: "Recebido", valor: totalRecebido, qtd: qtdPago, icon: CheckCircle, color: "bg-[hsl(140_60%_45%)]/15 text-[hsl(140_60%_55%)]" },
     { label: "Pendente", valor: totalPendente, qtd: qtdPendente, icon: Clock, color: "bg-yellow-500/15 text-yellow-400" },
-    { label: "Total Geral", valor: totalRecebido + totalPendente, qtd: payments.length, icon: DollarSign, color: "bg-primary/15 text-primary" },
+    { label: "Total Geral", valor: totalRecebido + totalPendente, qtd: activePayments.length, icon: DollarSign, color: "bg-primary/15 text-primary" },
   ];
+
+  const filterLabels: Record<ViewFilter, string> = { ativos: "Ativos", ocultados: "Ocultados", todos: "Todos" };
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
@@ -170,11 +195,39 @@ export default function AdminFinancial() {
         ))}
       </div>
 
+      {/* Filter tabs */}
+      <div className="flex items-center gap-2">
+        {(["ativos", "ocultados", "todos"] as const).map((f) => (
+          <Button
+            key={f}
+            size="sm"
+            variant={viewFilter === f ? "default" : "outline"}
+            className="rounded-xl text-xs"
+            onClick={() => setViewFilter(f)}
+          >
+            {filterLabels[f]}
+            {f === "ocultados" && (() => {
+              const count = payments.filter((p) => p.hidden).length;
+              return count > 0 ? ` (${count})` : "";
+            })()}
+          </Button>
+        ))}
+      </div>
+
+      {/* List */}
       <div className="space-y-3">
-        {payments.map((p) => (
-          <div key={p.id} className="rounded-xl bg-card border border-border p-4 flex items-center gap-4">
+        {filtered.map((p) => (
+          <div key={p.id} className={`rounded-xl bg-card border border-border p-4 flex items-center gap-4 ${p.hidden ? "opacity-50" : ""}`}>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate">{p.client_name}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold truncate">{p.client_name}</p>
+                {p.id.startsWith("bp_") && (
+                  <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary shrink-0">Plano Base</span>
+                )}
+                {p.hidden && (
+                  <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">Ocultado</span>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground">
                 R$ {p.valor.toFixed(2)} • {p.forma_pagamento}
                 {p.data_vencimento && ` • Venc: ${format(parseISO(p.data_vencimento), "dd/MM/yyyy")}`}
@@ -192,6 +245,10 @@ export default function AdminFinancial() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </>
+            ) : p.hidden ? (
+              <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-primary" title="Reexibir no painel" onClick={() => handleToggleHidden(p, false)}>
+                <Eye className="h-4 w-4" />
+              </Button>
             ) : (
               <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive" title="Ocultar do painel" onClick={() => setHideTarget(p)}>
                 <EyeOff className="h-4 w-4" />
@@ -199,8 +256,10 @@ export default function AdminFinancial() {
             )}
           </div>
         ))}
-        {payments.length === 0 && (
-          <p className="text-center text-muted-foreground py-8">Nenhum pagamento registrado</p>
+        {filtered.length === 0 && (
+          <p className="text-center text-muted-foreground py-8">
+            {viewFilter === "ocultados" ? "Nenhum pagamento ocultado" : "Nenhum pagamento registrado"}
+          </p>
         )}
       </div>
 
@@ -315,15 +374,8 @@ export default function AdminFinancial() {
               className="bg-destructive hover:bg-destructive/90"
               onClick={async () => {
                 if (!hideTarget) return;
-                const realId = hideTarget.id.replace("bp_", "");
-                setLoading(true);
-                await (supabase.from("base_plan_payments") as any)
-                  .update({ hidden_in_admin: true })
-                  .eq("id", realId);
-                setLoading(false);
+                await handleToggleHidden(hideTarget, true);
                 setHideTarget(null);
-                fetchData();
-                toast({ title: "Ocultado", description: "Pagamento ocultado do painel financeiro." });
               }}
             >
               {loading ? "Ocultando..." : "Ocultar"}
