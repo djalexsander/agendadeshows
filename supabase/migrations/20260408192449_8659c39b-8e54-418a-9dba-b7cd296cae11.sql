@@ -1,0 +1,1 @@
+ALTER TABLE public.base_plan_payments ADD COLUMN hidden_in_admin boolean NOT NULL DEFAULT false;

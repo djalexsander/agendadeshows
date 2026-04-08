@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { format, parseISO } from "date-fns";
-import { Plus, Pencil, Trash2, DollarSign, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, DollarSign, Clock, CheckCircle, XCircle, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,7 @@ export default function AdminFinancial() {
   const [editing, setEditing] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
+  const [hideTarget, setHideTarget] = useState<Payment | null>(null);
   const { toast } = useToast();
 
   const [form, setForm] = useState({
@@ -58,6 +59,7 @@ export default function AdminFinancial() {
     const { data: basePays } = await (supabase.from("base_plan_payments") as any)
       .select("*")
       .eq("status", "approved")
+      .eq("hidden_in_admin", false)
       .order("submitted_at", { ascending: false });
 
     const basePlanPayments: Payment[] = (basePays || []).map((bp: any) => ({
@@ -181,7 +183,7 @@ export default function AdminFinancial() {
             <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
               {p.status || "pendente"}
             </span>
-            {!p.id.startsWith("bp_") && (
+            {!p.id.startsWith("bp_") ? (
               <>
                 <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
                   <Pencil className="h-4 w-4" />
@@ -190,6 +192,10 @@ export default function AdminFinancial() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </>
+            ) : (
+              <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive" title="Ocultar do painel" onClick={() => setHideTarget(p)}>
+                <EyeOff className="h-4 w-4" />
+              </Button>
             )}
           </div>
         ))}
@@ -289,6 +295,38 @@ export default function AdminFinancial() {
               }}
             >
               {loading ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!hideTarget} onOpenChange={(o) => !o && setHideTarget(null)}>
+        <AlertDialogContent className="bg-card border-border rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ocultar pagamento do painel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O pagamento de <strong>{hideTarget?.client_name}</strong> (R$ {hideTarget?.valor.toFixed(2)}) será ocultado do Financeiro, mas continuará registrado no banco para auditoria.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={loading}
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={async () => {
+                if (!hideTarget) return;
+                const realId = hideTarget.id.replace("bp_", "");
+                setLoading(true);
+                await (supabase.from("base_plan_payments") as any)
+                  .update({ hidden_in_admin: true })
+                  .eq("id", realId);
+                setLoading(false);
+                setHideTarget(null);
+                fetchData();
+                toast({ title: "Ocultado", description: "Pagamento ocultado do painel financeiro." });
+              }}
+            >
+              {loading ? "Ocultando..." : "Ocultar"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

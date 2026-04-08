@@ -83,6 +83,7 @@ export type Database = {
           created_at: string
           gateway_provider: string | null
           gateway_status: string | null
+          hidden_in_admin: boolean
           id: string
           notes: string | null
           pix_expiration_date: string | null
@@ -104,6 +105,7 @@ export type Database = {
           created_at?: string
           gateway_provider?: string | null
           gateway_status?: string | null
+          hidden_in_admin?: boolean
           id?: string
           notes?: string | null
           pix_expiration_date?: string | null
@@ -125,6 +127,7 @@ export type Database = {
           created_at?: string
           gateway_provider?: string | null
           gateway_status?: string | null
+          hidden_in_admin?: boolean
           id?: string
           notes?: string | null
           pix_expiration_date?: string | null
