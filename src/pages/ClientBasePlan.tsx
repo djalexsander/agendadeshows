@@ -16,11 +16,12 @@ import { getEffectivePlanStatus, formatBillingPeriod } from "@/lib/planStatus";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import PixPaymentCard from "@/components/payments/PixPaymentCard";
 
 export default function ClientBasePlan() {
   const { user, profile, signOut } = useAuth();
   const { config } = useBasePlanConfig();
-  const { payments, hasPending, createPayment, refreshPayments } = useClientBasePlan();
+  const { payments, hasPending, createPayment } = useClientBasePlan();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -59,7 +60,6 @@ export default function ClientBasePlan() {
       toast({ title: "Erro", description: "Não foi possível enviar.", variant: "destructive" });
     } else {
       toast({ title: "Enviado!", description: "Seu pagamento foi enviado para análise." });
-      // Push to admins
       supabase.functions.invoke("send-push", {
         body: {
           title: "💳 Pagamento do plano base",
@@ -120,7 +120,6 @@ export default function ClientBasePlan() {
             </div>
           </div>
 
-          {/* Status display */}
           {status === "active" && (
             <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-4 flex items-center gap-3">
               <CheckCircle className="h-5 w-5 text-green-400 shrink-0" />
@@ -181,7 +180,6 @@ export default function ClientBasePlan() {
             </div>
           )}
 
-          {/* CTA buttons */}
           {!hasPending && status !== "pending_review" && (
             <Button
               onClick={() => setShowForm(true)}
@@ -193,6 +191,9 @@ export default function ClientBasePlan() {
             </Button>
           )}
         </div>
+
+        {/* Pix payment data — show when form is open or needs payment */}
+        {showForm && <PixPaymentCard amount={price} />}
 
         {/* Payment form */}
         {showForm && (
