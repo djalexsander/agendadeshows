@@ -41,12 +41,12 @@ export function useClientBasePlan() {
 
   const hasPending = payments.some((p) => p.status === "pending_review");
 
-  const createPayment = async (opts: { receiptUrl?: string; notes?: string }) => {
+  const createPayment = async (opts: { receiptUrl?: string; notes?: string; amount?: number }) => {
     if (!user || !config) return;
 
     const { error } = await (supabase.from("base_plan_payments") as any).insert({
       user_id: user.id,
-      amount: config.price,
+      amount: opts.amount ?? config.price,
       status: "pending_review",
       billing_period: config.billing_period,
       receipt_url: opts.receiptUrl || null,
