@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   CalendarDays,
   Users,
+  CreditCard,
   DollarSign,
   QrCode,
   LogOut,
