@@ -251,14 +251,23 @@ export default function ClientBasePlan() {
           )}
 
           {!hasPending && status !== "pending_review" && (
-            <Button
-              onClick={() => setShowForm(true)}
-              className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
-              disabled={showForm}
-            >
-              <Send className="h-4 w-4" />
-              {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Enviar pagamento"}
-            </Button>
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground text-center">
+                Você pode cancelar a qualquer momento.
+              </p>
+              <Button
+                onClick={() => setShowForm(true)}
+                className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
+                disabled={showForm}
+              >
+                <Send className="h-4 w-4" />
+                {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Enviar pagamento"}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Seus dados são seguros e seu acesso é liberado após a confirmação do pagamento.
+              </p>
+            </div>
           )}
         </div>
 
