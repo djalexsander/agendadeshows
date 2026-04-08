@@ -181,12 +181,16 @@ export default function AdminFinancial() {
             <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
               {p.status || "pendente"}
             </span>
-            <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {!p.id.startsWith("bp_") && (
+              <>
+                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         ))}
         {payments.length === 0 && (
