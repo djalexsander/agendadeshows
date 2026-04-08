@@ -41,7 +41,7 @@ interface PixPaymentData {
 
 export default function ModulesUpgrade() {
   const { user, profile } = useAuth();
-  const { hasModule, loading: modulesLoading } = useModules();
+  const { hasModule, loading: modulesLoading, refreshModules } = useModules();
   const { hasPendingRequest, loading: requestsLoading } = useModuleRequests();
   const { modules: catalog, loading: catalogLoading } = useModuleCatalog();
   const { hasPendingPayment, getLatestPayment, createAsaasModulePayment, refreshPayments, loading: paymentsLoading } = useClientModulePayments();
