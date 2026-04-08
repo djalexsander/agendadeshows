@@ -1,42 +1,177 @@
-import { useState } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { ModuleGate } from "@/components/modules/ModuleGate";
-import { useFinancialEntries } from "@/hooks/useFinancialEntries";
+import { useFinancialEntries, FinancialFilters } from "@/hooks/useFinancialEntries";
+import { useSupabaseShows } from "@/hooks/useSupabaseShows";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+
+const CATEGORIAS = [
+  "Cachê", "Combustível", "Alimentação", "Hospedagem", "Equipe",
+  "Manutenção", "Aluguel", "Recebimento de cliente", "Outros",
+];
+
+const FORMAS_PAGAMENTO = ["PIX", "Dinheiro", "Cartão", "Boleto", "Transferência"];
+
+const STATUS_OPTIONS = [
+  { value: "pendente", label: "Pendente", color: "text-yellow-500 bg-yellow-500/10" },
+  { value: "pago", label: "Pago", color: "text-green-500 bg-green-500/10" },
+  { value: "recebido", label: "Recebido", color: "text-green-500 bg-green-500/10" },
+  { value: "vencido", label: "Vencido", color: "text-red-500 bg-red-500/10" },
+  { value: "cancelado", label: "Cancelado", color: "text-muted-foreground bg-muted" },
+];
+
+function getStatusStyle(status: string) {
+  return STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
+}
+
+interface FormState {
+  title: string;
+  type: string;
+  amount: string;
+  notes: string;
+  data_lancamento: Date | undefined;
+  data_vencimento: Date | undefined;
+  data_pagamento: Date | undefined;
+  categoria: string;
+  forma_pagamento: string;
+  status: string;
+  pessoa: string;
+  show_id: string;
+  parcelas: string;
+  recorrencia: string;
+}
+
+const defaultForm: FormState = {
+  title: "",
+  type: "entrada",
+  amount: "",
+  notes: "",
+  data_lancamento: new Date(),
+  data_vencimento: undefined,
+  data_pagamento: undefined,
+  categoria: "",
+  forma_pagamento: "",
+  status: "pendente",
+  pessoa: "",
+  show_id: "",
+  parcelas: "1",
+  recorrencia: "nenhuma",
+};
+
+function DatePickerField({ label, value, onChange, required }: { label: string; value: Date | undefined; onChange: (d: Date | undefined) => void; required?: boolean }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}{required && " *"}</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-10", !value && "text-muted-foreground")}>
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {value ? format(value, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar mode="single" selected={value} onSelect={onChange} initialFocus className="p-3 pointer-events-auto" />
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
 
 function FinanceiroContent() {
-  const { entries, loading, addEntry, deleteEntry, totals } = useFinancialEntries();
+  const { user } = useAuth();
+  const { entries, loading, addEntry, deleteEntry, totals, filters, setFilters, categories } = useFinancialEntries();
+  const { shows } = useSupabaseShows();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [filter, setFilter] = useState<"all" | "entrada" | "saida">("all");
-  const [form, setForm] = useState({ title: "", type: "entrada", amount: "", event_name: "", notes: "" });
+  const [showFilters, setShowFilters] = useState(false);
+  const [form, setForm] = useState<FormState>({ ...defaultForm });
+  const [uploading, setUploading] = useState(false);
+  const [comprovante, setComprovante] = useState<string | null>(null);
+
+  // Currency mask
+  const formatCurrency = (v: string) => {
+    const num = v.replace(/\D/g, "");
+    if (!num) return "";
+    return (parseInt(num) / 100).toFixed(2);
+  };
+
+  const handleAmountChange = (raw: string) => {
+    const cleaned = raw.replace(/[^\d]/g, "");
+    if (!cleaned) { setForm((f) => ({ ...f, amount: "" })); return; }
+    const val = (parseInt(cleaned) / 100).toFixed(2);
+    setForm((f) => ({ ...f, amount: val }));
+  };
+
+  const handleUpload = async (file: File) => {
+    if (!user) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/financeiro/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("comprovantes").upload(path, file);
+    if (error) { toast.error("Erro ao enviar comprovante"); setUploading(false); return; }
+    const { data: urlData } = supabase.storage.from("comprovantes").getPublicUrl(path);
+    setComprovante(urlData.publicUrl);
+    setUploading(false);
+    toast.success("Comprovante enviado!");
+  };
 
   const handleSave = async () => {
-    if (!form.title || !form.amount) { toast.error("Preencha título e valor"); return; }
+    if (!form.title) { toast.error("Preencha o título"); return; }
+    if (!form.amount) { toast.error("Preencha o valor"); return; }
+    if (!form.data_lancamento) { toast.error("Selecione a data do lançamento"); return; }
     setSaving(true);
-    const res = await addEntry({
-      title: form.title,
-      type: form.type,
-      amount: parseFloat(form.amount),
-      event_name: form.event_name || undefined,
-      notes: form.notes || undefined,
-    });
+
+    const parcelas = parseInt(form.parcelas) || 1;
+
+    for (let i = 0; i < parcelas; i++) {
+      const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
+      const res = await addEntry({
+        title: form.title + suffix,
+        type: form.type,
+        amount: parseFloat(form.amount),
+        notes: form.notes || undefined,
+        data_lancamento: format(form.data_lancamento!, "yyyy-MM-dd"),
+        data_vencimento: form.data_vencimento ? format(form.data_vencimento, "yyyy-MM-dd") : undefined,
+        data_pagamento: form.data_pagamento ? format(form.data_pagamento, "yyyy-MM-dd") : undefined,
+        categoria: form.categoria || undefined,
+        forma_pagamento: form.forma_pagamento || undefined,
+        status: form.status,
+        pessoa: form.pessoa || undefined,
+        comprovante_url: comprovante || undefined,
+        parcelas,
+        parcela_atual: i + 1,
+        recorrencia: form.recorrencia,
+        show_id: form.show_id || undefined,
+        event_name: form.show_id ? shows.find((s) => s.id === form.show_id)?.evento || shows.find((s) => s.id === form.show_id)?.cidade : undefined,
+      });
+      if (res.error) { toast.error("Erro ao salvar"); setSaving(false); return; }
+    }
+
     setSaving(false);
-    if (res.error) { toast.error("Erro ao salvar"); return; }
-    toast.success("Lançamento adicionado!");
-    setForm({ title: "", type: "entrada", amount: "", event_name: "", notes: "" });
+    toast.success(parcelas > 1 ? `${parcelas} parcelas adicionadas!` : "Lançamento adicionado!");
+    setForm({ ...defaultForm });
+    setComprovante(null);
     setDialogOpen(false);
   };
 
-  const filtered = filter === "all" ? entries : entries.filter((e) => e.type === filter);
-
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const activeFilters = Object.values(filters).filter(Boolean).length;
 
   if (loading) {
     return (
@@ -81,26 +216,78 @@ function FinanceiroContent() {
 
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-2">
-          {(["all", "entrada", "saida"] as const).map((f) => (
-            <Button
-              key={f}
-              size="sm"
-              variant={filter === f ? "default" : "outline"}
-              className="rounded-xl text-xs"
-              onClick={() => setFilter(f)}
-            >
-              {f === "all" ? "Todos" : f === "entrada" ? "Entradas" : "Saídas"}
+        <div className="flex gap-2 items-center">
+          <Button
+            size="sm"
+            variant={showFilters ? "default" : "outline"}
+            className="rounded-xl text-xs gap-1.5"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="h-3.5 w-3.5" />
+            Filtros
+            {activeFilters > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">{activeFilters}</Badge>
+            )}
+          </Button>
+          {activeFilters > 0 && (
+            <Button size="sm" variant="ghost" className="text-xs text-muted-foreground" onClick={() => setFilters({})}>
+              <X className="h-3 w-3 mr-1" /> Limpar
             </Button>
-          ))}
+          )}
         </div>
         <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)}>
           <Plus className="h-4 w-4" /> Novo
         </Button>
       </div>
 
+      {/* Filters panel */}
+      {showFilters && (
+        <div className="rounded-xl bg-card border border-border p-4 space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div>
+              <Label className="text-xs text-muted-foreground">Tipo</Label>
+              <Select value={filters.type || "all"} onValueChange={(v) => setFilters({ ...filters, type: v === "all" ? undefined : v as any })}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="entrada">Entrada</SelectItem>
+                  <SelectItem value="saida">Saída</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Status</Label>
+              <Select value={filters.status || "all"} onValueChange={(v) => setFilters({ ...filters, status: v === "all" ? undefined : v })}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Categoria</Label>
+              <Select value={filters.categoria || "all"} onValueChange={(v) => setFilters({ ...filters, categoria: v === "all" ? undefined : v })}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {[...new Set([...CATEGORIAS, ...categories])].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Período</Label>
+              <div className="flex gap-1">
+                <Input type="date" className="h-9 text-xs" value={filters.periodoInicio || ""} onChange={(e) => setFilters({ ...filters, periodoInicio: e.target.value || undefined })} />
+                <Input type="date" className="h-9 text-xs" value={filters.periodoFim || ""} onChange={(e) => setFilters({ ...filters, periodoFim: e.target.value || undefined })} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* List */}
-      {filtered.length === 0 ? (
+      {entries.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="h-14 w-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3">
             <DollarSign className="h-7 w-7 text-muted-foreground" />
@@ -109,47 +296,204 @@ function FinanceiroContent() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((e) => (
-            <div key={e.id} className="rounded-xl bg-secondary/40 border border-border/50 p-4 flex items-center gap-3">
-              <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
-                {e.type === "entrada" ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
+          {entries.map((e) => {
+            const st = getStatusStyle(e.status);
+            const isOverdue = e.status === "vencido" || (e.status === "pendente" && e.data_vencimento && e.data_vencimento < new Date().toISOString().slice(0, 10));
+            return (
+              <div key={e.id} className={cn("rounded-xl bg-secondary/40 border p-4 flex items-center gap-3", isOverdue ? "border-red-500/40" : "border-border/50")}>
+                <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
+                  {e.type === "entrada" ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-foreground text-sm truncate">{e.title}</p>
+                    {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
+                    <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
+                    {e.data_lancamento && <span className="text-[10px] text-muted-foreground">{format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}</span>}
+                  </div>
+                </div>
+                <span className={`text-sm font-bold shrink-0 ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
+                  {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
+                </span>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => deleteEntry(e.id)}>
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-sm truncate">{e.title}</p>
-                {e.event_name && <p className="text-xs text-muted-foreground truncate">{e.event_name}</p>}
-              </div>
-              <span className={`text-sm font-bold shrink-0 ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
-                {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
-              </span>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => deleteEntry(e.id)}>
-                <Trash2 className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Dialog */}
+      {/* Dialog - Novo Lançamento */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
+        <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Novo lançamento</DialogTitle>
-            <DialogDescription>Adicione uma entrada ou saída financeira</DialogDescription>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-primary" />
+              Novo lançamento
+            </DialogTitle>
+            <DialogDescription>Preencha os dados do lançamento financeiro</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div><Label>Título *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Cachê do show" /></div>
-            <div><Label>Tipo *</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="entrada">Entrada</SelectItem><SelectItem value="saida">Saída</SelectItem></SelectContent>
-              </Select>
+          <div className="space-y-5 py-2">
+            {/* Seção: Informações principais */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Informações principais</p>
+              <div>
+                <Label className="text-xs">Título *</Label>
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Cachê do show" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Tipo *</Label>
+                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="entrada">Entrada</SelectItem>
+                      <SelectItem value="saida">Saída</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Valor (R$) *</Label>
+                  <Input
+                    value={form.amount}
+                    onChange={(e) => handleAmountChange(e.target.value)}
+                    placeholder="0,00"
+                    inputMode="numeric"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Categoria</Label>
+                  <Select value={form.categoria || "none"} onValueChange={(v) => setForm({ ...form, categoria: v === "none" ? "" : v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhuma</SelectItem>
+                      {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Status</Label>
+                  <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-            <div><Label>Valor (R$) *</Label><Input type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="0,00" /></div>
-            <div><Label>Evento (opcional)</Label><Input value={form.event_name} onChange={(e) => setForm({ ...form, event_name: e.target.value })} placeholder="Nome do evento" /></div>
-            <div><Label>Observações</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Anotações" /></div>
+
+            <Separator />
+
+            {/* Seção: Datas */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Datas</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <DatePickerField label="Data do lançamento" value={form.data_lancamento} onChange={(d) => setForm({ ...form, data_lancamento: d })} required />
+                <DatePickerField label="Vencimento" value={form.data_vencimento} onChange={(d) => setForm({ ...form, data_vencimento: d })} />
+                <DatePickerField label="Pagamento" value={form.data_pagamento} onChange={(d) => setForm({ ...form, data_pagamento: d })} />
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Seção: Pagamento */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pagamento</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Forma de pagamento</Label>
+                  <Select value={form.forma_pagamento || "none"} onValueChange={(v) => setForm({ ...form, forma_pagamento: v === "none" ? "" : v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhuma</SelectItem>
+                      {FORMAS_PAGAMENTO.map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Parcelas</Label>
+                  <Select value={form.parcelas} onValueChange={(v) => setForm({ ...form, parcelas: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
+                        <SelectItem key={n} value={String(n)}>{n === 1 ? "À vista" : `${n}x`}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Recorrência</Label>
+                <Select value={form.recorrencia} onValueChange={(v) => setForm({ ...form, recorrencia: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nenhuma">Nenhuma</SelectItem>
+                    <SelectItem value="semanal">Semanal</SelectItem>
+                    <SelectItem value="mensal">Mensal</SelectItem>
+                    <SelectItem value="anual">Anual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Seção: Detalhes */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detalhes</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Evento</Label>
+                  <Select value={form.show_id || "none"} onValueChange={(v) => setForm({ ...form, show_id: v === "none" ? "" : v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecionar evento" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhum</SelectItem>
+                      {shows.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Pessoa / Cliente</Label>
+                  <Input value={form.pessoa} onChange={(e) => setForm({ ...form, pessoa: e.target.value })} placeholder="Nome" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Observações</Label>
+                <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Anotações" rows={2} />
+              </div>
+              <div>
+                <Label className="text-xs">Comprovante</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <label className="cursor-pointer">
+                    <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleUpload(e.target.files[0]); }} />
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border hover:bg-secondary/50 transition text-sm text-muted-foreground">
+                      {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                      {comprovante ? "Enviado ✓" : "Enviar arquivo"}
+                    </div>
+                  </label>
+                  {comprovante && (
+                    <Button variant="ghost" size="sm" className="text-xs text-red-500" onClick={() => setComprovante(null)}>Remover</Button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
             <Button className="w-full h-12 gap-2" disabled={saving} onClick={handleSave}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              {saving ? "Salvando..." : "Adicionar"}
+              {saving ? "Salvando..." : parseInt(form.parcelas) > 1 ? `Adicionar ${form.parcelas} parcelas` : "Adicionar"}
             </Button>
           </div>
         </DialogContent>
