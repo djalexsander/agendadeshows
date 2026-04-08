@@ -76,7 +76,7 @@ export default function CompanyUsers() {
     fetchLimit();
   }, [company]);
 
-  const atLimit = members.length >= maxUsers;
+  const atLimit = maxUsers !== null && members.length >= maxUsers;
 
   const handleAdd = async () => {
     if (!email) { toast.error("Preencha o e-mail"); return; }
