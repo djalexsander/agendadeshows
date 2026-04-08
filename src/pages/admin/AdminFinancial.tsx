@@ -299,6 +299,38 @@ export default function AdminFinancial() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!hideTarget} onOpenChange={(o) => !o && setHideTarget(null)}>
+        <AlertDialogContent className="bg-card border-border rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ocultar pagamento do painel?</AlertDialogTitle>
+            <AlertDialogDescription>
+              O pagamento de <strong>{hideTarget?.client_name}</strong> (R$ {hideTarget?.valor.toFixed(2)}) será ocultado do Financeiro, mas continuará registrado no banco para auditoria.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={loading}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={loading}
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={async () => {
+                if (!hideTarget) return;
+                const realId = hideTarget.id.replace("bp_", "");
+                setLoading(true);
+                await (supabase.from("base_plan_payments") as any)
+                  .update({ hidden_in_admin: true })
+                  .eq("id", realId);
+                setLoading(false);
+                setHideTarget(null);
+                fetchData();
+                toast({ title: "Ocultado", description: "Pagamento ocultado do painel financeiro." });
+              }}
+            >
+              {loading ? "Ocultando..." : "Ocultar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
