@@ -17,6 +17,7 @@ import AdminClients from "./pages/admin/AdminClients";
 import AdminFinancial from "./pages/admin/AdminFinancial";
 import AdminPix from "./pages/admin/AdminPix";
 import AdminSettings from "./pages/admin/AdminSettings";
+import ModulesUpgrade from "./pages/ModulesUpgrade";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -102,6 +103,7 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/modulos" element={<ModulesUpgrade />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
