@@ -224,10 +224,18 @@ export type Database = {
       module_payments: {
         Row: {
           amount: number
+          asaas_customer_id: string | null
+          asaas_payment_id: string | null
           created_at: string
+          gateway_provider: string | null
+          gateway_status: string | null
+          hidden_in_admin: boolean
           id: string
           module_name: string
           notes: string | null
+          pix_expiration_date: string | null
+          pix_payload: string | null
+          pix_qr_code_image: string | null
           receipt_url: string | null
           rejection_reason: string | null
           reviewed_at: string | null
@@ -239,10 +247,18 @@ export type Database = {
         }
         Insert: {
           amount: number
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string | null
           created_at?: string
+          gateway_provider?: string | null
+          gateway_status?: string | null
+          hidden_in_admin?: boolean
           id?: string
           module_name: string
           notes?: string | null
+          pix_expiration_date?: string | null
+          pix_payload?: string | null
+          pix_qr_code_image?: string | null
           receipt_url?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
@@ -254,10 +270,18 @@ export type Database = {
         }
         Update: {
           amount?: number
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string | null
           created_at?: string
+          gateway_provider?: string | null
+          gateway_status?: string | null
+          hidden_in_admin?: boolean
           id?: string
           module_name?: string
           notes?: string | null
+          pix_expiration_date?: string | null
+          pix_payload?: string | null
+          pix_qr_code_image?: string | null
           receipt_url?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null

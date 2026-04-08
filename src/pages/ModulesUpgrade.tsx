@@ -1,12 +1,9 @@
 import { useState } from "react";
 import {
   Puzzle, DollarSign, Users, FileBarChart, ImageDown, MapPinned, ArrowLeft,
-  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Upload, Send, Plus, Minus,
+  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -19,8 +16,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import PixPaymentCard from "@/components/payments/PixPaymentCard";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   financeiro: DollarSign,
@@ -35,12 +30,21 @@ function formatPrice(price: number, billingPeriod: string) {
   return billingPeriod === "monthly" ? `${formatted}/mês` : `${formatted} único`;
 }
 
+interface PixPaymentData {
+  paymentId: string;
+  payload: string;
+  qrCodeImage: string;
+  expirationDate: string;
+  amount: number;
+  moduleName: string;
+}
+
 export default function ModulesUpgrade() {
   const { user, profile } = useAuth();
   const { hasModule, loading: modulesLoading } = useModules();
   const { hasPendingRequest, loading: requestsLoading } = useModuleRequests();
   const { modules: catalog, loading: catalogLoading } = useModuleCatalog();
-  const { hasPendingPayment, getLatestPayment, createModulePayment, loading: paymentsLoading } = useClientModulePayments();
+  const { hasPendingPayment, getLatestPayment, createAsaasModulePayment, refreshPayments, loading: paymentsLoading } = useClientModulePayments();
   const { isSelected, toggleModule, loading: selectionsLoading } = useTrialModuleSelections();
   const navigate = useNavigate();
 
@@ -52,11 +56,11 @@ export default function ModulesUpgrade() {
     planStatus === "pending_payment" ||
     planStatus === "expired";
 
-  const [selectedModule, setSelectedModule] = useState<CatalogModule | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [notes, setNotes] = useState("");
-  const [uploading, setUploading] = useState(false);
   const [toggling, setToggling] = useState<string | null>(null);
+  const [pixData, setPixData] = useState<PixPaymentData | null>(null);
+  const [pixLoading, setPixLoading] = useState(false);
+  const [pixModuleName, setPixModuleName] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loading = modulesLoading || requestsLoading || catalogLoading || paymentsLoading || selectionsLoading;
 
@@ -77,47 +81,53 @@ export default function ModulesUpgrade() {
     setToggling(null);
   };
 
-  const handleSubmit = async () => {
-    if (!selectedModule || !user) return;
-    setUploading(true);
+  const handleContractModule = async (mod: CatalogModule) => {
+    setPixLoading(true);
+    setPixModuleName(mod.module_name);
 
-    let receiptUrl: string | undefined;
-    if (file) {
-      const ext = file.name.split(".").pop();
-      const filePath = `${user.id}/mod_${selectedModule.module_name}_${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from("comprovantes").upload(filePath, file);
-      if (uploadError) {
-        toast.error("Falha ao enviar arquivo.");
-        setUploading(false);
-        return;
-      }
-      const { data: urlData } = supabase.storage.from("comprovantes").getPublicUrl(filePath);
-      receiptUrl = urlData.publicUrl;
+    const { data, error } = await createAsaasModulePayment(mod.module_name);
+    if (error) {
+      toast.error(error);
+      setPixLoading(false);
+      setPixModuleName(null);
+      return;
     }
-
-    const result = await createModulePayment(selectedModule.module_name, selectedModule.price, { receiptUrl, notes: notes || undefined });
-
-    if (result.error === "duplicate") {
-      toast.warning("Você já possui um pagamento pendente para este módulo.");
-    } else if (result.error) {
-      toast.error("Erro ao enviar pagamento.");
-    } else {
-      toast.success(`Pagamento de "${selectedModule.display_name}" enviado para análise!`);
-      supabase.functions.invoke("send-push", {
-        body: {
-          title: "💳 Pagamento de módulo",
-          body: `${profile?.nome || "Um cliente"} enviou pagamento do módulo "${selectedModule.display_name}".`,
-          url: "/admin/module-payments",
-          target_role: "admin",
-        },
-      }).catch(() => {});
+    if (data) {
+      setPixData({
+        paymentId: data.paymentId,
+        payload: data.payload,
+        qrCodeImage: data.qrCodeImage,
+        expirationDate: data.expirationDate,
+        amount: data.amount,
+        moduleName: data.moduleName,
+      });
     }
-
-    setSelectedModule(null);
-    setFile(null);
-    setNotes("");
-    setUploading(false);
+    setPixLoading(false);
   };
+
+  const handleCopyPayload = () => {
+    if (pixData?.payload) {
+      navigator.clipboard.writeText(pixData.payload);
+      toast.success("Código PIX copiado!");
+    }
+  };
+
+  const handleRefreshStatus = async () => {
+    setRefreshing(true);
+    await refreshPayments();
+    setRefreshing(false);
+    // Check if module is now active
+    if (pixData) {
+      const mod = catalog.find((m) => m.module_name === pixData.moduleName);
+      if (mod && hasModule(mod.module_name as ModuleName)) {
+        toast.success(`Módulo "${mod.display_name}" ativado!`);
+        setPixData(null);
+        setPixModuleName(null);
+      }
+    }
+  };
+
+  const pixModuleCatalog = pixData ? catalog.find((m) => m.module_name === pixData.moduleName) : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,6 +167,7 @@ export default function ModulesUpgrade() {
               const status = getModuleStatus(mod);
               const Icon = ICON_MAP[mod.module_name] || Puzzle;
               const isTogglingThis = toggling === mod.module_name;
+              const isLoadingThis = pixLoading && pixModuleName === mod.module_name;
 
               return (
                 <div
@@ -210,16 +221,12 @@ export default function ModulesUpgrade() {
                         onClick={() => handleToggleTrialModule(mod)}
                         disabled={isTogglingThis}
                       >
-                        {isTogglingThis ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Minus className="h-3.5 w-3.5" />
-                        )}
+                        {isTogglingThis ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Minus className="h-3.5 w-3.5" />}
                         Selecionado
                       </Button>
                     ) : status === "pending" ? (
                       <Button size="sm" variant="outline" disabled className="rounded-xl gap-1.5 text-xs border-yellow-500/30 text-yellow-500">
-                        <Clock className="h-3.5 w-3.5" /> Em análise
+                        <Clock className="h-3.5 w-3.5" /> Aguardando
                       </Button>
                     ) : isPreSubscription ? (
                       <Button
@@ -229,11 +236,7 @@ export default function ModulesUpgrade() {
                         onClick={() => handleToggleTrialModule(mod)}
                         disabled={isTogglingThis}
                       >
-                        {isTogglingThis ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Plus className="h-3.5 w-3.5" />
-                        )}
+                        {isTogglingThis ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
                         Adicionar ao plano
                       </Button>
                     ) : (
@@ -241,10 +244,11 @@ export default function ModulesUpgrade() {
                         size="sm"
                         variant="default"
                         className="rounded-xl gap-1.5 text-xs"
-                        onClick={() => setSelectedModule(mod)}
+                        onClick={() => handleContractModule(mod)}
+                        disabled={isLoadingThis}
                       >
-                        <Sparkles className="h-3.5 w-3.5" />
-                        {status === "rejected" ? "Reenviar" : "Solicitar ativação"}
+                        {isLoadingThis ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                        {status === "rejected" ? "Reenviar" : "Contratar"}
                       </Button>
                     )}
                   </div>
@@ -255,49 +259,69 @@ export default function ModulesUpgrade() {
         )}
       </div>
 
-      {/* Payment dialog — only for active plan users */}
-      <Dialog open={!!selectedModule} onOpenChange={(o) => { if (!o) { setSelectedModule(null); setFile(null); setNotes(""); } }}>
-        <DialogContent className="max-w-md">
+      {/* PIX Payment Dialog */}
+      <Dialog open={!!pixData} onOpenChange={(o) => { if (!o) { setPixData(null); setPixModuleName(null); } }}>
+        <DialogContent className="max-w-md mx-4 rounded-2xl bg-card border-border">
           <DialogHeader>
-            <DialogTitle>Solicitar {selectedModule?.display_name}</DialogTitle>
+            <DialogTitle>Pagamento PIX — {pixModuleCatalog?.display_name}</DialogTitle>
             <DialogDescription>
-              Envie o comprovante de pagamento para ativar o módulo.
+              Escaneie o QR Code ou copie o código para pagar.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {selectedModule && (
-              <PixPaymentCard amount={selectedModule.price} title="Pague via Pix" />
-            )}
+          {pixData && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-foreground">
+                  {pixData.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                </p>
+              </div>
 
-            <div className="space-y-1.5">
-              <Label>Comprovante (imagem/PDF)</Label>
-              <Input
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="h-10 bg-secondary/50 border-border file:text-primary file:font-medium"
-              />
+              {pixData.qrCodeImage && (
+                <div className="flex justify-center">
+                  <div className="bg-white p-3 rounded-xl">
+                    <img
+                      src={`data:image/png;base64,${pixData.qrCodeImage}`}
+                      alt="QR Code PIX"
+                      className="w-48 h-48"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {pixData.payload && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium">Copia e cola:</p>
+                  <div className="flex gap-2">
+                    <code className="flex-1 text-[10px] bg-secondary/50 p-2 rounded-lg break-all max-h-16 overflow-y-auto border border-border">
+                      {pixData.payload}
+                    </code>
+                    <Button size="icon" variant="outline" className="shrink-0 rounded-xl" onClick={handleCopyPayload}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-3 text-xs text-blue-400 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 shrink-0" />
+                Após o pagamento, o módulo será ativado automaticamente.
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full gap-2 rounded-xl"
+                onClick={handleRefreshStatus}
+                disabled={refreshing}
+              >
+                {refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                Já paguei — verificar ativação
+              </Button>
             </div>
+          )}
 
-            <div className="space-y-1.5">
-              <Label>Observação (opcional)</Label>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Ex: Paguei via Nubank"
-                className="bg-secondary/50 border-border resize-none"
-                rows={2}
-              />
-            </div>
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setSelectedModule(null)} disabled={uploading}>Cancelar</Button>
-            <Button onClick={handleSubmit} disabled={uploading} className="gap-1.5">
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              {uploading ? "Enviando..." : "Enviar pagamento"}
-            </Button>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setPixData(null); setPixModuleName(null); }}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
