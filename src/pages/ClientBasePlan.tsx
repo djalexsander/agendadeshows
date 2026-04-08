@@ -320,10 +320,24 @@ export default function ClientBasePlan() {
               <p className="text-xs text-muted-foreground text-center">
                 Você pode cancelar a qualquer momento.
               </p>
+
+              {/* CPF/CNPJ input */}
+              {showCpfInput && (
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">CPF ou CNPJ (obrigatório)</Label>
+                  <Input
+                    placeholder="000.000.000-00 ou 00.000.000/0001-00"
+                    value={cpfCnpj}
+                    onChange={(e) => setCpfCnpj(e.target.value)}
+                    className="bg-secondary/50 border-border"
+                  />
+                </div>
+              )}
+
               <Button
                 onClick={handleAsaasPayment}
                 className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
-                disabled={asaasLoading}
+                disabled={asaasLoading || (showCpfInput && !cpfCnpj.trim())}
               >
                 {asaasLoading ? (
                   <>
@@ -333,14 +347,14 @@ export default function ClientBasePlan() {
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
-                    {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Pagar com PIX"}
+                    {showCpfInput ? "Gerar PIX" : status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Pagar com PIX"}
                   </>
                 )}
               </Button>
 
               {/* Manual fallback link */}
               <button
-                onClick={() => setShowManualForm(true)}
+                onClick={() => { setShowCpfInput(false); setShowManualForm(true); }}
                 className="w-full text-xs text-muted-foreground hover:text-foreground underline transition-colors"
               >
                 Prefiro enviar comprovante manualmente
