@@ -352,6 +352,7 @@ export type Database = {
           description: string | null
           display_name: string
           id: string
+          max_users_default: number
           module_name: string
           price: number
           sort_order: number
@@ -364,6 +365,7 @@ export type Database = {
           description?: string | null
           display_name: string
           id?: string
+          max_users_default?: number
           module_name: string
           price?: number
           sort_order?: number
@@ -376,6 +378,7 @@ export type Database = {
           description?: string | null
           display_name?: string
           id?: string
+          max_users_default?: number
           module_name?: string
           price?: number
           sort_order?: number
