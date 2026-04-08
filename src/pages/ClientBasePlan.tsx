@@ -55,10 +55,17 @@ export default function ClientBasePlan() {
 
   const handleAsaasPayment = async () => {
     if (!user) return;
+    
+    // If no CPF/CNPJ provided yet, show the input
+    if (!cpfCnpj.trim()) {
+      setShowCpfInput(true);
+      return;
+    }
+
     setAsaasLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-asaas-base-plan-payment", {
-        body: {},
+        body: { cpfCnpj: cpfCnpj.replace(/\D/g, "") },
       });
 
       if (error) {
@@ -69,6 +76,7 @@ export default function ClientBasePlan() {
       }
 
       setAsaasPixData(data as AsaasPixData);
+      setShowCpfInput(false);
       if (data?.reused) {
         toast({ title: "PIX existente", description: "Você já tem um PIX pendente. Use o código abaixo." });
       } else {
