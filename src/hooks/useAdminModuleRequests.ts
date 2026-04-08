@@ -119,5 +119,17 @@ export function useAdminModuleRequests() {
     [user, fetchRequests]
   );
 
-  return { requests, loading, fetchRequests, approveRequest, rejectRequest };
+  const deleteRequest = useCallback(
+    async (requestId: string) => {
+      const { error } = await (supabase.from("module_requests") as any)
+        .delete()
+        .eq("id", requestId);
+      if (error) return { error: error.message };
+      await fetchRequests();
+      return { error: null };
+    },
+    [fetchRequests]
+  );
+
+  return { requests, loading, fetchRequests, approveRequest, rejectRequest, deleteRequest };
 }
