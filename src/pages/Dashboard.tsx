@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
@@ -11,11 +11,12 @@ import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
 import { useAuth } from "@/hooks/useAuth";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { APP_VERSION } from "@/lib/version";
 
 export default function Dashboard() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isEmbedded = location.pathname.startsWith("/admin");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -89,6 +90,15 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 rounded-xl"
+                onClick={() => navigate("/modulos")}
+                title="Módulos"
+              >
+                <Puzzle className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
