@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Crown, LogOut, Shield } from "lucide-react";
+import { CalendarX, Crown, LogOut, Shield, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
 import { formatBillingPeriod } from "@/lib/planStatus";
 
-export default function TrialExpired() {
+export default function PlanExpired() {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
   const { config } = useBasePlanConfig();
@@ -16,14 +16,28 @@ export default function TrialExpired() {
   const price = config?.price ?? 49.90;
   const period = config?.billing_period ?? "monthly";
 
-  const handleUpgrade = async () => {
+  const handleRenew = async () => {
     if (!user) return;
     setLoading(true);
 
+    // Create a base plan payment request
+    const { error: paymentError } = await (supabase.from("base_plan_payments") as any).insert({
+      user_id: user.id,
+      amount: price,
+      status: "pending_review",
+      billing_period: period,
+    });
+
+    if (paymentError) {
+      toast({ title: "Erro", description: "Não foi possível solicitar renovação.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
+    // Update profile status
     const { error } = await supabase
       .from("profiles")
       .update({
-        plan_type: "monthly",
         status_plano: "aguardando_pagamento",
         valor_plano: price,
       } as any)
@@ -35,6 +49,7 @@ export default function TrialExpired() {
       return;
     }
 
+    toast({ title: "Solicitação enviada!", description: "Envie o comprovante de pagamento para liberar o acesso." });
     window.location.reload();
   };
 
@@ -42,13 +57,13 @@ export default function TrialExpired() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-3">
-          <div className="h-16 w-16 rounded-2xl bg-destructive/20 flex items-center justify-center mx-auto">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
+          <div className="h-16 w-16 rounded-2xl bg-orange-500/20 flex items-center justify-center mx-auto">
+            <CalendarX className="h-8 w-8 text-orange-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Teste grátis expirado</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Plano vencido</h1>
             <p className="text-muted-foreground mt-1">
-              Seu período de teste de 7 dias terminou. Assine o plano mensal para continuar usando o aplicativo.
+              Olá, <strong>{profile?.nome}</strong>! Seu plano mensal venceu. Renove para continuar usando o aplicativo.
             </p>
           </div>
         </div>
@@ -60,7 +75,7 @@ export default function TrialExpired() {
             </div>
             <div>
               <h2 className="text-lg font-bold">{config?.name || "Plano Mensal"}</h2>
-              <p className="text-sm text-muted-foreground">Renovação mensal</p>
+              <p className="text-sm text-muted-foreground">Renove seu acesso</p>
               <p className="text-2xl font-bold text-primary">
                 R$ {price.toFixed(2)}
                 <span className="text-sm font-normal text-muted-foreground">{formatBillingPeriod(period)}</span>
@@ -70,22 +85,30 @@ export default function TrialExpired() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso completo ao aplicativo
+              Acesso completo por mais 30 dias
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Todas as funcionalidades
+              Seus dados são mantidos
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+              Renovação rápida
             </li>
           </ul>
           <Button
-            onClick={handleUpgrade}
+            onClick={handleRenew}
             disabled={loading}
             className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
           >
-            <Shield className="h-5 w-5" />
-            {loading ? "Processando..." : "Assinar plano mensal"}
+            <Send className="h-5 w-5" />
+            {loading ? "Processando..." : "Renovar plano mensal"}
           </Button>
         </div>
+
+        <p className="text-center text-xs text-muted-foreground px-4">
+          Após o pagamento, envie o comprovante e aguarde a aprovação do administrador.
+        </p>
 
         <Button variant="ghost" onClick={signOut} className="w-full gap-2">
           <LogOut className="h-4 w-4" /> Sair

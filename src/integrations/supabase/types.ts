@@ -44,6 +44,81 @@ export type Database = {
         }
         Relationships: []
       }
+      base_plan_config: {
+        Row: {
+          active: boolean
+          billing_period: string
+          created_at: string
+          id: string
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          billing_period?: string
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          billing_period?: string
+          created_at?: string
+          id?: string
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      base_plan_payments: {
+        Row: {
+          amount: number
+          billing_period: string
+          created_at: string
+          id: string
+          notes: string | null
+          receipt_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          billing_period?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          billing_period?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       financial_entries: {
         Row: {
           amount: number
@@ -275,6 +350,8 @@ export type Database = {
           approved_by: string | null
           cidade: string | null
           created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
           data_aprovacao_pagamento: string | null
           data_envio_comprovante: string | null
           email: string
@@ -303,6 +380,8 @@ export type Database = {
           approved_by?: string | null
           cidade?: string | null
           created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           data_aprovacao_pagamento?: string | null
           data_envio_comprovante?: string | null
           email?: string
@@ -331,6 +410,8 @@ export type Database = {
           approved_by?: string | null
           cidade?: string | null
           created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
           data_aprovacao_pagamento?: string | null
           data_envio_comprovante?: string | null
           email?: string

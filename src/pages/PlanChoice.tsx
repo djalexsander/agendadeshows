@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, Crown, LogOut, Clock, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
+import { formatBillingPeriod } from "@/lib/planStatus";
 
 export default function PlanChoice() {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
-  const [loading, setLoading] = useState<"trial" | "lifetime" | null>(null);
+  const { config, loading: configLoading } = useBasePlanConfig();
+  const [loading, setLoading] = useState<"trial" | "monthly" | null>(null);
 
   const handleStartTrial = async () => {
     if (!user) return;
@@ -37,17 +40,16 @@ export default function PlanChoice() {
     window.location.reload();
   };
 
-  const handleLifetime = async () => {
-    if (!user) return;
-    setLoading("lifetime");
+  const handleMonthly = async () => {
+    if (!user || !config) return;
+    setLoading("monthly");
 
-    // Update status to aguardando_pagamento and set plan_type to lifetime
     const { error } = await supabase
       .from("profiles")
       .update({
-        plan_type: "lifetime",
+        plan_type: "monthly",
         status_plano: "aguardando_pagamento",
-        valor_plano: 50,
+        valor_plano: config.price,
       } as any)
       .eq("user_id", user.id);
 
@@ -59,6 +61,9 @@ export default function PlanChoice() {
 
     window.location.reload();
   };
+
+  const price = config?.price ?? 49.90;
+  const period = config?.billing_period ?? "monthly";
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -115,7 +120,7 @@ export default function PlanChoice() {
           </Button>
         </div>
 
-        {/* Lifetime Card */}
+        {/* Monthly Plan Card */}
         <div className="rounded-2xl bg-card border-2 border-primary p-6 space-y-4 relative overflow-hidden shadow-lg shadow-primary/10">
           <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
             Recomendado
@@ -125,15 +130,18 @@ export default function PlanChoice() {
               <Crown className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">Pague agora</h2>
-              <p className="text-sm text-muted-foreground">Plano vitalício por apenas</p>
-              <p className="text-2xl font-bold text-primary">R$ 50,00</p>
+              <h2 className="text-lg font-bold">Assine agora</h2>
+              <p className="text-sm text-muted-foreground">Plano mensal com acesso completo</p>
+              <p className="text-2xl font-bold text-primary">
+                R$ {price.toFixed(2)}
+                <span className="text-sm font-normal text-muted-foreground">{formatBillingPeriod(period)}</span>
+              </p>
             </div>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso vitalício sem mensalidade
+              Acesso completo ao aplicativo
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
@@ -141,22 +149,22 @@ export default function PlanChoice() {
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Pagamento único
+              Renovação mensal
             </li>
           </ul>
           <Button
-            onClick={handleLifetime}
-            disabled={loading !== null}
+            onClick={handleMonthly}
+            disabled={loading !== null || configLoading}
             className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
           >
             <Shield className="h-5 w-5" />
-            {loading === "lifetime" ? "Processando..." : "Assinar plano vitalício"}
+            {loading === "monthly" ? "Processando..." : "Assinar plano mensal"}
           </Button>
         </div>
 
         {/* Disclaimer */}
         <p className="text-center text-xs text-muted-foreground px-4">
-          Após os 7 dias de teste, o acesso será bloqueado caso não haja upgrade para o plano vitalício.
+          Após os 7 dias de teste, o acesso será bloqueado caso não haja assinatura do plano mensal ativa.
         </p>
 
         <Button variant="ghost" onClick={signOut} className="w-full gap-2">
