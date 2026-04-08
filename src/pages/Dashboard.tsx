@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [exportOpen, setExportOpen] = useState(false);
   const { profile, signOut } = useAuth();
   const { pushEnabled, togglePush } = usePushSubscription();
+  const { hasModule } = useModules();
 
   const { shows, addShow, updateShow, deleteShow, getShowsByDate, getShowDates, getShowsInMonth } =
     useSupabaseShows();
