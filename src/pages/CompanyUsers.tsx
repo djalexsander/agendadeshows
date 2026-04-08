@@ -124,11 +124,14 @@ export default function CompanyUsers() {
                     {isOwner && <Badge variant="outline" className="text-[10px] px-1.5 py-0">Dono</Badge>}
                     {!m.active && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Inativo</Badge>}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                     <span className="text-xs text-muted-foreground">{m.profile?.email}</span>
                     <Badge className={`text-[10px] px-1.5 py-0 ${ROLE_COLORS[m.role as CompanyRole]}`}>
                       {ROLE_LABELS[m.role as CompanyRole]}
                     </Badge>
+                    <span className="text-[10px] text-muted-foreground">
+                      Desde {new Date(m.created_at).toLocaleDateString("pt-BR")}
+                    </span>
                   </div>
                 </div>
 
