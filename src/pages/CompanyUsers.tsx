@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Users, Plus, Mail, Shield, Eye, Pencil, Trash2, Loader2, UserPlus, X, ToggleLeft, ToggleRight, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useCompany, CompanyRole } from "@/hooks/useCompany";
 import { useAuth } from "@/hooks/useAuth";
 import { ModuleGate } from "@/components/modules/ModuleGate";
+import { supabase } from "@/integrations/supabase/client";
 
 const ROLE_LABELS: Record<CompanyRole, string> = {
   admin: "Admin",
@@ -47,7 +48,19 @@ export default function CompanyUsers() {
   const [saving, setSaving] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
-  const maxUsers = company?.max_users ?? 1;
+  const [maxUsers, setMaxUsers] = useState(1);
+
+  useEffect(() => {
+    supabase
+      .from("module_catalog")
+      .select("max_users_default")
+      .eq("module_name", "agenda_compartilhada")
+      .single()
+      .then(({ data }) => {
+        if (data) setMaxUsers((data as any).max_users_default ?? 1);
+      });
+  }, []);
+
   const atLimit = members.length >= maxUsers;
 
   const handleAdd = async () => {
