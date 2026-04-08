@@ -448,6 +448,53 @@ export default function Dashboard() {
         onClose={() => setExportOpen(false)}
         shows={shows}
       />
+
+      {/* All shows dialog */}
+      <Dialog open={allShowsOpen} onOpenChange={setAllShowsOpen}>
+        <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary" />
+              Todos os shows ({shows.length})
+            </DialogTitle>
+            <DialogDescription>Lista completa de eventos cadastrados</DialogDescription>
+          </DialogHeader>
+          {shows.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">Nenhum evento cadastrado</p>
+          ) : (
+            <div className="space-y-2 py-2">
+              {[...shows].sort((a, b) => b.date.localeCompare(a.date)).map((s) => (
+                <button
+                  key={s.id}
+                  className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-3 flex items-center gap-3 transition-colors"
+                  onClick={() => { setAllShowsOpen(false); handleShowClick(s.date); }}
+                >
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Music className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-foreground truncate">{s.evento || s.cidade}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                        <MapPin className="h-2.5 w-2.5" />{s.cidade}/{s.estado}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {format(parseISO(s.date), "dd/MM/yyyy")}
+                      </span>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                    s.status === "confirmado" ? "bg-green-500/20 text-green-500" :
+                    s.status === "finalizado" ? "bg-blue-500/20 text-blue-400" :
+                    "bg-yellow-500/20 text-yellow-400"
+                  }`}>{s.status || "pendente"}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {!isEmbedded && (
         <p className="text-center text-[10px] text-muted-foreground/50 py-2">{APP_VERSION}</p>
       )}
