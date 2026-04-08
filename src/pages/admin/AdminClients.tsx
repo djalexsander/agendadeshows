@@ -32,12 +32,21 @@ interface ClientProfile {
   status_plano: string | null;
   valor_plano: number | null;
   vencimento: string | null;
+  current_period_end: string | null;
   observacoes: string | null;
   origem_cadastro: string | null;
   plan_type: string | null;
   trial_started_at: string | null;
   trial_ends_at: string | null;
   is_paid: boolean | null;
+}
+
+function toDateInputValue(dateStr: string | null | undefined): string {
+  if (!dateStr) return "";
+  // Handle ISO timestamps like "2026-05-08T16:15:00+00:00"
+  const iso = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  return "";
 }
 
 export default function AdminClients() {
@@ -71,7 +80,7 @@ export default function AdminClients() {
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo",
       valor_plano: isTrialOrLifetime ? "" : String(c.valor_plano || ""),
-      vencimento: c.vencimento || "", observacoes: c.observacoes || "",
+      vencimento: toDateInputValue(c.current_period_end) || toDateInputValue(c.vencimento), observacoes: c.observacoes || "",
     });
     setDialogOpen(true);
   };
@@ -87,8 +96,10 @@ export default function AdminClients() {
       nome: form.nome, telefone: form.telefone,
       cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
       valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
-      vencimento: form.vencimento || null, observacoes: form.observacoes,
-    }).eq("id", editingClient!.id);
+      vencimento: form.vencimento || null,
+      current_period_end: form.vencimento ? new Date(form.vencimento + "T23:59:59Z").toISOString() : null,
+      observacoes: form.observacoes,
+    } as any).eq("id", editingClient!.id);
     toast({ title: "Sucesso", description: "Cliente atualizado." });
 
     setLoading(false);
