@@ -78,7 +78,6 @@ function AppRoutes() {
           <Route path="empresa/usuarios" element={<CompanyUsers />} />
           <Route path="empresa/modulos" element={<ModulesUpgrade />} />
           <Route path="empresa/meu-plano" element={<ClientBasePlan />} />
-          <Route path="empresa/usuarios" element={<CompanyUsers />} />
         </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
