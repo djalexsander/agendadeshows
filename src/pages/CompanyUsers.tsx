@@ -136,7 +136,7 @@ export default function CompanyUsers() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-foreground">{members.length}/{maxUsers} membro{maxUsers !== 1 ? "s" : ""}</p>
+              <p className="text-sm font-medium text-foreground">{members.length}/{maxUsers ?? "..."} membro{(maxUsers ?? 0) !== 1 ? "s" : ""}</p>
               <p className="text-xs text-muted-foreground">Membros acessam a agenda sem assinatura própria</p>
             </div>
             <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)} disabled={atLimit}>
