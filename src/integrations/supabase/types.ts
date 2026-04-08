@@ -146,11 +146,23 @@ export type Database = {
       financial_entries: {
         Row: {
           amount: number
+          categoria: string | null
+          comprovante_url: string | null
           created_at: string
+          data_lancamento: string
+          data_pagamento: string | null
+          data_vencimento: string | null
           event_date: string | null
           event_name: string | null
+          forma_pagamento: string | null
           id: string
           notes: string | null
+          parcela_atual: number
+          parcelas: number
+          pessoa: string | null
+          recorrencia: string
+          show_id: string | null
+          status: string
           title: string
           type: string
           updated_at: string
@@ -158,11 +170,23 @@ export type Database = {
         }
         Insert: {
           amount?: number
+          categoria?: string | null
+          comprovante_url?: string | null
           created_at?: string
+          data_lancamento?: string
+          data_pagamento?: string | null
+          data_vencimento?: string | null
           event_date?: string | null
           event_name?: string | null
+          forma_pagamento?: string | null
           id?: string
           notes?: string | null
+          parcela_atual?: number
+          parcelas?: number
+          pessoa?: string | null
+          recorrencia?: string
+          show_id?: string | null
+          status?: string
           title: string
           type?: string
           updated_at?: string
@@ -170,11 +194,23 @@ export type Database = {
         }
         Update: {
           amount?: number
+          categoria?: string | null
+          comprovante_url?: string | null
           created_at?: string
+          data_lancamento?: string
+          data_pagamento?: string | null
+          data_vencimento?: string | null
           event_date?: string | null
           event_name?: string | null
+          forma_pagamento?: string | null
           id?: string
           notes?: string | null
+          parcela_atual?: number
+          parcelas?: number
+          pessoa?: string | null
+          recorrencia?: string
+          show_id?: string | null
+          status?: string
           title?: string
           type?: string
           updated_at?: string
