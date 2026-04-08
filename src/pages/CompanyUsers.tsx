@@ -107,7 +107,6 @@ export default function CompanyUsers() {
             <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)}>
               <UserPlus className="h-4 w-4" /> Adicionar membro
             </Button>
-            </Button>
           </div>
 
           {members.map((m) => {
