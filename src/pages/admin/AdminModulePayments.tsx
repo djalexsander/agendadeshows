@@ -48,10 +48,22 @@ export default function AdminModulePayments() {
     setActionTarget(null);
   };
 
-  const statusBadge = (status: string) => {
-    if (status === "approved") return <Badge className="bg-green-600/15 text-green-500 border-green-600/30 text-[10px]"><CheckCircle2 className="h-3 w-3 mr-1" />Aprovado</Badge>;
+  const statusBadge = (p: AdminModulePayment) => {
+    const status = p.status;
+    const isAsaas = (p as any).gateway_provider === "asaas";
+    if (status === "approved") return (
+      <div className="flex items-center gap-1">
+        <Badge className="bg-green-600/15 text-green-500 border-green-600/30 text-[10px]"><CheckCircle2 className="h-3 w-3 mr-1" />Aprovado</Badge>
+        {isAsaas && <Badge className="bg-primary/15 text-primary border-primary/30 text-[9px]">Asaas</Badge>}
+      </div>
+    );
     if (status === "rejected") return <Badge variant="destructive" className="text-[10px]"><XCircle className="h-3 w-3 mr-1" />Rejeitado</Badge>;
-    return <Badge className="bg-yellow-500/15 text-yellow-500 border-yellow-500/30 text-[10px]"><Clock className="h-3 w-3 mr-1" />Pendente</Badge>;
+    return (
+      <div className="flex items-center gap-1">
+        <Badge className="bg-yellow-500/15 text-yellow-500 border-yellow-500/30 text-[10px]"><Clock className="h-3 w-3 mr-1" />Pendente</Badge>
+        {isAsaas && <Badge className="bg-primary/15 text-primary border-primary/30 text-[9px]">Asaas</Badge>}
+      </div>
+    );
   };
 
   const filterButtons: { key: StatusFilter; label: string }[] = [
