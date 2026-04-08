@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut,
+  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,7 +132,7 @@ export default function ClientBasePlan() {
 
           {/* Microcopy de valor */}
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Acesso completo ao sistema com as funcionalidades escolhidas para organizar e profissionalizar seus eventos.
+            Organize, controle e profissionalize seus shows com facilidade.
           </p>
 
           {/* "Você está contratando" */}
@@ -159,6 +159,7 @@ export default function ClientBasePlan() {
 
           {/* Valores */}
           <div className="rounded-xl bg-secondary/30 border border-border/50 p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Detalhamento</p>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Plano Base</span>
               <span className="font-medium text-foreground">R$ {price.toFixed(2)}</span>
@@ -174,13 +175,15 @@ export default function ClientBasePlan() {
               </div>
             )}
             <Separator className="my-1" />
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-foreground">Total mensal</span>
-              <span className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}</span>
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Plano selecionado</span>
+                <span className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}<span className="text-xs font-normal text-muted-foreground">/mês</span></span>
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-1.5">
+                Aproximadamente R$ {(totalPrice / 30).toFixed(2)} por dia
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              Aproximadamente R$ {(totalPrice / 30).toFixed(2)} por dia
-            </p>
           </div>
 
           <p className="text-xs text-muted-foreground text-center leading-relaxed">
@@ -248,14 +251,23 @@ export default function ClientBasePlan() {
           )}
 
           {!hasPending && status !== "pending_review" && (
-            <Button
-              onClick={() => setShowForm(true)}
-              className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
-              disabled={showForm}
-            >
-              <Send className="h-4 w-4" />
-              {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Enviar pagamento"}
-            </Button>
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground text-center">
+                Você pode cancelar a qualquer momento.
+              </p>
+              <Button
+                onClick={() => setShowForm(true)}
+                className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
+                disabled={showForm}
+              >
+                <Send className="h-4 w-4" />
+                {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Enviar pagamento"}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Seus dados são seguros e seu acesso é liberado após a confirmação do pagamento.
+              </p>
+            </div>
           )}
         </div>
 
