@@ -35,7 +35,6 @@ export default function ClientBasePlan() {
   const price = summary.basePrice;
   const totalPrice = summary.total;
   const planName = summary.basePlanName;
-  const period = summary.baseBillingPeriod;
   const hasModules = summary.modules.length > 0;
 
   const handleSubmit = async () => {
