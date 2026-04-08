@@ -44,6 +44,8 @@ export default function ClientBasePlan() {
   const [asaasLoading, setAsaasLoading] = useState(false);
   const [asaasPixData, setAsaasPixData] = useState<AsaasPixData | null>(null);
   const [copied, setCopied] = useState(false);
+  const [cpfCnpj, setCpfCnpj] = useState("");
+  const [showCpfInput, setShowCpfInput] = useState(false);
 
   const status = getEffectivePlanStatus(profile);
   const price = summary.basePrice;
