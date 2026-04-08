@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [allShowsOpen, setAllShowsOpen] = useState(false);
   const { profile, signOut } = useAuth();
   const { pushEnabled, togglePush } = usePushSubscription();
   const { hasModule } = useModules();
