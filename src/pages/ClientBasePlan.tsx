@@ -208,7 +208,7 @@ export default function ClientBasePlan() {
                 <p className="font-semibold text-blue-400">Período de teste</p>
                 {profile?.trial_ends_at && (
                   <p className="text-sm text-muted-foreground">
-                    Expira em {format(new Date(profile.trial_ends_at), "dd/MM/yyyy", { locale: ptBR })}
+                    Seu teste termina em {format(new Date(profile.trial_ends_at), "dd/MM/yyyy", { locale: ptBR })}. Garanta seu acesso antes do vencimento.
                   </p>
                 )}
               </div>
