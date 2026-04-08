@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, Clock, Filter, Puzzle, Loader2, ExternalLink } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Filter, Puzzle, Loader2, ExternalLink, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -24,13 +24,15 @@ const MODULE_LABELS: Record<string, string> = {
 type StatusFilter = "all" | "pending_review" | "approved" | "rejected";
 
 export default function AdminModulePayments() {
-  const { payments, loading, approvePayment, rejectPayment } = useAdminModulePayments();
+  const { payments, loading, approvePayment, rejectPayment, deletePayment } = useAdminModulePayments();
   const { toast } = useToast();
   const [filter, setFilter] = useState<StatusFilter>("pending_review");
   const [actionTarget, setActionTarget] = useState<AdminModulePayment | null>(null);
   const [actionType, setActionType] = useState<"approve" | "reject">("approve");
   const [reason, setReason] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AdminModulePayment | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = filter === "all" ? payments : payments.filter((p) => p.status === filter);
 
@@ -46,6 +48,19 @@ export default function AdminModulePayments() {
     }
     setProcessing(false);
     setActionTarget(null);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const result = await deletePayment(deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (result?.error) {
+      toast({ title: "Erro", description: result.error, variant: "destructive" });
+    } else {
+      toast({ title: "Pagamento excluído", description: `Pagamento de "${MODULE_LABELS[deleteTarget.module_name] ?? deleteTarget.module_name}" removido.` });
+    }
   };
 
   const statusBadge = (p: AdminModulePayment) => {
@@ -144,18 +159,26 @@ export default function AdminModulePayments() {
                     ) : <span className="text-xs text-muted-foreground">—</span>}
                   </TableCell>
                   <TableCell className="text-right">
-                    {p.status === "pending_review" ? (
-                      <div className="flex items-center gap-1 justify-end">
-                        <Button size="sm" variant="default" className="rounded-xl text-xs h-7 px-3" onClick={() => { setActionTarget(p); setActionType("approve"); setReason(""); }}>
-                          <CheckCircle2 className="h-3.5 w-3.5" /><span className="hidden sm:inline ml-1">Aprovar</span>
-                        </Button>
-                        <Button size="sm" variant="outline" className="rounded-xl text-xs h-7 px-3 text-destructive border-destructive/30" onClick={() => { setActionTarget(p); setActionType("reject"); setReason(""); }}>
-                          <XCircle className="h-3.5 w-3.5" /><span className="hidden sm:inline ml-1">Rejeitar</span>
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">{p.rejection_reason || p.notes || "—"}</span>
-                    )}
+                    <div className="flex items-center gap-1 justify-end">
+                      {p.status === "pending_review" && (
+                        <>
+                          <Button size="sm" variant="default" className="rounded-xl text-xs h-7 px-3" onClick={() => { setActionTarget(p); setActionType("approve"); setReason(""); }}>
+                            <CheckCircle2 className="h-3.5 w-3.5" /><span className="hidden sm:inline ml-1">Aprovar</span>
+                          </Button>
+                          <Button size="sm" variant="outline" className="rounded-xl text-xs h-7 px-3 text-destructive border-destructive/30" onClick={() => { setActionTarget(p); setActionType("reject"); setReason(""); }}>
+                            <XCircle className="h-3.5 w-3.5" /><span className="hidden sm:inline ml-1">Rejeitar</span>
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-xl text-xs h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeleteTarget(p)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -164,6 +187,7 @@ export default function AdminModulePayments() {
         </div>
       )}
 
+      {/* Approve/Reject Dialog */}
       <Dialog open={!!actionTarget} onOpenChange={(o) => !o && setActionTarget(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -182,6 +206,25 @@ export default function AdminModulePayments() {
             <Button variant={actionType === "approve" ? "default" : "destructive"} onClick={handleConfirm} disabled={processing} className="gap-1.5">
               {processing && <Loader2 className="h-4 w-4 animate-spin" />}
               {actionType === "approve" ? "Confirmar aprovação" : "Confirmar rejeição"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir pagamento</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir permanentemente o pagamento de R$ {deleteTarget?.amount.toFixed(2)} ({MODULE_LABELS[deleteTarget?.module_name ?? ""] ?? deleteTarget?.module_name}) de {deleteTarget?.user_nome || "usuário desconhecido"}? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="gap-1.5">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Excluir permanentemente
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, Clock, Filter, Puzzle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Filter, Puzzle, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -30,13 +30,15 @@ const STATUS_LABELS: Record<string, string> = {
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
 export default function AdminModuleRequests() {
-  const { requests, loading, approveRequest, rejectRequest } = useAdminModuleRequests();
+  const { requests, loading, approveRequest, rejectRequest, deleteRequest } = useAdminModuleRequests();
   const { toast } = useToast();
   const [filter, setFilter] = useState<StatusFilter>("pending");
   const [actionTarget, setActionTarget] = useState<AdminModuleRequest | null>(null);
   const [actionType, setActionType] = useState<"approve" | "reject">("approve");
   const [notes, setNotes] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AdminModuleRequest | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = filter === "all" ? requests : requests.filter((r) => r.status === filter);
 
@@ -69,6 +71,19 @@ export default function AdminModuleRequests() {
           ? `"${MODULE_LABELS[actionTarget.module_name] ?? actionTarget.module_name}" ativado para ${actionTarget.user_nome || "usuário"}.`
           : `Solicitação de "${MODULE_LABELS[actionTarget.module_name] ?? actionTarget.module_name}" rejeitada.`,
       });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const result = await deleteRequest(deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (result.error) {
+      toast({ title: "Erro", description: result.error, variant: "destructive" });
+    } else {
+      toast({ title: "Solicitação excluída", description: `Solicitação de "${MODULE_LABELS[deleteTarget.module_name] ?? deleteTarget.module_name}" removida.` });
     }
   };
 
@@ -155,32 +170,38 @@ export default function AdminModuleRequests() {
                     {format(new Date(req.requested_at), "dd/MM/yyyy HH:mm")}
                   </TableCell>
                   <TableCell className="text-right">
-                    {req.status === "pending" ? (
-                      <div className="flex items-center gap-1 justify-end">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="rounded-xl text-xs h-7 px-3"
-                          onClick={() => openAction(req, "approve")}
-                        >
-                          <CheckCircle2 className="h-3.5 w-3.5" />
-                          <span className="hidden sm:inline ml-1">Aprovar</span>
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="rounded-xl text-xs h-7 px-3 text-destructive border-destructive/30"
-                          onClick={() => openAction(req, "reject")}
-                        >
-                          <XCircle className="h-3.5 w-3.5" />
-                          <span className="hidden sm:inline ml-1">Rejeitar</span>
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        {req.notes ? req.notes : "—"}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1 justify-end">
+                      {req.status === "pending" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="rounded-xl text-xs h-7 px-3"
+                            onClick={() => openAction(req, "approve")}
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline ml-1">Aprovar</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-xl text-xs h-7 px-3 text-destructive border-destructive/30"
+                            onClick={() => openAction(req, "reject")}
+                          >
+                            <XCircle className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline ml-1">Rejeitar</span>
+                          </Button>
+                        </>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="rounded-xl text-xs h-7 px-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeleteTarget(req)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -189,7 +210,7 @@ export default function AdminModuleRequests() {
         </div>
       )}
 
-      {/* Confirm Dialog */}
+      {/* Confirm Action Dialog */}
       <Dialog open={!!actionTarget} onOpenChange={(o) => !o && setActionTarget(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -220,6 +241,27 @@ export default function AdminModuleRequests() {
             >
               {processing && <Loader2 className="h-4 w-4 animate-spin" />}
               {actionType === "approve" ? "Confirmar aprovação" : "Confirmar rejeição"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Excluir solicitação</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir permanentemente a solicitação de "{MODULE_LABELS[deleteTarget?.module_name ?? ""] ?? deleteTarget?.module_name}" de {deleteTarget?.user_nome || "usuário desconhecido"}? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="gap-1.5">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Excluir permanentemente
             </Button>
           </DialogFooter>
         </DialogContent>
