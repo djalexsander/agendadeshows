@@ -425,11 +425,23 @@ export default function ClientBasePlan() {
               </p>
             )}
 
-            <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4">
-              <p className="text-sm text-blue-400 text-center">
+            <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4 space-y-1">
+              <p className="text-sm text-blue-400 text-center font-medium">
                 Após o pagamento, seu plano será ativado automaticamente em alguns instantes.
               </p>
+              <p className="text-xs text-blue-400/70 text-center">
+                Você não precisa enviar comprovante.
+              </p>
             </div>
+
+            <Button
+              variant="default"
+              className="w-full gap-2"
+              onClick={() => window.location.reload()}
+            >
+              <CheckCircle className="h-4 w-4" />
+              Já paguei — verificar ativação
+            </Button>
 
             <Button
               variant="outline"
