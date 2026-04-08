@@ -83,6 +83,45 @@ export type Database = {
         }
         Relationships: []
       }
+      module_catalog: {
+        Row: {
+          active: boolean
+          billing_period: string
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          module_name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          billing_period?: string
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          module_name: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          billing_period?: string
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          module_name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       module_requests: {
         Row: {
           created_at: string
