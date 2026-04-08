@@ -119,46 +119,60 @@ export default function ClientBasePlan() {
         </div>
 
         {/* Plan info card */}
-        <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+        <div className="rounded-2xl bg-card border border-border p-6 space-y-5">
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <Crown className="h-6 w-6 text-primary" />
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-bold">{planName}</h2>
-              <p className="text-2xl font-bold text-primary">
-                R$ {price.toFixed(2)}
-                <span className="text-sm font-normal text-muted-foreground">{formatBillingPeriod(period)}</span>
-              </p>
+              <p className="text-sm text-muted-foreground">Assinatura mensal</p>
             </div>
           </div>
 
-          {/* Modules breakdown */}
-          {hasModules && (
-            <div className="rounded-xl bg-secondary/30 border border-border/50 p-4 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                <Puzzle className="h-4 w-4" />
-                Módulos incluídos
+          {/* "Você está contratando" */}
+          <div className="rounded-xl bg-secondary/30 border border-border/50 p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Você está contratando</p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-foreground">
+                <CheckCircle className="h-4 w-4 text-green-400 shrink-0" />
+                {planName}
               </div>
+              {summary.modules.map((m) => (
+                <div key={m.module_name} className="flex items-center gap-2 text-sm text-foreground">
+                  <CheckCircle className="h-4 w-4 text-green-400 shrink-0" />
+                  {m.display_name}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Valores */}
+          <div className="rounded-xl bg-secondary/30 border border-border/50 p-4 space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Plano Base</span>
+              <span className="font-medium text-foreground">R$ {price.toFixed(2)}</span>
+            </div>
+            {hasModules && (
               <div className="space-y-2">
                 {summary.modules.map((m) => (
                   <div key={m.module_name} className="flex items-center justify-between text-sm">
-                    <span className="text-foreground">{m.display_name}</span>
-                    <span className="font-medium text-foreground">
-                      R$ {m.price.toFixed(2)}
-                      <span className="text-xs text-muted-foreground">{formatBillingPeriod(m.billing_period)}</span>
-                    </span>
+                    <span className="text-muted-foreground">{m.display_name}</span>
+                    <span className="font-medium text-foreground">R$ {m.price.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
-              <div className="border-t border-border/50 pt-2 flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">Total mensal</span>
-                <span className="text-lg font-bold text-primary">
-                  R$ {totalPrice.toFixed(2)}
-                </span>
-              </div>
+            )}
+            <Separator className="my-1" />
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">Total mensal</span>
+              <span className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}</span>
             </div>
-          )}
+          </div>
+
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            Seu plano inclui todas as funcionalidades selecionadas e será ativado após a confirmação do pagamento.
+          </p>
 
           {status === "active" && (
             <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-4 flex items-center gap-3">
