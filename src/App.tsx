@@ -21,6 +21,7 @@ import AdminPix from "./pages/admin/AdminPix";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminModuleRequests from "./pages/admin/AdminModuleRequests";
 import AdminModuleCatalog from "./pages/admin/AdminModuleCatalog";
+import AdminModulePayments from "./pages/admin/AdminModulePayments";
 import AdminBasePlan from "./pages/admin/AdminBasePlan";
 import ModulesUpgrade from "./pages/ModulesUpgrade";
 import Financeiro from "./pages/Financeiro";
@@ -63,6 +64,7 @@ function AppRoutes() {
           <Route path="pix" element={<AdminPix />} />
           <Route path="modules" element={<AdminModuleRequests />} />
           <Route path="module-catalog" element={<AdminModuleCatalog />} />
+          <Route path="module-payments" element={<AdminModulePayments />} />
           <Route path="base-plan" element={<AdminBasePlan />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
