@@ -132,7 +132,7 @@ export default function AdminModulePayments() {
                   </TableCell>
                   <TableCell className="text-sm">{MODULE_LABELS[p.module_name] ?? p.module_name}</TableCell>
                   <TableCell className="text-sm font-semibold">R$ {p.amount.toFixed(2)}</TableCell>
-                  <TableCell>{statusBadge(p.status)}</TableCell>
+                  <TableCell>{statusBadge(p)}</TableCell>
                   <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                     {format(new Date(p.submitted_at), "dd/MM/yyyy HH:mm")}
                   </TableCell>
