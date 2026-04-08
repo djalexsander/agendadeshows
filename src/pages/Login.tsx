@@ -166,9 +166,9 @@ export default function Login() {
                     : "Preencha seus dados para criar sua conta"
                   : "Acesse sua conta"}
               </p>
-              {isSignup && signupConfig?.cadastro_ativo !== false && signupConfig?.valor_padrao != null && signupConfig.valor_padrao > 0 && (
+              {isSignup && signupConfig?.cadastro_ativo !== false && basePlanPrice != null && basePlanPrice > 0 && (
                 <p className="text-sm font-semibold text-primary mt-1">
-                  Valor de acesso: R$ {signupConfig.valor_padrao.toFixed(2)}
+                  Valor de acesso: R$ {basePlanPrice.toFixed(2)}
                 </p>
               )}
             </div>
