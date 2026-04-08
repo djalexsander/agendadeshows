@@ -96,6 +96,15 @@ export default function Dashboard() {
                 variant="ghost"
                 size="sm"
                 className="gap-2 rounded-xl"
+                onClick={() => navigate("/meu-plano")}
+                title="Meu Plano"
+              >
+                <Crown className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2 rounded-xl"
                 onClick={() => navigate("/modulos")}
                 title="Módulos"
               >
