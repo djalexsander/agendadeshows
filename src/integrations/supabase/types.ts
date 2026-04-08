@@ -77,10 +77,17 @@ export type Database = {
       base_plan_payments: {
         Row: {
           amount: number
+          asaas_customer_id: string | null
+          asaas_payment_id: string | null
           billing_period: string
           created_at: string
+          gateway_provider: string | null
+          gateway_status: string | null
           id: string
           notes: string | null
+          pix_expiration_date: string | null
+          pix_payload: string | null
+          pix_qr_code_image: string | null
           receipt_url: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -91,10 +98,17 @@ export type Database = {
         }
         Insert: {
           amount: number
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string | null
           billing_period?: string
           created_at?: string
+          gateway_provider?: string | null
+          gateway_status?: string | null
           id?: string
           notes?: string | null
+          pix_expiration_date?: string | null
+          pix_payload?: string | null
+          pix_qr_code_image?: string | null
           receipt_url?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -105,10 +119,17 @@ export type Database = {
         }
         Update: {
           amount?: number
+          asaas_customer_id?: string | null
+          asaas_payment_id?: string | null
           billing_period?: string
           created_at?: string
+          gateway_provider?: string | null
+          gateway_status?: string | null
           id?: string
           notes?: string | null
+          pix_expiration_date?: string | null
+          pix_payload?: string | null
+          pix_qr_code_image?: string | null
           receipt_url?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
