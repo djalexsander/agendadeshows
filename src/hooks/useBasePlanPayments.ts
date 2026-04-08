@@ -178,5 +178,17 @@ export function useAdminBasePlanPayments() {
     await fetchPayments();
   };
 
-  return { payments, loading, refreshPayments: fetchPayments, approvePayment, rejectPayment };
+  const deletePayment = useCallback(
+    async (paymentId: string) => {
+      const { error } = await (supabase.from("base_plan_payments") as any)
+        .delete()
+        .eq("id", paymentId);
+      if (error) return { error: error.message };
+      await fetchPayments();
+      return { error: null };
+    },
+    [fetchPayments]
+  );
+
+  return { payments, loading, refreshPayments: fetchPayments, approvePayment, rejectPayment, deletePayment };
 }
