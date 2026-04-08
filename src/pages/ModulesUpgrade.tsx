@@ -116,7 +116,17 @@ export default function ModulesUpgrade() {
     setRefreshing(true);
     await Promise.all([refreshPayments(), refreshModules()]);
     setRefreshing(false);
+    // The useEffect below will detect activation and close the dialog
   };
+
+  // Auto-detect module activation after refresh
+  const pixModuleActive = pixData ? hasModule(pixData.moduleName as ModuleName) : false;
+  if (pixModuleActive && pixData) {
+    const mod = catalog.find((m) => m.module_name === pixData.moduleName);
+    toast.success(`Módulo "${mod?.display_name || pixData.moduleName}" ativado com sucesso!`);
+    setPixData(null);
+    setPixModuleName(null);
+  }
 
   const pixModuleCatalog = pixData ? catalog.find((m) => m.module_name === pixData.moduleName) : null;
 
