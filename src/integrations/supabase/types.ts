@@ -147,6 +147,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          max_users: number
           name: string
           owner_user_id: string
           updated_at: string
@@ -154,6 +155,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          max_users?: number
           name: string
           owner_user_id: string
           updated_at?: string
@@ -161,6 +163,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          max_users?: number
           name?: string
           owner_user_id?: string
           updated_at?: string
