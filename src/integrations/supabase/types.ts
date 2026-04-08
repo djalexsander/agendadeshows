@@ -143,10 +143,123 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_invitations: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["company_role"]
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["company_role"]
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["company_role"]
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invitations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_members: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          id: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["company_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["company_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["company_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_entries: {
         Row: {
           amount: number
           categoria: string | null
+          company_id: string | null
           comprovante_url: string | null
           created_at: string
           data_lancamento: string
@@ -171,6 +284,7 @@ export type Database = {
         Insert: {
           amount?: number
           categoria?: string | null
+          company_id?: string | null
           comprovante_url?: string | null
           created_at?: string
           data_lancamento?: string
@@ -195,6 +309,7 @@ export type Database = {
         Update: {
           amount?: number
           categoria?: string | null
+          company_id?: string | null
           comprovante_url?: string | null
           created_at?: string
           data_lancamento?: string
@@ -216,7 +331,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "financial_entries_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       module_catalog: {
         Row: {
@@ -600,6 +723,7 @@ export type Database = {
         Row: {
           cidade: string
           com_quem_evento: string | null
+          company_id: string | null
           created_at: string
           date: string
           endereco: string | null
@@ -616,6 +740,7 @@ export type Database = {
         Insert: {
           cidade: string
           com_quem_evento?: string | null
+          company_id?: string | null
           created_at?: string
           date: string
           endereco?: string | null
@@ -632,6 +757,7 @@ export type Database = {
         Update: {
           cidade?: string
           com_quem_evento?: string | null
+          company_id?: string | null
           created_at?: string
           date?: string
           endereco?: string | null
@@ -645,7 +771,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "shows_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       signup_config: {
         Row: {
@@ -676,6 +810,7 @@ export type Database = {
       }
       team_members: {
         Row: {
+          company_id: string | null
           created_at: string
           email: string | null
           id: string
@@ -687,6 +822,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -698,6 +834,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -708,7 +845,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "team_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trial_module_selections: {
         Row: {
@@ -784,6 +929,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_company_id: { Args: { _user_id: string }; Returns: string }
+      get_user_company_role: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["company_role"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -791,9 +941,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_company_admin: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_company_member: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "client"
+      company_role: "admin" | "collaborator" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -922,6 +1081,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "client"],
+      company_role: ["admin", "collaborator", "viewer"],
     },
   },
 } as const
