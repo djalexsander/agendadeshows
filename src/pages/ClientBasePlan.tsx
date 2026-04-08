@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { useClientBasePlan } from "@/hooks/useClientBasePlan";
 import { useSubscriptionSummary } from "@/hooks/useSubscriptionSummary";
-import { getEffectivePlanStatus, formatBillingPeriod } from "@/lib/planStatus";
+import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
