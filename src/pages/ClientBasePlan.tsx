@@ -1,0 +1,263 @@
+import { useState } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
+import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
+import { useClientBasePlan } from "@/hooks/useClientBasePlan";
+import { getEffectivePlanStatus, formatBillingPeriod } from "@/lib/planStatus";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+export default function ClientBasePlan() {
+  const { user, profile, signOut } = useAuth();
+  const { config } = useBasePlanConfig();
+  const { payments, hasPending, createPayment, refreshPayments } = useClientBasePlan();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const [showForm, setShowForm] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const status = getEffectivePlanStatus(profile);
+  const price = config?.price ?? 49.9;
+  const planName = config?.name ?? "Plano Base";
+  const period = config?.billing_period ?? "monthly";
+
+  const handleSubmit = async () => {
+    if (!user) return;
+    setUploading(true);
+
+    let receiptUrl: string | undefined;
+
+    if (file) {
+      const ext = file.name.split(".").pop();
+      const filePath = `${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("comprovantes").upload(filePath, file);
+      if (uploadError) {
+        toast({ title: "Erro", description: "Falha ao enviar arquivo.", variant: "destructive" });
+        setUploading(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from("comprovantes").getPublicUrl(filePath);
+      receiptUrl = urlData.publicUrl;
+    }
+
+    const result = await createPayment({ receiptUrl, notes: notes || undefined });
+
+    if (result?.error) {
+      toast({ title: "Erro", description: "Não foi possível enviar.", variant: "destructive" });
+    } else {
+      toast({ title: "Enviado!", description: "Seu pagamento foi enviado para análise." });
+      // Push to admins
+      supabase.functions.invoke("send-push", {
+        body: {
+          title: "💳 Pagamento do plano base",
+          body: `${profile?.nome || "Um cliente"} enviou pagamento para análise.`,
+          url: "/admin/base-plan",
+          target_role: "admin",
+        },
+      }).catch(() => {});
+      setShowForm(false);
+      setFile(null);
+      setNotes("");
+    }
+    setUploading(false);
+  };
+
+  const statusBadge = (s: string) => {
+    switch (s) {
+      case "approved":
+        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Aprovado</Badge>;
+      case "rejected":
+        return <Badge variant="destructive">Recusado</Badge>;
+      default:
+        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Em análise</Badge>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="px-4 md:px-8 pt-6 pb-4">
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          <Button variant="ghost" size="sm" className="gap-2" onClick={() => navigate("/")}>
+            <ArrowLeft className="h-4 w-4" /> Voltar
+          </Button>
+          <Button variant="ghost" size="sm" className="gap-2" onClick={signOut}>
+            <LogOut className="h-4 w-4" /> Sair
+          </Button>
+        </div>
+      </header>
+
+      <div className="max-w-2xl mx-auto px-4 pb-8 space-y-6">
+        <div className="text-center space-y-1">
+          <h1 className="text-2xl font-bold">Meu Plano</h1>
+          <p className="text-muted-foreground text-sm">Gerencie sua assinatura</p>
+        </div>
+
+        {/* Plan info card */}
+        <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <Crown className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold">{planName}</h2>
+              <p className="text-2xl font-bold text-primary">
+                R$ {price.toFixed(2)}
+                <span className="text-sm font-normal text-muted-foreground">{formatBillingPeriod(period)}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Status display */}
+          {status === "active" && (
+            <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-4 flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-green-400">Plano ativo</p>
+                {profile?.current_period_end && (
+                  <p className="text-sm text-muted-foreground">
+                    Vence em {format(new Date(profile.current_period_end), "dd/MM/yyyy", { locale: ptBR })}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {status === "trial" && (
+            <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4 flex items-center gap-3">
+              <Clock className="h-5 w-5 text-blue-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-blue-400">Período de teste</p>
+                {profile?.trial_ends_at && (
+                  <p className="text-sm text-muted-foreground">
+                    Expira em {format(new Date(profile.trial_ends_at), "dd/MM/yyyy", { locale: ptBR })}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {(status === "expired" || status === "trial_expired") && (
+            <div className="rounded-xl bg-orange-500/10 border border-orange-500/20 p-4 flex items-center gap-3">
+              <CalendarX className="h-5 w-5 text-orange-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-orange-400">
+                  {status === "trial_expired" ? "Período de teste expirado" : "Plano vencido"}
+                </p>
+                <p className="text-sm text-muted-foreground">Renove para continuar usando o app</p>
+              </div>
+            </div>
+          )}
+
+          {status === "pending_review" && (
+            <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 p-4 flex items-center gap-3">
+              <Clock className="h-5 w-5 text-yellow-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-yellow-400">Pagamento em análise</p>
+                <p className="text-sm text-muted-foreground">Aguardando aprovação do administrador</p>
+              </div>
+            </div>
+          )}
+
+          {status === "rejected" && (
+            <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-4 flex items-center gap-3">
+              <XCircle className="h-5 w-5 text-red-400 shrink-0" />
+              <div>
+                <p className="font-semibold text-red-400">Pagamento recusado</p>
+                <p className="text-sm text-muted-foreground">Envie um novo comprovante</p>
+              </div>
+            </div>
+          )}
+
+          {/* CTA buttons */}
+          {!hasPending && status !== "pending_review" && (
+            <Button
+              onClick={() => setShowForm(true)}
+              className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
+              disabled={showForm}
+            >
+              <Send className="h-4 w-4" />
+              {status === "active" ? "Renovar antecipadamente" : status === "trial" ? "Assinar plano" : "Enviar pagamento"}
+            </Button>
+          )}
+        </div>
+
+        {/* Payment form */}
+        {showForm && (
+          <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Enviar Comprovante
+            </h3>
+            <div className="space-y-1.5">
+              <Label>Comprovante (imagem/PDF)</Label>
+              <Input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className="h-10 bg-secondary/50 border-border file:text-primary file:font-medium"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Observação (opcional)</Label>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Ex: Paguei via Nubank"
+                className="bg-secondary/50 border-border resize-none"
+                rows={2}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowForm(false)} className="flex-1">
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={uploading}
+                className="flex-1 gap-2 bg-primary hover:bg-primary/90"
+              >
+                <Upload className="h-4 w-4" />
+                {uploading ? "Enviando..." : "Enviar"}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Payment history */}
+        {payments.length > 0 && (
+          <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+              <FileText className="h-4 w-4" /> Histórico de pagamentos
+            </h3>
+            <div className="space-y-3">
+              {payments.map((p) => (
+                <div key={p.id} className="rounded-xl bg-secondary/40 border border-border/50 p-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm">R$ {p.amount.toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(p.submitted_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </p>
+                    {p.notes && <p className="text-xs text-muted-foreground mt-0.5">{p.notes}</p>}
+                  </div>
+                  {statusBadge(p.status)}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
