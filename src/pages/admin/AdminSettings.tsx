@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, Copy, Link, DollarSign, ToggleLeft, ToggleRight, Save } from "lucide-react";
+import { Settings, Copy, Link, DollarSign, ToggleLeft, ToggleRight, Save, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
+import { formatBillingPeriod } from "@/lib/planStatus";
+import { useNavigate } from "react-router-dom";
 
 interface SignupConfig {
   id: string;
-  valor_padrao: number;
   cadastro_ativo: boolean;
   instrucoes_pagamento: string;
 }
@@ -19,10 +20,11 @@ export default function AdminSettings() {
   const [config, setConfig] = useState<SignupConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [valorPadrao, setValorPadrao] = useState("");
   const [cadastroAtivo, setCadastroAtivo] = useState(true);
   const [instrucoes, setInstrucoes] = useState("");
   const { toast } = useToast();
+  const { config: planConfig, loading: planLoading } = useBasePlanConfig();
+  const navigate = useNavigate();
 
   const publicLink = window.location.origin;
 
@@ -31,7 +33,6 @@ export default function AdminSettings() {
     if (data && data.length > 0) {
       const c = data[0] as SignupConfig;
       setConfig(c);
-      setValorPadrao(String(c.valor_padrao || ""));
       setCadastroAtivo(c.cadastro_ativo);
       setInstrucoes(c.instrucoes_pagamento || "");
     }
@@ -45,7 +46,6 @@ export default function AdminSettings() {
     setSaving(true);
 
     await (supabase.from("signup_config") as any).update({
-      valor_padrao: valorPadrao ? parseFloat(valorPadrao) : 0,
       cadastro_ativo: cadastroAtivo,
       instrucoes_pagamento: instrucoes,
       updated_at: new Date().toISOString(),
@@ -73,7 +73,7 @@ export default function AdminSettings() {
     <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Configurações</h1>
-        <p className="text-muted-foreground text-sm">Configurações do cadastro público e valores</p>
+        <p className="text-muted-foreground text-sm">Configurações do cadastro público</p>
       </div>
 
       {/* Link público */}
@@ -97,7 +97,7 @@ export default function AdminSettings() {
       <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {cadastroAtivo ? <ToggleRight className="h-5 w-5 text-[hsl(140_60%_55%)]" /> : <ToggleLeft className="h-5 w-5 text-muted-foreground" />}
+            {cadastroAtivo ? <ToggleRight className="h-5 w-5 text-[hsl(140,60%,55%)]" /> : <ToggleLeft className="h-5 w-5 text-muted-foreground" />}
             <h2 className="font-semibold">Cadastro Público</h2>
           </div>
           <Switch checked={cadastroAtivo} onCheckedChange={setCadastroAtivo} />
@@ -109,28 +109,40 @@ export default function AdminSettings() {
         </p>
       </div>
 
-      {/* Valor padrão */}
+      {/* Plano Base Atual — informativo */}
       <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
         <div className="flex items-center gap-2">
           <DollarSign className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold">Valor Padrão para Novos Clientes</h2>
+          <h2 className="font-semibold">Plano Base Atual</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Este valor será automaticamente atribuído a novos clientes que se cadastrarem pelo link público.
-          Alterar este valor <strong>não afeta</strong> usuários já cadastrados.
+          Este é o valor cobrado automaticamente de novos clientes que se cadastrarem pelo link público.
+          Para alterar, acesse a tela de gerenciamento do plano base.
         </p>
-        <div className="space-y-1.5">
-          <Label>Valor (R$)</Label>
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            value={valorPadrao}
-            onChange={(e) => setValorPadrao(e.target.value)}
-            placeholder="0.00"
-            className="h-10 bg-secondary/50 border-border max-w-xs"
-          />
-        </div>
+        {planLoading ? (
+          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        ) : planConfig ? (
+          <div className="flex items-center justify-between flex-wrap gap-4 rounded-xl bg-secondary/40 border border-border/50 p-4">
+            <div>
+              <p className="font-semibold">{planConfig.name}</p>
+              <p className="text-2xl font-bold text-primary">
+                R$ {planConfig.price.toFixed(2)}
+                <span className="text-sm font-normal text-muted-foreground">{formatBillingPeriod(planConfig.billing_period)}</span>
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-xl"
+              onClick={() => navigate("/admin/base-plan")}
+            >
+              <ExternalLink className="h-4 w-4" />
+              Gerenciar plano base
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Nenhum plano base configurado.</p>
+        )}
       </div>
 
       {/* Instruções de pagamento */}
