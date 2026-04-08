@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,9 +21,27 @@ import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-const CATEGORIAS = [
-  "Cachê", "Combustível", "Alimentação", "Hospedagem", "Equipe",
-  "Manutenção", "Aluguel", "Recebimento de cliente", "Outros",
+const CATEGORIAS_ENTRADA = [
+  "Cachê do show",
+  "Sinal",
+  "Pagamento final",
+  "Reembolso",
+  "Outros recebimentos",
+];
+
+const CATEGORIAS_SAIDA = [
+  "Pedágio",
+  "Combustível",
+  "Alimentação",
+  "Hospedagem",
+  "Estacionamento",
+  "Transporte",
+  "Frete",
+  "Equipe",
+  "Manutenção",
+  "Aluguel de equipamento",
+  "Imprevistos",
+  "Outros",
 ];
 
 const FORMAS_PAGAMENTO = ["PIX", "Dinheiro", "Cartão", "Boleto", "Transferência"];
@@ -59,7 +77,7 @@ interface FormState {
 
 const defaultForm: FormState = {
   title: "",
-  type: "entrada",
+  type: "saida",
   amount: "",
   notes: "",
   data_lancamento: new Date(),
@@ -95,21 +113,19 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 
 function FinanceiroContent() {
   const { user } = useAuth();
-  const { entries, loading, addEntry, deleteEntry, totals, filters, setFilters, categories } = useFinancialEntries();
+  const { entries, loading, addEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showEventSummaries, setShowEventSummaries] = useState(false);
   const [form, setForm] = useState<FormState>({ ...defaultForm });
   const [uploading, setUploading] = useState(false);
   const [comprovante, setComprovante] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"list" | "events">("list");
 
-  // Currency mask
-  const formatCurrency = (v: string) => {
-    const num = v.replace(/\D/g, "");
-    if (!num) return "";
-    return (parseInt(num) / 100).toFixed(2);
-  };
+  const currentCategories = form.type === "entrada" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
+  const allFilterCategories = [...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])];
 
   const handleAmountChange = (raw: string) => {
     const cleaned = raw.replace(/[^\d]/g, "");
@@ -138,6 +154,7 @@ function FinanceiroContent() {
     setSaving(true);
 
     const parcelas = parseInt(form.parcelas) || 1;
+    const selectedShow = form.show_id ? shows.find((s) => s.id === form.show_id) : null;
 
     for (let i = 0; i < parcelas; i++) {
       const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
@@ -158,7 +175,8 @@ function FinanceiroContent() {
         parcela_atual: i + 1,
         recorrencia: form.recorrencia,
         show_id: form.show_id || undefined,
-        event_name: form.show_id ? shows.find((s) => s.id === form.show_id)?.evento || shows.find((s) => s.id === form.show_id)?.cidade : undefined,
+        event_name: selectedShow ? (selectedShow.evento || selectedShow.cidade) : undefined,
+        event_date: selectedShow ? selectedShow.date : undefined,
       });
       if (res.error) { toast.error("Erro ao salvar"); setSaving(false); return; }
     }
@@ -183,7 +201,7 @@ function FinanceiroContent() {
 
   return (
     <>
-      {/* Summary */}
+      {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-2xl bg-card border border-border p-4 flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-green-500/15 flex items-center justify-center shrink-0">
@@ -213,6 +231,64 @@ function FinanceiroContent() {
           </div>
         </div>
       </div>
+
+      {/* Event summaries toggle */}
+      {eventSummaries.length > 0 && (
+        <div className="space-y-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full rounded-xl text-xs gap-2 justify-between"
+            onClick={() => setShowEventSummaries(!showEventSummaries)}
+          >
+            <span className="flex items-center gap-2">
+              <Music className="h-3.5 w-3.5 text-primary" />
+              Resumo por evento ({eventSummaries.length})
+            </span>
+            {showEventSummaries ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </Button>
+          {showEventSummaries && (
+            <div className="space-y-2">
+              {eventSummaries.map((ev) => (
+                <div
+                  key={ev.show_id}
+                  className="rounded-xl bg-card border border-border p-3 cursor-pointer hover:border-primary/50 transition-colors"
+                  onClick={() => setFilters({ ...filters, show_id: filters.show_id === ev.show_id ? undefined : ev.show_id })}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Music className="h-4 w-4 text-primary shrink-0" />
+                      <span className="font-medium text-sm truncate">{ev.event_name}</span>
+                      {ev.event_date && (
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {format(new Date(ev.event_date + "T12:00:00"), "dd/MM/yy")}
+                        </span>
+                      )}
+                    </div>
+                    {filters.show_id === ev.show_id && (
+                      <Badge variant="default" className="text-[10px] shrink-0">Filtrado</Badge>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Entradas</span>
+                      <p className="font-bold text-green-500">{fmt(ev.entradas)}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Saídas</span>
+                      <p className="font-bold text-red-500">{fmt(ev.saidas)}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Líquido</span>
+                      <p className={`font-bold ${ev.saldo >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(ev.saldo)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3">
@@ -256,12 +332,14 @@ function FinanceiroContent() {
               </Select>
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">Status</Label>
-              <Select value={filters.status || "all"} onValueChange={(v) => setFilters({ ...filters, status: v === "all" ? undefined : v })}>
+              <Label className="text-xs text-muted-foreground">Evento</Label>
+              <Select value={filters.show_id || "all"} onValueChange={(v) => setFilters({ ...filters, show_id: v === "all" ? undefined : v })}>
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                  {shows.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -271,7 +349,7 @@ function FinanceiroContent() {
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas</SelectItem>
-                  {[...new Set([...CATEGORIAS, ...categories])].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {allFilterCategories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -310,6 +388,11 @@ function FinanceiroContent() {
                     {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    {e.event_name && (
+                      <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                        <Music className="h-2.5 w-2.5" />{e.event_name}
+                      </span>
+                    )}
                     {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
                     <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
                     {e.data_lancamento && <span className="text-[10px] text-muted-foreground">{format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}</span>}
@@ -335,20 +418,37 @@ function FinanceiroContent() {
               <DollarSign className="h-5 w-5 text-primary" />
               Novo lançamento
             </DialogTitle>
-            <DialogDescription>Preencha os dados do lançamento financeiro</DialogDescription>
+            <DialogDescription>Vincule ao evento para controle completo por show</DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-2">
-            {/* Seção: Informações principais */}
+            {/* Evento */}
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Informações principais</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Evento</p>
               <div>
-                <Label className="text-xs">Título *</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Cachê do show" />
+                <Label className="text-xs">Vincular a um evento</Label>
+                <Select value={form.show_id || "none"} onValueChange={(v) => setForm({ ...form, show_id: v === "none" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecionar evento" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Sem vínculo</SelectItem>
+                    {shows.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
+
+            <Separator />
+
+            {/* Informações principais */}
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Informações</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Tipo *</Label>
-                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v })}>
+                  <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v, categoria: "" })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="entrada">Entrada</SelectItem>
@@ -357,6 +457,22 @@ function FinanceiroContent() {
                   </Select>
                 </div>
                 <div>
+                  <Label className="text-xs">Categoria</Label>
+                  <Select value={form.categoria || "none"} onValueChange={(v) => setForm({ ...form, categoria: v === "none" ? "" : v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Nenhuma</SelectItem>
+                      {currentCategories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Título *</Label>
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={form.type === "entrada" ? "Ex: Cachê do show" : "Ex: Pedágio ida e volta"} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
                   <Label className="text-xs">Valor (R$) *</Label>
                   <Input
                     value={form.amount}
@@ -364,18 +480,6 @@ function FinanceiroContent() {
                     placeholder="0,00"
                     inputMode="numeric"
                   />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs">Categoria</Label>
-                  <Select value={form.categoria || "none"} onValueChange={(v) => setForm({ ...form, categoria: v === "none" ? "" : v })}>
-                    <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhuma</SelectItem>
-                      {CATEGORIAS.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
                 </div>
                 <div>
                   <Label className="text-xs">Status</Label>
@@ -391,7 +495,7 @@ function FinanceiroContent() {
 
             <Separator />
 
-            {/* Seção: Datas */}
+            {/* Datas */}
             <div className="space-y-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Datas</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -403,7 +507,7 @@ function FinanceiroContent() {
 
             <Separator />
 
-            {/* Seção: Pagamento */}
+            {/* Pagamento e detalhes */}
             <div className="space-y-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pagamento</p>
               <div className="grid grid-cols-2 gap-3">
@@ -429,44 +533,16 @@ function FinanceiroContent() {
                   </Select>
                 </div>
               </div>
-              <div>
-                <Label className="text-xs">Recorrência</Label>
-                <Select value={form.recorrencia} onValueChange={(v) => setForm({ ...form, recorrencia: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nenhuma">Nenhuma</SelectItem>
-                    <SelectItem value="semanal">Semanal</SelectItem>
-                    <SelectItem value="mensal">Mensal</SelectItem>
-                    <SelectItem value="anual">Anual</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             <Separator />
 
-            {/* Seção: Detalhes */}
+            {/* Extras */}
             <div className="space-y-3">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Detalhes</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs">Evento</Label>
-                  <Select value={form.show_id || "none"} onValueChange={(v) => setForm({ ...form, show_id: v === "none" ? "" : v })}>
-                    <SelectTrigger><SelectValue placeholder="Selecionar evento" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhum</SelectItem>
-                      {shows.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label className="text-xs">Pessoa / Cliente</Label>
-                  <Input value={form.pessoa} onChange={(e) => setForm({ ...form, pessoa: e.target.value })} placeholder="Nome" />
-                </div>
+              <div>
+                <Label className="text-xs">Pessoa / Cliente</Label>
+                <Input value={form.pessoa} onChange={(e) => setForm({ ...form, pessoa: e.target.value })} placeholder="Nome (opcional)" />
               </div>
               <div>
                 <Label className="text-xs">Observações</Label>
