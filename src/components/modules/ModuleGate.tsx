@@ -10,6 +10,7 @@ const MODULE_LABELS: Record<ModuleName, string> = {
   relatorios: "Relatórios",
   export_png: "Exportação PNG",
   gps: "Rotas / GPS",
+  agenda_compartilhada: "Agenda Compartilhada",
 };
 
 interface ModuleGateProps {

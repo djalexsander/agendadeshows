@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useCompany, CompanyRole } from "@/hooks/useCompany";
 import { useAuth } from "@/hooks/useAuth";
+import { ModuleGate } from "@/components/modules/ModuleGate";
 
 const ROLE_LABELS: Record<CompanyRole, string> = {
   admin: "Admin",
@@ -83,6 +84,11 @@ export default function CompanyUsers() {
       </header>
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-6">
+        <ModuleGate
+          moduleName="agenda_compartilhada"
+          title="Agenda Compartilhada"
+          description="Adicione múltiplos usuários à sua empresa com níveis de acesso. Ative o módulo para liberar."
+        >
         {/* Company name */}
         {company && (
           <div className="rounded-xl bg-secondary/40 border border-border/50 p-4">
@@ -187,6 +193,7 @@ export default function CompanyUsers() {
             ))}
           </div>
         )}
+        </ModuleGate>
       </div>
 
       {/* Add member dialog */}
