@@ -193,6 +193,7 @@ export default function CompanyUsers() {
             ))}
           </div>
         )}
+        </ModuleGate>
       </div>
 
       {/* Add member dialog */}
