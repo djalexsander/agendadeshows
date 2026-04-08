@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompany } from "@/hooks/useCompany";
 
 export interface TeamMember {
   id: string;
@@ -14,17 +15,25 @@ export interface TeamMember {
 
 export function useTeamMembers() {
   const { user } = useAuth();
+  const { company } = useCompany();
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch = useCallback(async () => {
     if (!user) { setMembers([]); setLoading(false); return; }
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("team_members")
       .select("id, name, role, phone, email, notes, created_at")
-      .eq("user_id", user.id)
       .order("name", { ascending: true });
+
+    if (company) {
+      query = query.eq("company_id", company.id);
+    } else {
+      query = query.eq("user_id", user.id);
+    }
+
+    const { data } = await query;
     setMembers((data as TeamMember[]) ?? []);
     setLoading(false);
   }, [user]);
@@ -35,6 +44,7 @@ export function useTeamMembers() {
     if (!user) return { error: "Não autenticado" };
     const { error } = await (supabase.from("team_members") as any).insert({
       user_id: user.id,
+      company_id: company?.id || null,
       ...member,
     });
     if (error) return { error: error.message };
