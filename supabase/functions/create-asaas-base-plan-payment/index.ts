@@ -7,7 +7,9 @@ const corsHeaders = {
 };
 
 const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY")!;
-const ASAAS_BASE_URL = Deno.env.get("ASAAS_BASE_URL") || Deno.env.get("URL_BASE_ASAAS") || "";
+const RAW_ASAAS_URL = Deno.env.get("ASAAS_BASE_URL") || Deno.env.get("URL_BASE_ASAAS") || "";
+// Normalize: strip trailing /api/v3 or /v3 and re-add /v3
+const ASAAS_BASE_URL = RAW_ASAAS_URL.replace(/\/(api\/)?v3\/?$/, "") + "/v3";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
