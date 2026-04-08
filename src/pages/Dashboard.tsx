@@ -93,11 +93,11 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
-                size="sm"
-                className="gap-2 rounded-xl"
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={() => navigate("/meu-plano")}
                 title="Meu Plano"
               >
@@ -105,8 +105,8 @@ export default function Dashboard() {
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                className="gap-2 rounded-xl"
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={() => navigate("/modulos")}
                 title="Módulos"
               >
@@ -114,8 +114,8 @@ export default function Dashboard() {
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
-                className="gap-2 rounded-xl"
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={() => window.location.reload()}
                 title="Atualizar página"
               >
@@ -124,38 +124,35 @@ export default function Dashboard() {
               {hasModule("export_png") ? (
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-xl border-border"
+                  size="icon"
+                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border"
                   onClick={() => setExportOpen(true)}
                   disabled={shows.length === 0}
                 >
                   <Image className="h-4 w-4" />
-                  <span className="hidden sm:inline">Exportar</span>
                 </Button>
               ) : (
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-xl border-border opacity-70"
+                  size="icon"
+                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border opacity-70"
                   onClick={() => navigate("/modulos")}
                 >
                   <Lock className="h-4 w-4" />
-                  <span className="hidden sm:inline">Exportar</span>
                 </Button>
               )}
               <Button
                 variant="ghost"
-                size="sm"
-                className="gap-2 rounded-xl"
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={signOut}
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Sair</span>
               </Button>
               <Button
                 variant={pushEnabled ? "default" : "outline"}
-                size="sm"
-                className="gap-2 rounded-xl"
+                size="icon"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={togglePush}
                 title={pushEnabled ? "Desativar notificações" : "Ativar notificações"}
               >

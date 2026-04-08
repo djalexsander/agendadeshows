@@ -202,32 +202,32 @@ function FinanceiroContent() {
   return (
     <>
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-2xl bg-card border border-border p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-green-500/15 flex items-center justify-center shrink-0">
-            <TrendingUp className="h-5 w-5 text-green-500" />
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-green-500/15 flex items-center justify-center shrink-0">
+            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
           </div>
-          <div className="min-w-0">
-            <p className="text-sm sm:text-lg font-bold text-green-500 truncate">{fmt(totals.entradas)}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Entradas</p>
-          </div>
-        </div>
-        <div className="rounded-2xl bg-card border border-border p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-red-500/15 flex items-center justify-center shrink-0">
-            <TrendingDown className="h-5 w-5 text-red-500" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm sm:text-lg font-bold text-red-500 truncate">{fmt(totals.saidas)}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Saídas</p>
+          <div className="min-w-0 w-full">
+            <p className="text-xs sm:text-lg font-bold text-green-500 truncate">{fmt(totals.entradas)}</p>
+            <p className="text-[9px] sm:text-xs text-muted-foreground">Entradas</p>
           </div>
         </div>
-        <div className="rounded-2xl bg-card border border-border p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-            <Wallet className="h-5 w-5 text-primary" />
+        <div className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-red-500/15 flex items-center justify-center shrink-0">
+            <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
           </div>
-          <div className="min-w-0">
-            <p className={`text-sm sm:text-lg font-bold truncate ${totals.saldo >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(totals.saldo)}</p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">Saldo</p>
+          <div className="min-w-0 w-full">
+            <p className="text-xs sm:text-lg font-bold text-red-500 truncate">{fmt(totals.saidas)}</p>
+            <p className="text-[9px] sm:text-xs text-muted-foreground">Saídas</p>
+          </div>
+        </div>
+        <div className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+          </div>
+          <div className="min-w-0 w-full">
+            <p className={`text-xs sm:text-lg font-bold truncate ${totals.saldo >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(totals.saldo)}</p>
+            <p className="text-[9px] sm:text-xs text-muted-foreground">Saldo</p>
           </div>
         </div>
       </div>
