@@ -74,15 +74,25 @@ export default function AdminClients() {
     fetchClients();
   }, []);
 
-  const openEdit = (c: ClientProfile) => {
+  const openEdit = async (c: ClientProfile) => {
     setEditingClient(c);
     const isTrialOrLifetime = c.plan_type === "free_trial_7_days" || (c.plan_type === "lifetime" && c.is_paid);
+    
+    // Fetch company max_users
+    const { data: companyData } = await supabase
+      .from("companies")
+      .select("max_users")
+      .eq("owner_user_id", c.user_id)
+      .limit(1)
+      .single();
+
     setForm({
       nome: c.nome,
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo",
       valor_plano: isTrialOrLifetime ? "" : String(c.valor_plano || ""),
       vencimento: toDateInputValue(c.current_period_end) || toDateInputValue(c.vencimento), observacoes: c.observacoes || "",
+      max_users: String(companyData?.max_users ?? 1),
     });
     setDialogOpen(true);
   };
