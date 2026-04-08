@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, FileBarChart, Crown } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, UsersRound, FileBarChart, Crown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -195,6 +195,7 @@ export default function Dashboard() {
               { label: "Financeiro", icon: DollarSign, path: "/financeiro" },
               { label: "Equipe", icon: Users, path: "/equipe" },
               { label: "Relatórios", icon: FileBarChart, path: "/relatorios" },
+              ...(hasModule("agenda_compartilhada") ? [{ label: "Usuários", icon: UsersRound, path: "/usuarios" }] : []),
             ].map((item) => {
               const Icon = item.icon;
               return (

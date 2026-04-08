@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Puzzle, DollarSign, Users, FileBarChart, ImageDown, MapPinned, ArrowLeft,
+  Puzzle, DollarSign, Users, UsersRound, FileBarChart, ImageDown, MapPinned, ArrowLeft,
   CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   relatorios: FileBarChart,
   export_png: ImageDown,
   gps: MapPinned,
+  agenda_compartilhada: UsersRound,
 };
 
 function formatPrice(price: number, billingPeriod: string) {
