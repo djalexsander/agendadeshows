@@ -26,6 +26,7 @@ import ModulesUpgrade from "./pages/ModulesUpgrade";
 import Financeiro from "./pages/Financeiro";
 import Equipe from "./pages/Equipe";
 import Relatorios from "./pages/Relatorios";
+import ClientBasePlan from "./pages/ClientBasePlan";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
