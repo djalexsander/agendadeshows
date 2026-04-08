@@ -368,7 +368,7 @@ export default function Dashboard() {
           </div>
 
           {/* Shows List */}
-          <div className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
+          <div id="month-shows-list" className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Shows em{" "}
               <span className="capitalize text-foreground">
