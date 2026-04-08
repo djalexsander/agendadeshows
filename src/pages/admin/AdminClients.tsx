@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Pencil, Search, Trash2, Globe, Shield } from "lucide-react";
+import { Pencil, Search, Trash2, Globe, Shield, Info } from "lucide-react";
+import { getEffectivePlanStatus, type EffectivePlanStatus } from "@/lib/planStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -254,9 +255,44 @@ export default function AdminClients() {
                 </SelectContent>
               </Select>
             </div>
+            {/* Computed real status */}
+            {editingClient && (() => {
+              const realStatus = getEffectivePlanStatus(editingClient);
+              const statusLabels: Record<EffectivePlanStatus, string> = {
+                trial: "Em teste",
+                trial_expired: "Trial expirado",
+                pending_payment: "Aguardando pagamento",
+                pending_review: "Em análise",
+                active: "Ativo",
+                expired: "Vencido",
+                rejected: "Recusado",
+                blocked: "Bloqueado",
+                pending_plan_choice: "Escolhendo plano",
+              };
+              const statusColors: Record<EffectivePlanStatus, string> = {
+                trial: "bg-blue-500/20 text-blue-400",
+                trial_expired: "bg-destructive/20 text-destructive",
+                pending_payment: "bg-orange-500/20 text-orange-400",
+                pending_review: "bg-blue-500/20 text-blue-400",
+                active: "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]",
+                expired: "bg-destructive/20 text-destructive",
+                rejected: "bg-destructive/20 text-destructive",
+                blocked: "bg-muted text-muted-foreground",
+                pending_plan_choice: "bg-yellow-500/20 text-yellow-400",
+              };
+              return (
+                <div className="flex items-center gap-2 rounded-xl bg-secondary/30 border border-border/50 px-3 py-2">
+                  <Info className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-muted-foreground">Status real:</span>
+                  <span className={`text-xs font-semibold uppercase px-2 py-0.5 rounded-lg ${statusColors[realStatus]}`}>
+                    {statusLabels[realStatus]}
+                  </span>
+                </div>
+              );
+            })()}
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
-                <Label>Status</Label>
+                <Label>Status Admin</Label>
                 <Select value={form.status_plano} onValueChange={(v) => setForm({ ...form, status_plano: v })}>
                   <SelectTrigger className="h-10 bg-secondary/50 border-border">
                     <SelectValue />
