@@ -78,7 +78,7 @@ export default function CompanyUsers() {
           </Button>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">Usuários da Empresa</h1>
+            <h1 className="text-xl font-bold tracking-tight">Equipe da Empresa</h1>
           </div>
         </div>
       </header>
@@ -100,9 +100,13 @@ export default function CompanyUsers() {
         {/* Members */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">{members.length} membro{members.length !== 1 ? "s" : ""}</p>
+            <div>
+              <p className="text-sm font-medium text-foreground">{members.length} membro{members.length !== 1 ? "s" : ""}</p>
+              <p className="text-xs text-muted-foreground">Membros acessam a agenda sem assinatura própria</p>
+            </div>
             <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)}>
-              <UserPlus className="h-4 w-4" /> Adicionar
+              <UserPlus className="h-4 w-4" /> Adicionar membro
+            </Button>
             </Button>
           </div>
 
