@@ -58,6 +58,8 @@ Deno.serve(async (req) => {
     const tempPassword = crypto.randomUUID() + "!Aa1";
 
     // Create user with service role (does NOT affect caller's session)
+    // The handle_new_user trigger will create the profile,
+    // and handle_new_profile_company trigger will auto-create company + admin membership
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
       password: tempPassword,
