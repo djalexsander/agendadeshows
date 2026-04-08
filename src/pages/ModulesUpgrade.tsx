@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import PixPaymentCard from "@/components/payments/PixPaymentCard";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   financeiro: DollarSign,
