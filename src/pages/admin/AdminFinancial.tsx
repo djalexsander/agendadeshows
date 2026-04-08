@@ -172,26 +172,26 @@ export default function AdminFinancial() {
   const filterLabels: Record<ViewFilter, string> = { ativos: "Ativos", ocultados: "Ocultados", todos: "Todos" };
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6">
+      <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold">Financeiro</h1>
-          <p className="text-muted-foreground text-sm">Controle de pagamentos</p>
+          <h1 className="text-xl md:text-2xl font-bold">Financeiro</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">Controle de pagamentos</p>
         </div>
-        <Button onClick={openNew} className="gap-2 rounded-xl">
-          <Plus className="h-4 w-4" /> Novo Pagamento
+        <Button onClick={openNew} className="gap-2 rounded-xl text-xs md:text-sm" size="sm">
+          <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Novo</span> Pagamento
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
         {summaryCards.map((card) => (
-          <div key={card.label} className="rounded-2xl bg-card border border-border p-5 space-y-2">
-            <div className={`h-10 w-10 rounded-xl ${card.color} flex items-center justify-center`}>
-              <card.icon className="h-5 w-5" />
+          <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-1.5 md:space-y-2">
+            <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
+              <card.icon className="h-4 w-4 md:h-5 md:w-5" />
             </div>
-            <p className="text-2xl font-bold">R$ {card.valor.toFixed(2)}</p>
-            <p className="text-sm text-muted-foreground">{card.label} ({card.qtd})</p>
+            <p className="text-sm md:text-2xl font-bold truncate">R$ {card.valor.toFixed(2)}</p>
+            <p className="text-[10px] md:text-sm text-muted-foreground">{card.label} ({card.qtd})</p>
           </div>
         ))}
       </div>
@@ -218,10 +218,10 @@ export default function AdminFinancial() {
       {/* List */}
       <div className="space-y-3">
         {filtered.map((p) => (
-          <div key={p.id} className={`rounded-xl bg-card border border-border p-4 flex items-center gap-4 ${p.hidden ? "opacity-50" : ""}`}>
+          <div key={p.id} className={`rounded-xl bg-card border border-border p-3 md:p-4 space-y-2 md:space-y-0 md:flex md:items-center md:gap-4 ${p.hidden ? "opacity-50" : ""}`}>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold truncate">{p.client_name}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-semibold truncate text-sm md:text-base">{p.client_name}</p>
                 {p.id.startsWith("bp_") && (
                   <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary shrink-0">Plano Base</span>
                 )}
@@ -229,38 +229,41 @@ export default function AdminFinancial() {
                   <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">Ocultado</span>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground truncate">
                 R$ {p.valor.toFixed(2)} • {p.forma_pagamento}
                 {p.data_vencimento && ` • Venc: ${format(parseISO(p.data_vencimento), "dd/MM/yyyy")}`}
               </p>
             </div>
-            <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
-              {p.status || "pendente"}
-            </span>
-            {!p.id.startsWith("bp_") ? (
-              <>
-                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </>
-            ) : p.hidden ? (
-              <>
-                <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-primary" title="Reexibir no painel" onClick={() => handleToggleHidden(p, false)}>
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" title="Excluir permanentemente" onClick={() => setDeleteBpTarget(p)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </>
-
-            ) : (
-              <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground hover:text-destructive" title="Ocultar do painel" onClick={() => setHideTarget(p)}>
-                <EyeOff className="h-4 w-4" />
-              </Button>
-            )}
+            <div className="flex items-center justify-between md:justify-end gap-2">
+              <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
+                {p.status || "pendente"}
+              </span>
+              <div className="flex items-center gap-1">
+                {!p.id.startsWith("bp_") ? (
+                  <>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => openEdit(p)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : p.hidden ? (
+                  <>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground hover:text-primary" title="Reexibir no painel" onClick={() => handleToggleHidden(p, false)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:text-destructive" title="Excluir permanentemente" onClick={() => setDeleteBpTarget(p)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive" title="Ocultar do painel" onClick={() => setHideTarget(p)}>
+                    <EyeOff className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         ))}
         {filtered.length === 0 && (

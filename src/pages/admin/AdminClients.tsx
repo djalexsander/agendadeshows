@@ -177,11 +177,11 @@ export default function AdminClients() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Clientes</h1>
-          <p className="text-muted-foreground text-sm">{clients.length} cadastrado(s)</p>
+          <h1 className="text-xl md:text-2xl font-bold">Clientes</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">{clients.length} cadastrado(s)</p>
         </div>
       </div>
 
@@ -195,12 +195,12 @@ export default function AdminClients() {
         />
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2 md:space-y-3">
         {filtered.map((c) => (
-          <div key={c.id} className="rounded-xl bg-card border border-border p-4 flex items-center gap-4">
+          <div key={c.id} className="rounded-xl bg-card border border-border p-3 md:p-4 space-y-2 md:space-y-0 md:flex md:items-center md:gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="font-semibold truncate">{c.nome}</p>
+                <p className="font-semibold truncate text-sm md:text-base">{c.nome}</p>
                 {c.origem_cadastro === "publico_link" ? (
                   <span title="Cadastro pelo link"><Globe className="h-3.5 w-3.5 text-blue-400 shrink-0" /></span>
                 ) : (
@@ -208,9 +208,9 @@ export default function AdminClients() {
                 )}
               </div>
               {c.nome_artistico && (
-                <p className="text-sm text-primary truncate">{c.nome_artistico}</p>
+                <p className="text-xs md:text-sm text-primary truncate">{c.nome_artistico}</p>
               )}
-              <p className="text-sm text-muted-foreground">{c.email}</p>
+              <p className="text-xs md:text-sm text-muted-foreground truncate">{c.email}</p>
               {c.plan_type === "free_trial_7_days" && c.trial_ends_at && (
                 <p className="text-xs text-muted-foreground">
                   Expira: {new Date(c.trial_ends_at).toLocaleDateString("pt-BR")}
@@ -223,17 +223,21 @@ export default function AdminClients() {
                 <p className="text-xs text-muted-foreground">R$ {c.valor_plano.toFixed(2)}</p>
               )}
             </div>
-            {(() => { const s = getDisplayStatus(c); return (
-              <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${s.color}`}>
-                {s.label}
-              </span>
-            ); })()}
-            <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(c)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(c)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center justify-between md:justify-end gap-2">
+              {(() => { const s = getDisplayStatus(c); return (
+                <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${s.color}`}>
+                  {s.label}
+                </span>
+              ); })()}
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => openEdit(c)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(c)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         ))}
         {filtered.length === 0 && (
@@ -310,7 +314,7 @@ export default function AdminClients() {
                 </div>
               );
             })()}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label>Status Admin</Label>
                 <Select value={form.status_plano} onValueChange={(v) => setForm({ ...form, status_plano: v })}>
@@ -336,7 +340,7 @@ export default function AdminClients() {
                 <Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Observações</Label>
                 <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />

@@ -203,16 +203,16 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground text-sm">Visão geral da plataforma</p>
+        <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground text-xs md:text-sm">Visão geral da plataforma</p>
       </div>
 
       {/* Notification badge */}
       {notifications.length > 0 && (
         <div
-          className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-4 flex items-center gap-3 cursor-pointer hover:bg-yellow-500/15 transition-colors"
+          className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-3 md:p-4 flex items-center gap-3 cursor-pointer hover:bg-yellow-500/15 transition-colors"
           onClick={() => {
             const section = document.getElementById("pending-users-section") || document.getElementById("pending-proofs-section");
             if (section) {
@@ -242,15 +242,15 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-2xl bg-card border border-border p-5 space-y-3">
-            <div className={`h-10 w-10 rounded-xl ${card.color} flex items-center justify-center`}>
-              <card.icon className="h-5 w-5" />
+          <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-2 md:space-y-3">
+            <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
+              <card.icon className="h-4 w-4 md:h-5 md:w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{card.value}</p>
-              <p className="text-sm text-muted-foreground">{card.label}</p>
+              <p className="text-xl md:text-2xl font-bold">{card.value}</p>
+              <p className="text-[10px] md:text-sm text-muted-foreground leading-tight">{card.label}</p>
             </div>
           </div>
         ))}
@@ -265,11 +265,11 @@ export default function AdminDashboard() {
           </div>
           <div className="space-y-3">
             {pendingUsers.map((pu) => (
-              <div key={pu.id} className="rounded-xl bg-card border border-yellow-500/30 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{pu.nome}</p>
-                    <p className="text-xs text-muted-foreground">{pu.email}</p>
+              <div key={pu.id} className="rounded-xl bg-card border border-yellow-500/30 p-3 md:p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{pu.nome}</p>
+                    <p className="text-xs text-muted-foreground truncate">{pu.email}</p>
                     {pu.telefone && <p className="text-xs text-muted-foreground">{pu.telefone}</p>}
                     <p className="text-xs text-muted-foreground mt-1">
                       Cadastrado em {format(parseISO(pu.created_at), "dd/MM/yyyy 'às' HH:mm")}
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
                       {pu.valor_plano != null && pu.valor_plano > 0 && ` · R$ ${pu.valor_plano.toFixed(2)}`}
                     </p>
                   </div>
-                  <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg bg-yellow-500/20 text-yellow-400">
+                  <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg bg-yellow-500/20 text-yellow-400 self-start shrink-0">
                     Pendente
                   </span>
                 </div>
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
                     size="sm"
                     onClick={() => handleApproveUser(pu)}
                     disabled={loading === pu.id}
-                    className="gap-1 bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)] flex-1"
+                    className="gap-1 bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)] flex-1 text-xs"
                   >
                     <CheckCircle className="h-4 w-4" /> Aprovar
                   </Button>
@@ -296,7 +296,7 @@ export default function AdminDashboard() {
                     size="sm"
                     onClick={() => handleRejectUser(pu)}
                     disabled={loading === pu.id}
-                    className="gap-1 flex-1"
+                    className="gap-1 flex-1 text-xs"
                   >
                     <X className="h-4 w-4" /> Rejeitar
                   </Button>
@@ -316,15 +316,15 @@ export default function AdminDashboard() {
           </div>
           <div className="space-y-3">
             {proofs.map((proof) => (
-              <div key={proof.id} className="rounded-xl bg-card border border-orange-500/30 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{proof.client_name}</p>
+              <div key={proof.id} className="rounded-xl bg-card border border-orange-500/30 p-3 md:p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{proof.client_name}</p>
                     <p className="text-xs text-muted-foreground">
                       Enviado em {format(parseISO(proof.created_at), "dd/MM/yyyy 'às' HH:mm")}
                     </p>
                   </div>
-                  <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg bg-orange-500/20 text-orange-400">
+                  <span className="text-[10px] font-semibold uppercase px-2 py-1 rounded-lg bg-orange-500/20 text-orange-400 self-start shrink-0">
                     Pendente
                   </span>
                 </div>
@@ -333,29 +333,31 @@ export default function AdminDashboard() {
                     "{proof.mensagem}"
                   </p>
                 )}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <a href={proof.image_url} target="_blank" rel="noopener noreferrer" className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full gap-2">
+                    <Button variant="outline" size="sm" className="w-full gap-2 text-xs">
                       <ExternalLink className="h-4 w-4" /> Ver Comprovante
                     </Button>
                   </a>
-                  <Button
-                    size="sm"
-                    onClick={() => handleApprovePayment(proof)}
-                    disabled={loading === proof.id}
-                    className="gap-1 bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)]"
-                  >
-                    <CheckCircle className="h-4 w-4" /> Aprovar
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleRejectPayment(proof)}
-                    disabled={loading === proof.id}
-                    className="gap-1"
-                  >
-                    <X className="h-4 w-4" /> Rejeitar
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleApprovePayment(proof)}
+                      disabled={loading === proof.id}
+                      className="gap-1 bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)] flex-1 sm:flex-initial text-xs"
+                    >
+                      <CheckCircle className="h-4 w-4" /> Aprovar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleRejectPayment(proof)}
+                      disabled={loading === proof.id}
+                      className="gap-1 flex-1 sm:flex-initial text-xs"
+                    >
+                      <X className="h-4 w-4" /> Rejeitar
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}

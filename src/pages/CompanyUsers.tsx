@@ -134,12 +134,12 @@ export default function CompanyUsers() {
 
         {/* Members */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <p className="text-sm font-medium text-foreground">{members.length}/{maxUsers ?? "..."} membro{(maxUsers ?? 0) !== 1 ? "s" : ""}</p>
               <p className="text-xs text-muted-foreground">Membros acessam a agenda sem assinatura própria</p>
             </div>
-            <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)} disabled={atLimit}>
+            <Button size="sm" className="rounded-xl gap-1.5 self-start sm:self-auto" onClick={() => setDialogOpen(true)} disabled={atLimit}>
               <UserPlus className="h-4 w-4" /> Adicionar membro
             </Button>
           </div>
@@ -155,36 +155,38 @@ export default function CompanyUsers() {
             const isSelf = m.user_id === user?.id;
 
             return (
-              <div key={m.id} className="rounded-xl bg-secondary/40 border border-border/50 p-4 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                  <RoleIcon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground text-sm truncate">
-                      {m.profile?.nome || "Usuário"}
-                    </p>
-                    {isOwner && <Badge variant="outline" className="text-[10px] px-1.5 py-0">Dono</Badge>}
-                    {!m.active && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Inativo</Badge>}
+              <div key={m.id} className="rounded-xl bg-secondary/40 border border-border/50 p-3 md:p-4 space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                    <RoleIcon className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    <span className="text-xs text-muted-foreground">{m.profile?.email}</span>
-                    <Badge className={`text-[10px] px-1.5 py-0 ${ROLE_COLORS[m.role as CompanyRole]}`}>
-                      {ROLE_LABELS[m.role as CompanyRole]}
-                    </Badge>
-                    <span className="text-[10px] text-muted-foreground">
-                      Desde {new Date(m.created_at).toLocaleDateString("pt-BR")}
-                    </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground text-sm truncate">
+                        {m.profile?.nome || "Usuário"}
+                      </p>
+                      {isOwner && <Badge variant="outline" className="text-[10px] px-1.5 py-0">Dono</Badge>}
+                      {!m.active && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Inativo</Badge>}
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      <span className="text-xs text-muted-foreground truncate">{m.profile?.email}</span>
+                      <Badge className={`text-[10px] px-1.5 py-0 ${ROLE_COLORS[m.role as CompanyRole]}`}>
+                        {ROLE_LABELS[m.role as CompanyRole]}
+                      </Badge>
+                      <span className="text-[10px] text-muted-foreground">
+                        Desde {new Date(m.created_at).toLocaleDateString("pt-BR")}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {!isOwner && !isSelf && (
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-2 pl-0 sm:pl-[52px]">
                     <Select
                       value={m.role}
                       onValueChange={(v) => updateMemberRole(m.id, v as CompanyRole)}
                     >
-                      <SelectTrigger className="h-8 w-[110px] text-xs">
+                      <SelectTrigger className="h-8 flex-1 sm:w-[110px] sm:flex-initial text-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
