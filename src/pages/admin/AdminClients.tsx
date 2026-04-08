@@ -96,8 +96,10 @@ export default function AdminClients() {
       nome: form.nome, telefone: form.telefone,
       cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
       valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
-      vencimento: form.vencimento || null, observacoes: form.observacoes,
-    }).eq("id", editingClient!.id);
+      vencimento: form.vencimento || null,
+      current_period_end: form.vencimento ? new Date(form.vencimento + "T23:59:59Z").toISOString() : null,
+      observacoes: form.observacoes,
+    } as any).eq("id", editingClient!.id);
     toast({ title: "Sucesso", description: "Cliente atualizado." });
 
     setLoading(false);
