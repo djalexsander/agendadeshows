@@ -5,6 +5,7 @@ import { ptBR } from "date-fns/locale";
 import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, FileBarChart, Crown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { DayEventsDialog } from "@/components/DayEventsDialog";
 import { ExportPNGListDialog } from "@/components/ExportPNGListDialog";
