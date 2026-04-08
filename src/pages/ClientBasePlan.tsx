@@ -130,6 +130,11 @@ export default function ClientBasePlan() {
             </div>
           </div>
 
+          {/* Microcopy de valor */}
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Acesso completo ao sistema com as funcionalidades escolhidas para organizar e profissionalizar seus eventos.
+          </p>
+
           {/* "Você está contratando" */}
           <div className="rounded-xl bg-secondary/30 border border-border/50 p-4 space-y-3">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Você está contratando</p>
@@ -145,6 +150,11 @@ export default function ClientBasePlan() {
                 </div>
               ))}
             </div>
+            {hasModules && (
+              <p className="text-xs text-muted-foreground italic pt-1">
+                Você escolheu apenas os módulos que precisa, sem pagar por funcionalidades desnecessárias.
+              </p>
+            )}
           </div>
 
           {/* Valores */}
@@ -168,6 +178,9 @@ export default function ClientBasePlan() {
               <span className="text-sm font-semibold text-foreground">Total mensal</span>
               <span className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}</span>
             </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Aproximadamente R$ {(totalPrice / 30).toFixed(2)} por dia
+            </p>
           </div>
 
           <p className="text-xs text-muted-foreground text-center leading-relaxed">
