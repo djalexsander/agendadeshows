@@ -15,6 +15,7 @@ import {
   Settings,
   RefreshCw,
   Puzzle,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ const navItems = [
   { to: "/admin/financial", icon: DollarSign, label: "Financeiro" },
   { to: "/admin/pix", icon: QrCode, label: "Pix" },
   { to: "/admin/modules", icon: Puzzle, label: "Módulos" },
+  { to: "/admin/module-catalog", icon: Tag, label: "Catálogo" },
   { to: "/admin/settings", icon: Settings, label: "Config" },
 ];
 
