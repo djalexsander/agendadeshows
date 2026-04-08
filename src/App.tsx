@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { AdminModeProvider } from "@/hooks/useAdminMode";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import Login from "./pages/Login";
 import PlanChoice from "./pages/PlanChoice";
@@ -67,6 +68,13 @@ function AppRoutes() {
           <Route path="module-payments" element={<AdminModulePayments />} />
           <Route path="base-plan" element={<AdminBasePlan />} />
           <Route path="settings" element={<AdminSettings />} />
+          {/* Minha Empresa routes */}
+          <Route path="empresa" element={<Dashboard />} />
+          <Route path="empresa/equipe" element={<Equipe />} />
+          <Route path="empresa/financeiro" element={<Financeiro />} />
+          <Route path="empresa/relatorios" element={<Relatorios />} />
+          <Route path="empresa/modulos" element={<ModulesUpgrade />} />
+          <Route path="empresa/meu-plano" element={<ClientBasePlan />} />
         </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
@@ -133,7 +141,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes />
+          <AdminModeProvider>
+            <AppRoutes />
+          </AdminModeProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

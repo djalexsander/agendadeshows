@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 export type ModuleName = "financeiro" | "equipe" | "relatorios" | "export_png" | "gps";
 
+const ALL_MODULE_NAMES: ModuleName[] = ["financeiro", "equipe", "relatorios", "export_png", "gps"];
+
 interface UserModule {
   id: string;
   module_name: string;
@@ -11,13 +13,22 @@ interface UserModule {
 }
 
 export function useModules() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const [modules, setModules] = useState<UserModule[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const isAdmin = role === "admin";
 
   const fetchModules = useCallback(async () => {
     if (!user) {
       setModules([]);
+      setLoading(false);
+      return;
+    }
+
+    // Admin always has all modules
+    if (isAdmin) {
+      setModules(ALL_MODULE_NAMES.map((name) => ({ id: name, module_name: name, active: true })));
       setLoading(false);
       return;
     }
@@ -31,15 +42,18 @@ export function useModules() {
 
     setModules(data ?? []);
     setLoading(false);
-  }, [user]);
+  }, [user, isAdmin]);
 
   useEffect(() => {
     fetchModules();
   }, [fetchModules]);
 
   const hasModule = useCallback(
-    (name: ModuleName) => modules.some((m) => m.module_name === name),
-    [modules]
+    (name: ModuleName) => {
+      if (isAdmin) return true;
+      return modules.some((m) => m.module_name === name);
+    },
+    [modules, isAdmin]
   );
 
   return { modules, loading, hasModule, refreshModules: fetchModules };
