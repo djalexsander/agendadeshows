@@ -114,17 +114,8 @@ export default function ModulesUpgrade() {
 
   const handleRefreshStatus = async () => {
     setRefreshing(true);
-    await refreshPayments();
+    await Promise.all([refreshPayments(), refreshModules()]);
     setRefreshing(false);
-    // Check if module is now active
-    if (pixData) {
-      const mod = catalog.find((m) => m.module_name === pixData.moduleName);
-      if (mod && hasModule(mod.module_name as ModuleName)) {
-        toast.success(`Módulo "${mod.display_name}" ativado!`);
-        setPixData(null);
-        setPixModuleName(null);
-      }
-    }
   };
 
   const pixModuleCatalog = pixData ? catalog.find((m) => m.module_name === pixData.moduleName) : null;
