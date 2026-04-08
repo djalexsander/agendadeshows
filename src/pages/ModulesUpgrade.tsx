@@ -120,13 +120,14 @@ export default function ModulesUpgrade() {
   };
 
   // Auto-detect module activation after refresh
-  const pixModuleActive = pixData ? hasModule(pixData.moduleName as ModuleName) : false;
-  if (pixModuleActive && pixData) {
-    const mod = catalog.find((m) => m.module_name === pixData.moduleName);
-    toast.success(`Módulo "${mod?.display_name || pixData.moduleName}" ativado com sucesso!`);
-    setPixData(null);
-    setPixModuleName(null);
-  }
+  useEffect(() => {
+    if (pixData && hasModule(pixData.moduleName as ModuleName)) {
+      const mod = catalog.find((m) => m.module_name === pixData.moduleName);
+      toast.success(`Módulo "${mod?.display_name || pixData.moduleName}" ativado com sucesso!`);
+      setPixData(null);
+      setPixModuleName(null);
+    }
+  }, [pixData, hasModule, catalog]);
 
   const pixModuleCatalog = pixData ? catalog.find((m) => m.module_name === pixData.moduleName) : null;
 
