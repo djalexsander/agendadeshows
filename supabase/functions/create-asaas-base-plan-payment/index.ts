@@ -36,7 +36,16 @@ async function asaasFetch(path: string, options: RequestInit = {}) {
 async function findOrCreateCustomer(email: string, name: string, cpfCnpj?: string): Promise<string> {
   const search = await asaasFetch(`/customers?email=${encodeURIComponent(email)}`);
   if (search.data && search.data.length > 0) {
-    return search.data[0].id;
+    const existing = search.data[0];
+    // Update customer with cpfCnpj if missing
+    if (cpfCnpj && !existing.cpfCnpj) {
+      console.log(`Updating customer ${existing.id} with cpfCnpj`);
+      await asaasFetch(`/customers/${existing.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ cpfCnpj }),
+      });
+    }
+    return existing.id;
   }
   const customer = await asaasFetch("/customers", {
     method: "POST",
