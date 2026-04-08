@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Puzzle,
   Tag,
+  Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ const navItems = [
   { to: "/admin/base-plan", icon: CreditCard, label: "Plano Base" },
   { to: "/admin/modules", icon: Puzzle, label: "Módulos" },
   { to: "/admin/module-catalog", icon: Tag, label: "Catálogo" },
+  { to: "/admin/module-payments", icon: Receipt, label: "Pgto Módulos" },
   { to: "/admin/settings", icon: Settings, label: "Config" },
 ];
 
