@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Puzzle, DollarSign, Users, FileBarChart, ImageDown, MapPinned, ArrowLeft,
   CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw,
@@ -41,7 +41,7 @@ interface PixPaymentData {
 
 export default function ModulesUpgrade() {
   const { user, profile } = useAuth();
-  const { hasModule, loading: modulesLoading } = useModules();
+  const { hasModule, loading: modulesLoading, refreshModules } = useModules();
   const { hasPendingRequest, loading: requestsLoading } = useModuleRequests();
   const { modules: catalog, loading: catalogLoading } = useModuleCatalog();
   const { hasPendingPayment, getLatestPayment, createAsaasModulePayment, refreshPayments, loading: paymentsLoading } = useClientModulePayments();
@@ -114,18 +114,20 @@ export default function ModulesUpgrade() {
 
   const handleRefreshStatus = async () => {
     setRefreshing(true);
-    await refreshPayments();
+    await Promise.all([refreshPayments(), refreshModules()]);
     setRefreshing(false);
-    // Check if module is now active
-    if (pixData) {
-      const mod = catalog.find((m) => m.module_name === pixData.moduleName);
-      if (mod && hasModule(mod.module_name as ModuleName)) {
-        toast.success(`Módulo "${mod.display_name}" ativado!`);
-        setPixData(null);
-        setPixModuleName(null);
-      }
-    }
+    // The useEffect below will detect activation and close the dialog
   };
+
+  // Auto-detect module activation after refresh
+  useEffect(() => {
+    if (pixData && hasModule(pixData.moduleName as ModuleName)) {
+      const mod = catalog.find((m) => m.module_name === pixData.moduleName);
+      toast.success(`Módulo "${mod?.display_name || pixData.moduleName}" ativado com sucesso!`);
+      setPixData(null);
+      setPixModuleName(null);
+    }
+  }, [pixData, hasModule, catalog]);
 
   const pixModuleCatalog = pixData ? catalog.find((m) => m.module_name === pixData.moduleName) : null;
 
