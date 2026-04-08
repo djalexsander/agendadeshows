@@ -62,6 +62,7 @@ export default function AdminClients() {
   const [form, setForm] = useState({
     nome: "", telefone: "", cidade: "", estado: "",
     status_plano: "ativo", valor_plano: "", vencimento: "", observacoes: "",
+    max_users_override: "",
   });
 
   const fetchClients = async () => {
@@ -73,15 +74,26 @@ export default function AdminClients() {
     fetchClients();
   }, []);
 
-  const openEdit = (c: ClientProfile) => {
+  const openEdit = async (c: ClientProfile) => {
     setEditingClient(c);
     const isTrialOrLifetime = c.plan_type === "free_trial_7_days" || (c.plan_type === "lifetime" && c.is_paid);
+
+    const { data: companyData } = await supabase
+      .from("companies")
+      .select("max_users")
+      .eq("owner_user_id", c.user_id)
+      .limit(1)
+      .single();
+
+    const overrideVal = (companyData as any)?.max_users;
+
     setForm({
       nome: c.nome,
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo",
       valor_plano: isTrialOrLifetime ? "" : String(c.valor_plano || ""),
       vencimento: toDateInputValue(c.current_period_end) || toDateInputValue(c.vencimento), observacoes: c.observacoes || "",
+      max_users_override: overrideVal && overrideVal > 1 ? String(overrideVal) : "",
     });
     setDialogOpen(true);
   };
@@ -102,6 +114,12 @@ export default function AdminClients() {
       observacoes: form.observacoes,
     } as any).eq("id", editingClient!.id);
 
+
+    // Save company max_users override
+    const overrideNum = form.max_users_override ? parseInt(form.max_users_override) : 1;
+    await (supabase.from("companies") as any).update({
+      max_users: overrideNum || 1,
+    }).eq("owner_user_id", editingClient!.user_id);
 
     toast({ title: "Sucesso", description: "Cliente atualizado." });
 
@@ -318,9 +336,16 @@ export default function AdminClients() {
                 <Input type="date" value={form.vencimento} onChange={(e) => setForm({ ...form, vencimento: e.target.value })} className="h-10 bg-secondary/50 border-border" />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Observações</Label>
-              <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Observações</Label>
+                <Input value={form.observacoes} onChange={(e) => setForm({ ...form, observacoes: e.target.value })} className="h-10 bg-secondary/50 border-border" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Limite usuários (VIP)</Label>
+                <Input type="number" min="1" placeholder="Padrão do módulo" value={form.max_users_override} onChange={(e) => setForm({ ...form, max_users_override: e.target.value })} className="h-10 bg-secondary/50 border-border" />
+                <p className="text-[10px] text-muted-foreground">Deixe vazio para usar o padrão do módulo</p>
+              </div>
             </div>
             <Button onClick={handleSave} disabled={loading} className="w-full h-11 bg-primary hover:bg-primary/90">
               {loading ? "Salvando..." : "Salvar Alterações"}
