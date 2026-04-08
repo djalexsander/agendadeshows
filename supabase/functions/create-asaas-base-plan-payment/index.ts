@@ -84,6 +84,9 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Debug: log config (masked)
+    console.log(`ASAAS config: URL="${ASAAS_BASE_URL}", KEY starts with "${ASAAS_API_KEY?.substring(0, 10)}...", KEY length=${ASAAS_API_KEY?.length}`);
+    
     // Validate config
     if (!ASAAS_API_KEY || !ASAAS_BASE_URL) {
       console.error("Missing ASAAS_API_KEY or ASAAS_BASE_URL");
