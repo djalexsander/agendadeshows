@@ -29,9 +29,20 @@ export type FinancialFilters = {
   type?: "entrada" | "saida";
   status?: string;
   categoria?: string;
+  show_id?: string;
   periodoInicio?: string;
   periodoFim?: string;
 };
+
+export interface EventSummary {
+  show_id: string;
+  event_name: string;
+  event_date: string | null;
+  entradas: number;
+  saidas: number;
+  saldo: number;
+  count: number;
+}
 
 export function useFinancialEntries() {
   const { user } = useAuth();
@@ -88,11 +99,12 @@ export function useFinancialEntries() {
     await fetchEntries();
   }, [fetchEntries]);
 
-  // Apply client-side filters
+  // Client-side filters
   const filtered = entries.filter((e) => {
     if (filters.type && e.type !== filters.type) return false;
     if (filters.status && e.status !== filters.status) return false;
     if (filters.categoria && e.categoria !== filters.categoria) return false;
+    if (filters.show_id && e.show_id !== filters.show_id) return false;
     if (filters.periodoInicio) {
       const d = e.data_lancamento || e.created_at.slice(0, 10);
       if (d < filters.periodoInicio) return false;
@@ -112,6 +124,31 @@ export function useFinancialEntries() {
 
   const categories = [...new Set(entries.map((e) => e.categoria).filter(Boolean))] as string[];
 
+  // Event summaries
+  const eventSummaries: EventSummary[] = (() => {
+    const map = new Map<string, EventSummary>();
+    for (const e of entries) {
+      if (!e.show_id) continue;
+      if (!map.has(e.show_id)) {
+        map.set(e.show_id, {
+          show_id: e.show_id,
+          event_name: e.event_name || "Evento",
+          event_date: e.event_date || e.data_lancamento,
+          entradas: 0,
+          saidas: 0,
+          saldo: 0,
+          count: 0,
+        });
+      }
+      const s = map.get(e.show_id)!;
+      if (e.type === "entrada") s.entradas += Number(e.amount);
+      else s.saidas += Number(e.amount);
+      s.saldo = s.entradas - s.saidas;
+      s.count++;
+    }
+    return Array.from(map.values()).sort((a, b) => (b.event_date || "").localeCompare(a.event_date || ""));
+  })();
+
   return {
     entries: filtered,
     allEntries: entries,
@@ -123,5 +160,6 @@ export function useFinancialEntries() {
     filters,
     setFilters,
     categories,
+    eventSummaries,
   };
 }
