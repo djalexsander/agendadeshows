@@ -83,6 +83,48 @@ export function useAdminBasePlanPayments() {
       } as any)
       .eq("user_id", userId);
 
+    // Activate pending modules for this user
+    const { data: pendingRequests } = await (supabase.from("module_requests") as any)
+      .select("module_name")
+      .eq("user_id", userId)
+      .eq("status", "pending");
+
+    if (pendingRequests && pendingRequests.length > 0) {
+      for (const req of pendingRequests) {
+        // Upsert user_modules
+        const { data: existing } = await supabase
+          .from("user_modules")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("module_name", req.module_name)
+          .maybeSingle();
+
+        if (existing) {
+          await supabase.from("user_modules").update({ active: true } as any).eq("id", existing.id);
+        } else {
+          await (supabase.from("user_modules") as any).insert({
+            user_id: userId,
+            module_name: req.module_name,
+            active: true,
+          });
+        }
+
+        // Update request status
+        await (supabase.from("module_requests") as any)
+          .update({ status: "approved", reviewed_at: now.toISOString(), reviewed_by: user.id })
+          .eq("user_id", userId)
+          .eq("module_name", req.module_name)
+          .eq("status", "pending");
+
+        // Update module payment status if exists
+        await (supabase.from("module_payments") as any)
+          .update({ status: "approved", reviewed_at: now.toISOString(), reviewed_by: user.id })
+          .eq("user_id", userId)
+          .eq("module_name", req.module_name)
+          .eq("status", "pending_review");
+      }
+    }
+
     await fetchPayments();
   };
 
