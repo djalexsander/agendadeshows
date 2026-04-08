@@ -110,6 +110,8 @@ export function ShowDialog({
   const [isEditing, setIsEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [routePickerOpen, setRoutePickerOpen] = useState(false);
+  const { hasModule } = useModules();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (existingShow) {
