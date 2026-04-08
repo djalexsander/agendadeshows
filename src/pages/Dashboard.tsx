@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
@@ -13,6 +13,7 @@ import { usePushSubscription } from "@/hooks/usePushSubscription";
 import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { useLocation, useNavigate } from "react-router-dom";
 import { APP_VERSION } from "@/lib/version";
+import { useModules } from "@/hooks/useModules";
 
 export default function Dashboard() {
   const location = useLocation();
