@@ -48,7 +48,7 @@ export default function CompanyUsers() {
   const [saving, setSaving] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
-  const [maxUsers, setMaxUsers] = useState(1);
+  const [maxUsers, setMaxUsers] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchLimit = async () => {
@@ -71,12 +71,12 @@ export default function CompanyUsers() {
         .select("max_users_default")
         .eq("module_name", "agenda_compartilhada")
         .single();
-      if (data) setMaxUsers((data as any).max_users_default ?? 1);
+      if (data) setMaxUsers((data as any).max_users_default ?? 5);
     };
     fetchLimit();
   }, [company]);
 
-  const atLimit = members.length >= maxUsers;
+  const atLimit = maxUsers !== null && members.length >= maxUsers;
 
   const handleAdd = async () => {
     if (!email) { toast.error("Preencha o e-mail"); return; }
@@ -136,7 +136,7 @@ export default function CompanyUsers() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-foreground">{members.length}/{maxUsers} membro{maxUsers !== 1 ? "s" : ""}</p>
+              <p className="text-sm font-medium text-foreground">{members.length}/{maxUsers ?? "..."} membro{(maxUsers ?? 0) !== 1 ? "s" : ""}</p>
               <p className="text-xs text-muted-foreground">Membros acessam a agenda sem assinatura própria</p>
             </div>
             <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)} disabled={atLimit}>
