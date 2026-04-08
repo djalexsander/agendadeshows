@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdminMode } from "@/hooks/useAdminMode";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Music,
@@ -18,6 +19,11 @@ import {
   Puzzle,
   Tag,
   Receipt,
+  Building2,
+  ShieldCheck,
+  FileBarChart,
+  MapPin,
+  Image,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -25,7 +31,7 @@ import { APP_VERSION } from "@/lib/version";
 import { useToast } from "@/hooks/use-toast";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 
-const navItems = [
+const adminNavItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
   { to: "/admin/agenda", icon: CalendarDays, label: "Agenda" },
   { to: "/admin/clients", icon: Users, label: "Clientes" },
@@ -38,6 +44,13 @@ const navItems = [
   { to: "/admin/settings", icon: Settings, label: "Config" },
 ];
 
+const empresaNavItems = [
+  { to: "/admin/empresa", icon: CalendarDays, label: "Agenda", end: true },
+  { to: "/admin/empresa/equipe", icon: Users, label: "Equipe" },
+  { to: "/admin/empresa/financeiro", icon: DollarSign, label: "Financeiro" },
+  { to: "/admin/empresa/relatorios", icon: FileBarChart, label: "Relatórios" },
+];
+
 function requestNotificationPermission() {
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
@@ -46,9 +59,7 @@ function requestNotificationPermission() {
 
 function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").catch(() => {
-      // SW registration failed silently
-    });
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
   }
 }
 
@@ -68,13 +79,34 @@ export default function AdminLayout() {
   const { signOut } = useAuth();
   const { toast } = useToast();
   const { pushEnabled, togglePush } = usePushSubscription();
+  const { mode, setMode, isEmpresaMode } = useAdminMode();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems = isEmpresaMode ? empresaNavItems : adminNavItems;
+
+  const handleModeSwitch = (newMode: "admin" | "empresa") => {
+    setMode(newMode);
+    if (newMode === "empresa") {
+      navigate("/admin/empresa");
+    } else {
+      navigate("/admin");
+    }
+  };
+
+  // Sync mode based on current route
+  useEffect(() => {
+    if (location.pathname.startsWith("/admin/empresa")) {
+      if (!isEmpresaMode) setMode("empresa");
+    } else {
+      if (isEmpresaMode) setMode("admin");
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
-    // Request notification permission and register SW
     requestNotificationPermission();
     registerServiceWorker();
 
-    // Listen for new admin notifications in realtime
     const channel = supabase
       .channel("admin-push-notifications")
       .on(
@@ -99,6 +131,34 @@ export default function AdminLayout() {
     };
   }, [toast]);
 
+  const ModeToggle = ({ className }: { className?: string }) => (
+    <div className={cn("flex gap-1 p-1 bg-muted rounded-xl", className)}>
+      <button
+        onClick={() => handleModeSwitch("admin")}
+        className={cn(
+          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+          !isEmpresaMode
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <ShieldCheck className="h-3.5 w-3.5" />
+        Administração
+      </button>
+      <button
+        onClick={() => handleModeSwitch("empresa")}
+        className={cn(
+          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+          isEmpresaMode
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        <Building2 className="h-3.5 w-3.5" />
+        Minha Empresa
+      </button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -110,9 +170,17 @@ export default function AdminLayout() {
           </div>
           <div>
             <h1 className="text-sm font-bold tracking-tight">Agenda de Shows</h1>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Painel Master</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              {isEmpresaMode ? "Minha Empresa" : "Painel Master"}
+            </p>
           </div>
         </div>
+
+        {/* Mode toggle */}
+        <div className="px-4 pt-4">
+          <ModeToggle />
+        </div>
+
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => (
             <NavLink
@@ -152,19 +220,33 @@ export default function AdminLayout() {
 
       {/* Mobile header */}
       <div className="flex-1 flex flex-col">
-        <header className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card sticky top-0 z-50">
-          <div className="flex items-center gap-2">
-            <Music className="h-5 w-5 text-primary" />
-            <span className="font-bold text-sm">Admin</span>
+        <header className="md:hidden flex flex-col border-b border-border bg-card sticky top-0 z-50">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-2">
+              <Music className="h-5 w-5 text-primary" />
+              <span className="font-bold text-sm">
+                {isEmpresaMode ? "Minha Empresa" : "Admin"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => window.location.reload()}
+                className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50"
+                title="Atualizar"
+              >
+                <RefreshCw className="h-5 w-5" />
+              </button>
+              <button onClick={signOut} className="p-2 text-muted-foreground">
+                <LogOut className="h-5 w-5" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-1 overflow-x-auto">
-            <button
-              onClick={() => window.location.reload()}
-              className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50"
-              title="Atualizar"
-            >
-              <RefreshCw className="h-5 w-5" />
-            </button>
+          {/* Mode toggle mobile */}
+          <div className="px-4 pb-3">
+            <ModeToggle className="w-full" />
+          </div>
+          {/* Nav items */}
+          <div className="flex items-center gap-1 overflow-x-auto px-4 pb-3">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -172,7 +254,7 @@ export default function AdminLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    "p-2 rounded-lg transition-colors",
+                    "p-2 rounded-lg transition-colors flex-shrink-0",
                     isActive ? "bg-primary/15 text-primary" : "text-muted-foreground"
                   )
                 }
@@ -180,9 +262,6 @@ export default function AdminLayout() {
                 <item.icon className="h-5 w-5" />
               </NavLink>
             ))}
-            <button onClick={signOut} className="p-2 text-muted-foreground">
-              <LogOut className="h-5 w-5" />
-            </button>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">
