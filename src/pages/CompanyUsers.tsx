@@ -48,7 +48,7 @@ export default function CompanyUsers() {
   const [saving, setSaving] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
-  const [maxUsers, setMaxUsers] = useState(1);
+  const [maxUsers, setMaxUsers] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchLimit = async () => {
@@ -71,7 +71,7 @@ export default function CompanyUsers() {
         .select("max_users_default")
         .eq("module_name", "agenda_compartilhada")
         .single();
-      if (data) setMaxUsers((data as any).max_users_default ?? 1);
+      if (data) setMaxUsers((data as any).max_users_default ?? 5);
     };
     fetchLimit();
   }, [company]);
