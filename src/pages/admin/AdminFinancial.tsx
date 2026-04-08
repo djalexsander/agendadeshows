@@ -48,12 +48,31 @@ export default function AdminFinancial() {
   const fetchData = async () => {
     const { data: profiles } = await supabase.from("profiles").select("user_id, nome");
     if (profiles) setClients(profiles);
+    const nameMap = new Map((profiles || []).map((p) => [p.user_id, p.nome]));
 
+    // Manual payments
     const { data: pays } = await supabase.from("payments").select("*").order("data_vencimento", { ascending: false });
-    if (pays && profiles) {
-      const map = new Map(profiles.map((p) => [p.user_id, p.nome]));
-      setPayments(pays.map((p) => ({ ...p, client_name: map.get(p.client_user_id) || "—" })));
-    }
+    const manualPayments: Payment[] = (pays || []).map((p) => ({ ...p, client_name: nameMap.get(p.client_user_id) || "—" }));
+
+    // Approved base plan payments (from Asaas/webhook)
+    const { data: basePays } = await (supabase.from("base_plan_payments") as any)
+      .select("*")
+      .eq("status", "approved")
+      .order("submitted_at", { ascending: false });
+
+    const basePlanPayments: Payment[] = (basePays || []).map((bp: any) => ({
+      id: `bp_${bp.id}`,
+      client_user_id: bp.user_id,
+      valor: Number(bp.amount),
+      status: "pago",
+      forma_pagamento: bp.gateway_provider === "asaas" ? "pix (Asaas)" : "pix",
+      data_vencimento: bp.submitted_at ? bp.submitted_at.split("T")[0] : null,
+      data_pagamento: bp.reviewed_at ? bp.reviewed_at.split("T")[0] : null,
+      observacoes: "Plano Base",
+      client_name: nameMap.get(bp.user_id) || "—",
+    }));
+
+    setPayments([...manualPayments, ...basePlanPayments]);
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -162,12 +181,16 @@ export default function AdminFinancial() {
             <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
               {p.status || "pendente"}
             </span>
-            <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
+            {!p.id.startsWith("bp_") && (
+              <>
+                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => openEdit(p)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" onClick={() => setDeleteTarget(p)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         ))}
         {payments.length === 0 && (
