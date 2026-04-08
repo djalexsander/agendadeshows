@@ -318,8 +318,8 @@ function FinanceiroContent() {
 
       {/* Filters panel */}
       {showFilters && (
-        <div className="rounded-xl bg-card border border-border p-4 space-y-3">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-xl bg-card border border-border p-3 sm:p-4 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <Label className="text-xs text-muted-foreground">Tipo</Label>
               <Select value={filters.type || "all"} onValueChange={(v) => setFilters({ ...filters, type: v === "all" ? undefined : v as any })}>
@@ -356,8 +356,8 @@ function FinanceiroContent() {
             <div>
               <Label className="text-xs text-muted-foreground">Período</Label>
               <div className="flex gap-1">
-                <Input type="date" className="h-9 text-xs" value={filters.periodoInicio || ""} onChange={(e) => setFilters({ ...filters, periodoInicio: e.target.value || undefined })} />
-                <Input type="date" className="h-9 text-xs" value={filters.periodoFim || ""} onChange={(e) => setFilters({ ...filters, periodoFim: e.target.value || undefined })} />
+                <Input type="date" className="h-9 text-xs flex-1 min-w-0" value={filters.periodoInicio || ""} onChange={(e) => setFilters({ ...filters, periodoInicio: e.target.value || undefined })} />
+                <Input type="date" className="h-9 text-xs flex-1 min-w-0" value={filters.periodoFim || ""} onChange={(e) => setFilters({ ...filters, periodoFim: e.target.value || undefined })} />
               </div>
             </div>
           </div>
@@ -378,11 +378,19 @@ function FinanceiroContent() {
             const st = getStatusStyle(e.status);
             const isOverdue = e.status === "vencido" || (e.status === "pendente" && e.data_vencimento && e.data_vencimento < new Date().toISOString().slice(0, 10));
             return (
-              <div key={e.id} className={cn("rounded-xl bg-secondary/40 border p-4 flex items-center gap-3", isOverdue ? "border-red-500/40" : "border-border/50")}>
-                <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
-                  {e.type === "entrada" ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
+              <div key={e.id} className={cn("rounded-xl bg-secondary/40 border p-3 sm:p-4 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-3", isOverdue ? "border-red-500/40" : "border-border/50")}>
+                <div className="flex items-center gap-3">
+                  <div className={`h-8 w-8 sm:h-9 sm:w-9 rounded-lg flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
+                    {e.type === "entrada" ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
+                  </div>
+                  <div className="flex-1 min-w-0 sm:hidden">
+                    <p className="font-medium text-foreground text-sm truncate">{e.title}</p>
+                  </div>
+                  <span className={`text-sm font-bold shrink-0 sm:hidden ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
+                    {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 hidden sm:block">
                   <div className="flex items-center gap-2">
                     <p className="font-medium text-foreground text-sm truncate">{e.title}</p>
                     {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
@@ -398,10 +406,24 @@ function FinanceiroContent() {
                     {e.data_lancamento && <span className="text-[10px] text-muted-foreground">{format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}</span>}
                   </div>
                 </div>
-                <span className={`text-sm font-bold shrink-0 ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
+                {/* Mobile detail row */}
+                <div className="flex items-center gap-2 flex-wrap sm:hidden">
+                  {e.event_name && (
+                    <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <Music className="h-2.5 w-2.5" />{e.event_name}
+                    </span>
+                  )}
+                  {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
+                  <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
+                  {e.data_lancamento && <span className="text-[10px] text-muted-foreground">{format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}</span>}
+                  <Button variant="ghost" size="icon" className="h-7 w-7 ml-auto shrink-0" onClick={() => deleteEntry(e.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                  </Button>
+                </div>
+                <span className={`text-sm font-bold shrink-0 hidden sm:block ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
                   {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
                 </span>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => deleteEntry(e.id)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 hidden sm:flex" onClick={() => deleteEntry(e.id)}>
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </div>
