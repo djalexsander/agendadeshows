@@ -30,6 +30,7 @@ const navItems = [
   { to: "/admin/clients", icon: Users, label: "Clientes" },
   { to: "/admin/financial", icon: DollarSign, label: "Financeiro" },
   { to: "/admin/pix", icon: QrCode, label: "Pix" },
+  { to: "/admin/base-plan", icon: CreditCard, label: "Plano Base" },
   { to: "/admin/modules", icon: Puzzle, label: "Módulos" },
   { to: "/admin/module-catalog", icon: Tag, label: "Catálogo" },
   { to: "/admin/settings", icon: Settings, label: "Config" },
