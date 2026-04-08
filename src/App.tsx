@@ -18,6 +18,9 @@ import AdminFinancial from "./pages/admin/AdminFinancial";
 import AdminPix from "./pages/admin/AdminPix";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ModulesUpgrade from "./pages/ModulesUpgrade";
+import Financeiro from "./pages/Financeiro";
+import Equipe from "./pages/Equipe";
+import Relatorios from "./pages/Relatorios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -104,6 +107,9 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/modulos" element={<ModulesUpgrade />} />
+        <Route path="/financeiro" element={<Financeiro />} />
+        <Route path="/equipe" element={<Equipe />} />
+        <Route path="/relatorios" element={<Relatorios />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
