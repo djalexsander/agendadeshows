@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import { CheckCircle, XCircle, Clock, DollarSign, Settings, Save } from "lucide-react";
+import { CheckCircle, XCircle, Clock, DollarSign, Settings, Save, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -17,13 +17,15 @@ import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
 
 export default function AdminBasePlan() {
   const { toast } = useToast();
-  const { payments, loading, approvePayment, rejectPayment, refreshPayments } = useAdminBasePlanPayments();
+  const { payments, loading, approvePayment, rejectPayment, deletePayment, refreshPayments } = useAdminBasePlanPayments();
   const { config, updateConfig, refreshConfig } = useBasePlanConfig();
 
   const [filter, setFilter] = useState<"all" | "pending_review" | "approved" | "rejected">("all");
   const [actionDialog, setActionDialog] = useState<{ type: "approve" | "reject"; payment: any } | null>(null);
   const [notes, setNotes] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Config editing
   const [editingConfig, setEditingConfig] = useState(false);
@@ -70,6 +72,19 @@ export default function AdminBasePlan() {
     setProcessing(false);
     setActionDialog(null);
     setNotes("");
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const result = await deletePayment(deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
+    if (result?.error) {
+      toast({ title: "Erro", description: result.error, variant: "destructive" });
+    } else {
+      toast({ title: "Pagamento excluído", description: "Registro removido permanentemente." });
+    }
   };
 
   const statusColor = (s: string) => {
@@ -164,25 +179,35 @@ export default function AdminBasePlan() {
             <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
               {statusLabel(p.status)}
             </span>
-            {p.status === "pending_review" && (
-              <div className="flex gap-2 shrink-0">
-                <Button
-                  size="sm"
-                  className="gap-1 rounded-xl bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)]"
-                  onClick={() => setActionDialog({ type: "approve", payment: p })}
-                >
-                  <CheckCircle className="h-4 w-4" /> Aprovar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10"
-                  onClick={() => setActionDialog({ type: "reject", payment: p })}
-                >
-                  <XCircle className="h-4 w-4" /> Rejeitar
-                </Button>
-              </div>
-            )}
+            <div className="flex gap-2 shrink-0">
+              {p.status === "pending_review" && (
+                <>
+                  <Button
+                    size="sm"
+                    className="gap-1 rounded-xl bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)]"
+                    onClick={() => setActionDialog({ type: "approve", payment: p })}
+                  >
+                    <CheckCircle className="h-4 w-4" /> Aprovar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10"
+                    onClick={() => setActionDialog({ type: "reject", payment: p })}
+                  >
+                    <XCircle className="h-4 w-4" /> Rejeitar
+                  </Button>
+                </>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 px-2"
+                onClick={() => setDeleteTarget(p)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         ))}
         {filtered.length === 0 && (
@@ -228,6 +253,27 @@ export default function AdminBasePlan() {
                 : "Confirmar rejeição"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border">
+          <DialogHeader>
+            <DialogTitle>Excluir pagamento</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir permanentemente o pagamento de R$ {deleteTarget?.amount?.toFixed(2)} de {deleteTarget?.profile_name || "usuário desconhecido"}? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting} className="gap-1.5">
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Excluir permanentemente
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
