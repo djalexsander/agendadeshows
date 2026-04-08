@@ -212,7 +212,14 @@ export default function Dashboard() {
         )}
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => {
+              // Show all events this month — scroll to the list
+              const el = document.getElementById("month-shows-list");
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
@@ -221,7 +228,10 @@ export default function Dashboard() {
               <p className="text-xs sm:text-sm text-muted-foreground">Eventos no mês</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => setAllShowsOpen(true)}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
               <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
             </div>
@@ -230,7 +240,10 @@ export default function Dashboard() {
               <p className="text-xs sm:text-sm text-muted-foreground">Total de shows</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
@@ -245,7 +258,10 @@ export default function Dashboard() {
               </p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3">
+          <div
+            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
+          >
             <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
               <Navigation className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
             </div>
