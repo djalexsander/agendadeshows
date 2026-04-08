@@ -159,6 +159,7 @@ export default function ClientBasePlan() {
 
           {/* Valores */}
           <div className="rounded-xl bg-secondary/30 border border-border/50 p-4 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Detalhamento</p>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Plano Base</span>
               <span className="font-medium text-foreground">R$ {price.toFixed(2)}</span>
@@ -174,13 +175,15 @@ export default function ClientBasePlan() {
               </div>
             )}
             <Separator className="my-1" />
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-foreground">Total mensal</span>
-              <span className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}</span>
+            <div className="rounded-lg bg-primary/5 border border-primary/20 p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Plano selecionado</span>
+                <span className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}<span className="text-xs font-normal text-muted-foreground">/mês</span></span>
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-1.5">
+                Aproximadamente R$ {(totalPrice / 30).toFixed(2)} por dia
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              Aproximadamente R$ {(totalPrice / 30).toFixed(2)} por dia
-            </p>
           </div>
 
           <p className="text-xs text-muted-foreground text-center leading-relaxed">
