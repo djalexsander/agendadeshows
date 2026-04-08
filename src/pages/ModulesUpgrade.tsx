@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import PixPaymentCard from "@/components/payments/PixPaymentCard";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   financeiro: DollarSign,
@@ -200,12 +201,10 @@ export default function ModulesUpgrade() {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="rounded-xl bg-secondary/50 p-4 flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Valor</span>
-              <span className="text-lg font-bold text-primary">
-                {selectedModule && formatPrice(selectedModule.price, selectedModule.billing_period)}
-              </span>
-            </div>
+            {/* Pix payment info */}
+            {selectedModule && (
+              <PixPaymentCard amount={selectedModule.price} title="Pague via Pix" />
+            )}
 
             <div className="space-y-1.5">
               <Label>Comprovante (imagem/PDF)</Label>
