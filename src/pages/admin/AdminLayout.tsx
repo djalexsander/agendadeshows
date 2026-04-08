@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   CalendarDays,
   Users,
+  UsersRound,
   CreditCard,
   DollarSign,
   QrCode,
@@ -49,6 +50,7 @@ const empresaNavItems = [
   { to: "/admin/empresa/equipe", icon: Users, label: "Equipe" },
   { to: "/admin/empresa/financeiro", icon: DollarSign, label: "Financeiro" },
   { to: "/admin/empresa/relatorios", icon: FileBarChart, label: "Relatórios" },
+  { to: "/admin/empresa/usuarios", icon: UsersRound, label: "Usuários" },
 ];
 
 function requestNotificationPermission() {
