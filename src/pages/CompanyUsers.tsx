@@ -47,15 +47,22 @@ export default function CompanyUsers() {
   const [saving, setSaving] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<string | null>(null);
 
+  const maxUsers = company?.max_users ?? 1;
+  const atLimit = members.length >= maxUsers;
+
   const handleAdd = async () => {
     if (!email) { toast.error("Preencha o e-mail"); return; }
+    if (atLimit) {
+      toast.error(`Limite de ${maxUsers} usuário(s) atingido. Solicite aumento ao administrador.`);
+      return;
+    }
     setSaving(true);
     const res = mode === "invite"
       ? await inviteMember(email, role)
       : await linkExistingUser(email, role);
     setSaving(false);
     if (res.error) { toast.error(res.error); return; }
-    toast.success(mode === "invite" ? "Convite enviado!" : "Usuário vinculado!");
+    toast.success(mode === "invite" ? "Convite enviado!" : "Membro vinculado!");
     setEmail("");
     setRole("viewer");
     setDialogOpen(false);
