@@ -23,6 +23,9 @@ import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { exportShowPNG } from "@/lib/exportPNG";
 import { toast } from "sonner";
 import { RoutePickerSheet } from "./RoutePickerSheet";
+import { useModules } from "@/hooks/useModules";
+import { Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ESTADOS_BR = [
   { sigla: "AC", nome: "Acre" },
