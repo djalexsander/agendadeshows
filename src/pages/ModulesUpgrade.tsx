@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Puzzle, DollarSign, Users, FileBarChart, ImageDown, MapPinned, ArrowLeft,
   CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw,
