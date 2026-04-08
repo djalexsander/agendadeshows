@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut, ShieldCheck,
+  Crown, CheckCircle, Clock, XCircle, CalendarX, Send, Upload, ArrowLeft, FileText, LogOut, ShieldCheck, Copy, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,16 @@ import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import PixPaymentCard from "@/components/payments/PixPaymentCard";
+
+interface AsaasPixData {
+  paymentId: string;
+  asaasPaymentId: string;
+  payload: string;
+  qrCodeImage: string;
+  expirationDate: string;
+  amount: number;
+  reused: boolean;
+}
 
 export default function ClientBasePlan() {
   const { user, profile, signOut } = useAuth();
@@ -26,10 +35,15 @@ export default function ClientBasePlan() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [showForm, setShowForm] = useState(false);
+  const [showManualForm, setShowManualForm] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  // Asaas state
+  const [asaasLoading, setAsaasLoading] = useState(false);
+  const [asaasPixData, setAsaasPixData] = useState<AsaasPixData | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const status = getEffectivePlanStatus(profile);
   const price = summary.basePrice;
@@ -37,7 +51,48 @@ export default function ClientBasePlan() {
   const planName = summary.basePlanName;
   const hasModules = summary.modules.length > 0;
 
-  const handleSubmit = async () => {
+  const handleAsaasPayment = async () => {
+    if (!user) return;
+    setAsaasLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-asaas-base-plan-payment", {
+        body: {},
+      });
+
+      if (error) {
+        console.error("Asaas error:", error);
+        toast({ title: "Erro", description: "Não foi possível gerar o pagamento PIX.", variant: "destructive" });
+        setAsaasLoading(false);
+        return;
+      }
+
+      setAsaasPixData(data as AsaasPixData);
+      if (data?.reused) {
+        toast({ title: "PIX existente", description: "Você já tem um PIX pendente. Use o código abaixo." });
+      } else {
+        toast({ title: "PIX gerado!", description: "Escaneie o QR Code ou copie o código para pagar." });
+      }
+    } catch (err) {
+      console.error("Asaas payment error:", err);
+      toast({ title: "Erro", description: "Falha ao gerar pagamento.", variant: "destructive" });
+    }
+    setAsaasLoading(false);
+  };
+
+  const handleCopyPayload = async () => {
+    if (!asaasPixData?.payload) return;
+    try {
+      await navigator.clipboard.writeText(asaasPixData.payload);
+      setCopied(true);
+      toast({ title: "Copiado!", description: "Código PIX copiado para a área de transferência." });
+      setTimeout(() => setCopied(false), 3000);
+    } catch {
+      toast({ title: "Erro", description: "Não foi possível copiar.", variant: "destructive" });
+    }
+  };
+
+  // Manual payment fallback
+  const handleManualSubmit = async () => {
     if (!user) return;
     setUploading(true);
 
@@ -56,7 +111,6 @@ export default function ClientBasePlan() {
       receiptUrl = urlData.publicUrl;
     }
 
-    // Build notes with module names included
     const moduleNames = summary.modules.map((m) => m.display_name);
     const fullNotes = [
       notes,
@@ -81,7 +135,7 @@ export default function ClientBasePlan() {
           target_role: "admin",
         },
       }).catch(() => {});
-      setShowForm(false);
+      setShowManualForm(false);
       setFile(null);
       setNotes("");
     }
@@ -130,7 +184,6 @@ export default function ClientBasePlan() {
             </div>
           </div>
 
-          {/* Microcopy de valor */}
           <p className="text-sm text-muted-foreground leading-relaxed">
             Organize, controle e profissionalize seus shows com facilidade.
           </p>
@@ -190,6 +243,7 @@ export default function ClientBasePlan() {
             Seu plano inclui todas as funcionalidades selecionadas e será ativado após a confirmação do pagamento.
           </p>
 
+          {/* Status badges */}
           {status === "active" && (
             <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-4 flex items-center gap-3">
               <CheckCircle className="h-5 w-5 text-green-400 shrink-0" />
@@ -235,7 +289,7 @@ export default function ClientBasePlan() {
               <Clock className="h-5 w-5 text-yellow-400 shrink-0" />
               <div>
                 <p className="font-semibold text-yellow-400">Pagamento em análise</p>
-                <p className="text-sm text-muted-foreground">Aguardando aprovação do administrador</p>
+                <p className="text-sm text-muted-foreground">Aguardando confirmação do pagamento</p>
               </div>
             </div>
           )}
@@ -250,19 +304,38 @@ export default function ClientBasePlan() {
             </div>
           )}
 
-          {!hasPending && status !== "pending_review" && (
+          {/* CTA buttons */}
+          {!hasPending && status !== "pending_review" && !asaasPixData && (
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground text-center">
                 Você pode cancelar a qualquer momento.
               </p>
               <Button
-                onClick={() => setShowForm(true)}
+                onClick={handleAsaasPayment}
                 className="w-full h-11 gap-2 bg-primary hover:bg-primary/90"
-                disabled={showForm}
+                disabled={asaasLoading}
               >
-                <Send className="h-4 w-4" />
-                {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Enviar pagamento"}
+                {asaasLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Gerando PIX...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    {status === "active" ? "Renovar meu plano" : (status === "expired" || status === "trial_expired") ? "Renovar meu plano" : status === "trial" ? "Ativar meu plano agora" : "Pagar com PIX"}
+                  </>
+                )}
               </Button>
+
+              {/* Manual fallback link */}
+              <button
+                onClick={() => setShowManualForm(true)}
+                className="w-full text-xs text-muted-foreground hover:text-foreground underline transition-colors"
+              >
+                Prefiro enviar comprovante manualmente
+              </button>
+
               <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Seus dados são seguros e seu acesso é liberado após a confirmação do pagamento.
@@ -271,17 +344,86 @@ export default function ClientBasePlan() {
           )}
         </div>
 
-        {/* Pix payment data */}
-        {showForm && <PixPaymentCard amount={totalPrice} />}
+        {/* Asaas PIX QR Code */}
+        {asaasPixData && (
+          <div className="rounded-2xl bg-card border border-border p-6 space-y-5">
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-bold">Pague com PIX</h3>
+              <p className="text-sm text-muted-foreground">
+                Escaneie o QR Code ou copie o código abaixo
+              </p>
+            </div>
 
-        {/* Payment form */}
-        {showForm && (
+            {/* QR Code */}
+            <div className="flex justify-center">
+              <div className="bg-white rounded-xl p-4">
+                <img
+                  src={`data:image/png;base64,${asaasPixData.qrCodeImage}`}
+                  alt="QR Code PIX"
+                  className="w-48 h-48 md:w-56 md:h-56"
+                />
+              </div>
+            </div>
+
+            {/* Amount */}
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Valor</p>
+              <p className="text-2xl font-bold text-primary">R$ {asaasPixData.amount.toFixed(2)}</p>
+            </div>
+
+            {/* Copy & Paste */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Código copia e cola</Label>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={asaasPixData.payload}
+                  className="bg-secondary/50 border-border text-xs font-mono"
+                />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyPayload}
+                  className="shrink-0"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              {copied && (
+                <p className="text-xs text-green-400">✓ Código copiado!</p>
+              )}
+            </div>
+
+            {/* Expiration */}
+            {asaasPixData.expirationDate && (
+              <p className="text-xs text-muted-foreground text-center">
+                PIX válido até {format(new Date(asaasPixData.expirationDate), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+              </p>
+            )}
+
+            <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-4">
+              <p className="text-sm text-blue-400 text-center">
+                Após o pagamento, seu plano será ativado automaticamente em alguns instantes.
+              </p>
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setAsaasPixData(null)}
+            >
+              Voltar
+            </Button>
+          </div>
+        )}
+
+        {/* Manual payment form (fallback) */}
+        {showManualForm && !asaasPixData && (
           <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Enviar Comprovante
+              Enviar Comprovante Manual
             </h3>
 
-            {/* Total reminder */}
             <div className="rounded-xl bg-primary/5 border border-primary/20 p-3 text-center">
               <p className="text-xs text-muted-foreground">Valor total a pagar</p>
               <p className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)}</p>
@@ -312,11 +454,11 @@ export default function ClientBasePlan() {
               />
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowForm(false)} className="flex-1">
+              <Button variant="outline" onClick={() => setShowManualForm(false)} className="flex-1">
                 Cancelar
               </Button>
               <Button
-                onClick={handleSubmit}
+                onClick={handleManualSubmit}
                 disabled={uploading}
                 className="flex-1 gap-2 bg-primary hover:bg-primary/90"
               >
