@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock } from "lucide-react";
+import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, FileBarChart } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
@@ -175,6 +175,30 @@ export default function Dashboard() {
               <Image className="h-4 w-4" />
               Exportar
             </Button>
+          </div>
+        )}
+        {/* Quick nav for modules */}
+        {!isEmbedded && (
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {[
+              { label: "Financeiro", icon: DollarSign, path: "/financeiro" },
+              { label: "Equipe", icon: Users, path: "/equipe" },
+              { label: "Relatórios", icon: FileBarChart, path: "/relatorios" },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <Button
+                  key={item.path}
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl gap-2 shrink-0 border-border"
+                  onClick={() => navigate(item.path)}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </Button>
+              );
+            })}
           </div>
         )}
         {/* Summary Cards */}
