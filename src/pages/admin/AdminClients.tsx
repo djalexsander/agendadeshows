@@ -80,7 +80,7 @@ export default function AdminClients() {
       telefone: c.telefone || "", cidade: c.cidade || "", estado: c.estado || "",
       status_plano: c.status_plano || "ativo",
       valor_plano: isTrialOrLifetime ? "" : String(c.valor_plano || ""),
-      vencimento: toDateInputValue(c.current_period_end) || toDateInputValue(c.vencimento),
+      vencimento: toDateInputValue(c.current_period_end) || toDateInputValue(c.vencimento), observacoes: c.observacoes || "",
     });
     setDialogOpen(true);
   };
