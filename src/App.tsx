@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AdminModeProvider } from "@/hooks/useAdminMode";
+import { CompanyProvider } from "@/hooks/useCompany";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import Login from "./pages/Login";
 import PlanChoice from "./pages/PlanChoice";
@@ -29,6 +30,7 @@ import Financeiro from "./pages/Financeiro";
 import Equipe from "./pages/Equipe";
 import Relatorios from "./pages/Relatorios";
 import ClientBasePlan from "./pages/ClientBasePlan";
+import CompanyUsers from "./pages/CompanyUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,6 +77,7 @@ function AppRoutes() {
           <Route path="empresa/relatorios" element={<Relatorios />} />
           <Route path="empresa/modulos" element={<ModulesUpgrade />} />
           <Route path="empresa/meu-plano" element={<ClientBasePlan />} />
+          <Route path="empresa/usuarios" element={<CompanyUsers />} />
         </Route>
         <Route path="/" element={<Navigate to="/admin" replace />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
@@ -99,6 +102,7 @@ function AppRoutes() {
             <Route path="/modulos" element={<ModulesUpgrade />} />
             <Route path="/financeiro" element={<Financeiro />} />
             <Route path="/equipe" element={<Equipe />} />
+            <Route path="/usuarios" element={<CompanyUsers />} />
             <Route path="/relatorios" element={<Relatorios />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -141,9 +145,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <AdminModeProvider>
-            <AppRoutes />
-          </AdminModeProvider>
+          <CompanyProvider>
+            <AdminModeProvider>
+              <AppRoutes />
+            </AdminModeProvider>
+          </CompanyProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

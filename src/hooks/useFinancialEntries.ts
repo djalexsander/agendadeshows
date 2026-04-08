@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompany } from "@/hooks/useCompany";
 
 export interface FinancialEntry {
   id: string;
@@ -46,6 +47,7 @@ export interface EventSummary {
 
 export function useFinancialEntries() {
   const { user } = useAuth();
+  const { company } = useCompany();
   const [entries, setEntries] = useState<FinancialEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<FinancialFilters>({});
@@ -53,11 +55,18 @@ export function useFinancialEntries() {
   const fetchEntries = useCallback(async () => {
     if (!user) { setEntries([]); setLoading(false); return; }
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("financial_entries")
       .select("*")
-      .eq("user_id", user.id)
       .order("data_lancamento", { ascending: false });
+
+    if (company) {
+      query = query.eq("company_id", company.id);
+    } else {
+      query = query.eq("user_id", user.id);
+    }
+
+    const { data } = await query;
     setEntries((data as FinancialEntry[]) ?? []);
     setLoading(false);
   }, [user]);
@@ -87,6 +96,7 @@ export function useFinancialEntries() {
     if (!user) return { error: "Não autenticado" };
     const { error } = await (supabase.from("financial_entries") as any).insert({
       user_id: user.id,
+      company_id: company?.id || null,
       ...entry,
     });
     if (error) return { error: error.message };

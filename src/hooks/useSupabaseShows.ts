@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useCompany } from "./useCompany";
 
 export type ShowStatus = "pendente" | "confirmado" | "finalizado";
 
@@ -20,17 +21,25 @@ export interface Show {
 
 export function useSupabaseShows() {
   const { user } = useAuth();
+  const { company } = useCompany();
   const [shows, setShows] = useState<Show[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchShows = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("shows")
       .select("*")
-      .eq("user_id", user.id)
       .order("date", { ascending: true });
+
+    if (company) {
+      query = query.eq("company_id", company.id);
+    } else {
+      query = query.eq("user_id", user.id);
+    }
+
+    const { data } = await query;
 
     if (data) {
       setShows(
@@ -61,7 +70,7 @@ export function useSupabaseShows() {
       if (!user) return;
       const { data, error } = await supabase
         .from("shows")
-        .insert({ user_id: user.id, date, cidade, estado, status, com_quem_evento: com_quem_evento || "", horario: horario || "", local: local || "", endereco: endereco || "" })
+        .insert({ user_id: user.id, company_id: company?.id || null, date, cidade, estado, status, com_quem_evento: com_quem_evento || "", horario: horario || "", local: local || "", endereco: endereco || "" })
         .select()
         .single();
       if (data && !error) {
