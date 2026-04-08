@@ -132,7 +132,7 @@ export default function ClientBasePlan() {
 
           {/* Microcopy de valor */}
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Acesso completo ao sistema com as funcionalidades escolhidas para organizar e profissionalizar seus eventos.
+            Organize, controle e profissionalize seus shows com facilidade.
           </p>
 
           {/* "Você está contratando" */}
