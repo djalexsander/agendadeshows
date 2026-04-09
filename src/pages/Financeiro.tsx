@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight } from "lucide-react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,8 @@ import { FinancialDetailDrawer, DetailDrawerType } from "@/components/FinancialD
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompany } from "@/hooks/useCompany";
+import { FinancialExportDialog } from "@/components/FinancialExportDialog";
 
 const CATEGORIAS_ENTRADA = [
   "Cachê do show",
