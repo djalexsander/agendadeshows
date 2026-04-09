@@ -40,7 +40,7 @@ export function TrialExpiredModal() {
           </div>
           <DialogTitle className="text-center">Seu teste gratuito terminou</DialogTitle>
           <DialogDescription className="text-center">
-            Você aproveitou 7 dias de acesso total. Para continuar usando os módulos, ative-os no seu plano.
+            Você aproveitou o período de teste com acesso total. Para continuar usando os módulos, ative-os no seu plano.
           </DialogDescription>
         </DialogHeader>
         <Button className="w-full rounded-xl gap-2" onClick={() => { setOpen(false); navigate("/modulos"); }}>
