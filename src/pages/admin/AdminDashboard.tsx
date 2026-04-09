@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink, Clock, UserPlus } from "lucide-react";
+import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink, Clock, UserPlus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +41,7 @@ interface AdminNotification {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0, pendentes_pagamento: 0, pendentes_aprovacao: 0 });
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
@@ -209,36 +211,56 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground text-xs md:text-sm">Visão geral da plataforma</p>
       </div>
 
-      {/* Notification badge */}
+      {/* Notification list */}
       {notifications.length > 0 && (
-        <div
-          className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-3 md:p-4 flex items-center gap-3 cursor-pointer hover:bg-yellow-500/15 transition-colors"
-          onClick={() => {
-            const section = document.getElementById("pending-users-section") || document.getElementById("pending-proofs-section");
-            if (section) {
-              section.scrollIntoView({ behavior: "smooth" });
-            }
-          }}
-        >
-          <Bell className="h-5 w-5 text-yellow-400 shrink-0" />
-          <p className="text-sm flex-1">
-            <strong>{notifications.length}</strong> notificação(ões) não lida(s)
-          </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/20"
-            onClick={async (e) => {
-              e.stopPropagation();
-              await (supabase.from("admin_notifications") as any)
-                .update({ lida: true })
-                .eq("lida", false);
-              toast({ title: "Notificações limpas" });
-              load();
-            }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-yellow-400" />
+              <p className="text-sm font-medium">{notifications.length} notificação(ões)</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={async () => {
+                await (supabase.from("admin_notifications") as any)
+                  .update({ lida: true })
+                  .eq("lida", false);
+                toast({ title: "Notificações limpas" });
+                load();
+              }}
+            >
+              Limpar todas
+            </Button>
+          </div>
+          {notifications.map((n) => {
+            const route = n.tipo === "novo_cadastro" ? "/admin/clients"
+              : n.tipo === "novo_pagamento" || n.tipo === "comprovante_enviado" ? "/admin/financial"
+              : n.tipo === "novo_modulo" || n.tipo === "modulo_request" ? "/admin/modules"
+              : "/admin";
+
+            return (
+              <div
+                key={n.id}
+                className="rounded-xl bg-yellow-500/10 border border-yellow-500/30 p-3 flex items-center gap-3 cursor-pointer hover:bg-yellow-500/20 transition-colors"
+                onClick={async () => {
+                  await (supabase.from("admin_notifications") as any)
+                    .update({ lida: true })
+                    .eq("id", n.id);
+                  load();
+                  navigate(route);
+                }}
+              >
+                <Bell className="h-4 w-4 text-yellow-400 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{n.titulo}</p>
+                  <p className="text-xs text-muted-foreground truncate">{n.mensagem}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+              </div>
+            );
+          })}
         </div>
       )}
 
