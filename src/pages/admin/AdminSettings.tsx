@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Settings, Copy, Link, DollarSign, ToggleLeft, ToggleRight, Save, ExternalLink } from "lucide-react";
+import { Settings, Copy, Link, DollarSign, ToggleLeft, ToggleRight, Save, ExternalLink, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
 import { formatBillingPeriod } from "@/lib/planStatus";
@@ -14,6 +15,7 @@ interface SignupConfig {
   id: string;
   cadastro_ativo: boolean;
   instrucoes_pagamento: string;
+  trial_days: number;
 }
 
 export default function AdminSettings() {
@@ -22,6 +24,7 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false);
   const [cadastroAtivo, setCadastroAtivo] = useState(true);
   const [instrucoes, setInstrucoes] = useState("");
+  const [trialDays, setTrialDays] = useState(7);
   const { toast } = useToast();
   const { config: planConfig, loading: planLoading } = useBasePlanConfig();
   const navigate = useNavigate();
@@ -35,6 +38,7 @@ export default function AdminSettings() {
       setConfig(c);
       setCadastroAtivo(c.cadastro_ativo);
       setInstrucoes(c.instrucoes_pagamento || "");
+      setTrialDays(c.trial_days ?? 7);
     }
     setLoading(false);
   };
@@ -48,6 +52,7 @@ export default function AdminSettings() {
     await (supabase.from("signup_config") as any).update({
       cadastro_ativo: cadastroAtivo,
       instrucoes_pagamento: instrucoes,
+      trial_days: trialDays,
       updated_at: new Date().toISOString(),
     }).eq("id", config.id);
 
