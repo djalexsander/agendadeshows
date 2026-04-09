@@ -249,6 +249,9 @@ export default function AdminClients() {
                 </span>
               ); })()}
               <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-purple-400 hover:text-purple-300" title="Controle de acesso" onClick={() => setAccessControlTarget(c)}>
+                  <KeyRound className="h-4 w-4" />
+                </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => openEdit(c)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
