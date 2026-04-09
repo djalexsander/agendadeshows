@@ -28,6 +28,7 @@ export default function PlanChoice() {
 
     const now = new Date();
     const trialEnd = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
+    const graceEnd = new Date(trialEnd.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     const { error } = await supabase
       .from("profiles")
@@ -35,6 +36,7 @@ export default function PlanChoice() {
         plan_type: "free_trial_7_days",
         trial_started_at: now.toISOString(),
         trial_ends_at: trialEnd.toISOString(),
+        grace_ends_at: graceEnd.toISOString(),
         status_plano: "ativo",
       } as any)
       .eq("user_id", user.id);
