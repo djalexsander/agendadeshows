@@ -121,8 +121,21 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 
 function FinanceiroContent() {
   const { user } = useAuth();
-  const { entries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
+  const { entries, allEntries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
+  const [detailDrawer, setDetailDrawer] = useState<DetailDrawerType>(null);
+
+  const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
+
+  const advancedTotals = useMemo(() => {
+    const totalEntradas = entries.filter((e) => e.type === "entrada").reduce((s, e) => s + Number(e.amount), 0);
+    const totalSaidas = entries.filter((e) => e.type === "saida").reduce((s, e) => s + Number(e.amount), 0);
+    const totalPendentes = entries.filter((e) => e.status === "pendente").reduce((s, e) => s + Number(e.amount), 0);
+    const entradasConfirmadas = entries.filter((e) => e.type === "entrada" && CONFIRMED_STATUSES.includes(e.status)).reduce((s, e) => s + Number(e.amount), 0);
+    const saidasConfirmadas = entries.filter((e) => e.type === "saida" && CONFIRMED_STATUSES.includes(e.status)).reduce((s, e) => s + Number(e.amount), 0);
+    const saldoConfirmado = entradasConfirmadas - saidasConfirmadas;
+    return { totalEntradas, totalSaidas, totalPendentes, entradasConfirmadas, saidasConfirmadas, saldoConfirmado };
+  }, [entries]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
