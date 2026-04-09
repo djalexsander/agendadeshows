@@ -12,13 +12,22 @@ export default function PlanChoice() {
   const { toast } = useToast();
   const { config, loading: configLoading } = useBasePlanConfig();
   const [loading, setLoading] = useState<"trial" | "monthly" | null>(null);
+  const [trialDays, setTrialDays] = useState(7);
+
+  useEffect(() => {
+    supabase.from("signup_config").select("trial_days").limit(1).then(({ data }) => {
+      if (data && data.length > 0 && (data[0] as any).trial_days) {
+        setTrialDays((data[0] as any).trial_days);
+      }
+    });
+  }, []);
 
   const handleStartTrial = async () => {
     if (!user) return;
     setLoading("trial");
 
     const now = new Date();
-    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const trialEnd = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
 
     const { error } = await supabase
       .from("profiles")
@@ -36,7 +45,7 @@ export default function PlanChoice() {
       return;
     }
 
-    toast({ title: "Teste grátis ativado! 🎉", description: "Você tem 7 dias de acesso completo." });
+    toast({ title: "Teste grátis ativado! 🎉", description: `Você tem ${trialDays} dias de acesso completo.` });
     window.location.reload();
   };
 
