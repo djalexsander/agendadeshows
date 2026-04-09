@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany } from "@/hooks/useCompany";
 import { FinancialExportDialog } from "@/components/FinancialExportDialog";
+import { FinancialEntryViewModal } from "@/components/FinancialEntryViewModal";
 
 const CATEGORIAS_ENTRADA = [
   "Cachê do show",
