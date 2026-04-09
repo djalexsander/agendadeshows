@@ -714,6 +714,14 @@ function FinanceiroContent() {
         entries={entries}
         categories={[...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])]}
       />
+
+      <FinancialExportDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        entries={entries}
+        eventSummaries={eventSummaries}
+        companyName={company?.name || "Minha Empresa"}
+      />
     </>
   );
 }
