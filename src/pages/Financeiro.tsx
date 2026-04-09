@@ -129,6 +129,7 @@ function FinanceiroContent() {
   const { shows } = useSupabaseShows();
   const [detailDrawer, setDetailDrawer] = useState<DetailDrawerType>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [viewEntry, setViewEntry] = useState<typeof entries[0] | null>(null);
 
   const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
 
