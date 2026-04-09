@@ -191,6 +191,7 @@ export function useFinancialEntries() {
     allEntries: entries,
     loading,
     addEntry,
+    updateEntry,
     deleteEntry,
     refresh: fetchEntries,
     totals: { ...totals, saldo: totals.entradas - totals.saidas },
