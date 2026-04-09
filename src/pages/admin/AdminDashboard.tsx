@@ -205,7 +205,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full">
       <div>
         <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground text-xs md:text-sm">Visão geral da plataforma</p>
@@ -264,15 +264,15 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
         {cards.map((card) => (
-          <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-2 md:space-y-3">
+          <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-2 md:space-y-3 min-w-0">
             <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
               <card.icon className="h-4 w-4 md:h-5 md:w-5" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xl md:text-2xl font-bold">{card.value}</p>
-              <p className="text-[10px] md:text-sm text-muted-foreground leading-tight">{card.label}</p>
+              <p className="text-xs md:text-sm text-muted-foreground leading-tight">{card.label}</p>
             </div>
           </div>
         ))}

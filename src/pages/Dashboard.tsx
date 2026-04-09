@@ -163,7 +163,7 @@ export default function Dashboard() {
         </header>
       )}
 
-      <div className={`max-w-6xl mx-auto ${isEmbedded ? 'p-6 md:p-8' : 'px-4 md:px-8 pb-8'} space-y-6`}>
+      <div className={`max-w-6xl mx-auto w-full ${isEmbedded ? 'p-4 md:p-8' : 'px-4 md:px-8 pb-8'} space-y-6`}>
         {/* Embedded header */}
         {isEmbedded && (
           <div className="flex items-center justify-between">
@@ -210,7 +210,7 @@ export default function Dashboard() {
           </div>
         )}
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div
             className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
             onClick={() => {

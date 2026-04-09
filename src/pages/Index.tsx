@@ -69,7 +69,7 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 space-y-6 w-full">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
