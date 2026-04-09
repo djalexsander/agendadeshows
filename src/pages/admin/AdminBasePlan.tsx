@@ -106,7 +106,7 @@ export default function AdminBasePlan() {
   const pendingCount = payments.filter((p) => p.status === "pending_review").length;
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
@@ -119,39 +119,39 @@ export default function AdminBasePlan() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-2xl bg-card border border-border p-4 space-y-1">
-          <div className="h-10 w-10 rounded-xl bg-yellow-500/15 flex items-center justify-center">
-            <Clock className="h-5 w-5 text-yellow-400" />
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
+        <div className="rounded-2xl bg-card border border-border p-3 md:p-4 space-y-1">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-yellow-500/15 flex items-center justify-center">
+            <Clock className="h-4 w-4 md:h-5 md:w-5 text-yellow-400" />
           </div>
-          <p className="text-2xl font-bold">{pendingCount}</p>
-          <p className="text-xs text-muted-foreground">Pendentes</p>
+          <p className="text-xl md:text-2xl font-bold">{pendingCount}</p>
+          <p className="text-[10px] md:text-xs text-muted-foreground">Pendentes</p>
         </div>
-        <div className="rounded-2xl bg-card border border-border p-4 space-y-1">
-          <div className="h-10 w-10 rounded-xl bg-[hsl(140_60%_45%)]/15 flex items-center justify-center">
-            <CheckCircle className="h-5 w-5 text-[hsl(140_60%_55%)]" />
+        <div className="rounded-2xl bg-card border border-border p-3 md:p-4 space-y-1">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-[hsl(140_60%_45%)]/15 flex items-center justify-center">
+            <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-[hsl(140_60%_55%)]" />
           </div>
-          <p className="text-2xl font-bold">{payments.filter((p) => p.status === "approved").length}</p>
-          <p className="text-xs text-muted-foreground">Aprovados</p>
+          <p className="text-xl md:text-2xl font-bold">{payments.filter((p) => p.status === "approved").length}</p>
+          <p className="text-[10px] md:text-xs text-muted-foreground">Aprovados</p>
         </div>
-        <div className="rounded-2xl bg-card border border-border p-4 space-y-1">
-          <div className="h-10 w-10 rounded-xl bg-destructive/15 flex items-center justify-center">
-            <XCircle className="h-5 w-5 text-destructive" />
+        <div className="rounded-2xl bg-card border border-border p-3 md:p-4 space-y-1">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-destructive/15 flex items-center justify-center">
+            <XCircle className="h-4 w-4 md:h-5 md:w-5 text-destructive" />
           </div>
-          <p className="text-2xl font-bold">{payments.filter((p) => p.status === "rejected").length}</p>
-          <p className="text-xs text-muted-foreground">Rejeitados</p>
+          <p className="text-xl md:text-2xl font-bold">{payments.filter((p) => p.status === "rejected").length}</p>
+          <p className="text-[10px] md:text-xs text-muted-foreground">Rejeitados</p>
         </div>
-        <div className="rounded-2xl bg-card border border-border p-4 space-y-1">
-          <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center">
-            <DollarSign className="h-5 w-5 text-primary" />
+        <div className="rounded-2xl bg-card border border-border p-3 md:p-4 space-y-1">
+          <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/15 flex items-center justify-center">
+            <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-primary" />
           </div>
-          <p className="text-2xl font-bold">R$ {config?.price?.toFixed(2) || "0.00"}</p>
-          <p className="text-xs text-muted-foreground">Valor atual</p>
+          <p className="text-sm md:text-2xl font-bold truncate">R$ {config?.price?.toFixed(2) || "0.00"}</p>
+          <p className="text-[10px] md:text-xs text-muted-foreground">Valor atual</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap overflow-x-auto scrollbar-none">
         {(["all", "pending_review", "approved", "rejected"] as const).map((f) => (
           <Button
             key={f}
@@ -168,7 +168,7 @@ export default function AdminBasePlan() {
       {/* Payment list */}
       <div className="space-y-3">
         {filtered.map((p) => (
-          <div key={p.id} className="rounded-xl bg-card border border-border p-4 flex items-center gap-4 flex-wrap">
+          <div key={p.id} className="rounded-xl bg-card border border-border p-3 md:p-4 space-y-2 md:space-y-0 md:flex md:items-center md:gap-4">
             <div className="flex-1 min-w-0">
               <p className="font-semibold truncate">{p.profile_name}</p>
               <p className="text-xs text-muted-foreground truncate">{p.profile_email}</p>
@@ -179,7 +179,7 @@ export default function AdminBasePlan() {
             <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
               {statusLabel(p.status)}
             </span>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex items-center justify-between md:justify-end gap-2">
               {p.status === "pending_review" && (
                 <>
                   <Button
