@@ -45,12 +45,6 @@
 
     --show-indicator: 258 70% 58%;
     --show-indicator-glow: 258 80% 65%;
-
-    /* Safe area insets for notch/home indicator */
-    --safe-area-top: env(safe-area-inset-top, 0px);
-    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-area-left: env(safe-area-inset-left, 0px);
-    --safe-area-right: env(safe-area-inset-right, 0px);
   }
 }
 
@@ -59,48 +53,9 @@
     @apply border-border;
   }
 
-  html {
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: transparent;
-    overflow-x: hidden;
-  }
-
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    padding-top: var(--safe-area-top);
-    padding-bottom: var(--safe-area-bottom);
-    padding-left: var(--safe-area-left);
-    padding-right: var(--safe-area-right);
-  }
-
-  /* Prevent iOS zoom on input focus */
-  input, select, textarea {
-    font-size: 16px !important;
-  }
-
-  /* Smooth scrolling for modals */
-  .overflow-y-auto {
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Better touch targets */
-  button, a, [role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  /* Exception for inline/badge elements */
-  .badge-touch-override,
-  [data-slot="badge"],
-  .text-\[10px\],
-  .text-\[9px\] {
-    min-height: unset;
-    min-width: unset;
   }
 }
 
@@ -116,24 +71,4 @@
 
 .show-circle {
   display: none;
-}
-
-/* Calendar touch optimization */
-.rdp-button {
-  min-height: 44px !important;
-  min-width: 44px !important;
-}
-
-/* Dialog mobile optimization */
-@media (max-width: 640px) {
-  [role="dialog"] {
-    max-height: calc(100vh - var(--safe-area-top) - var(--safe-area-bottom)) !important;
-    max-height: calc(100dvh - var(--safe-area-top) - var(--safe-area-bottom)) !important;
-  }
-}
-
-/* Prevent horizontal scroll globally */
-#root {
-  overflow-x: hidden;
-  width: 100%;
 }

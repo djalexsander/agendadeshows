@@ -80,83 +80,83 @@ export default function Dashboard() {
     <div className={isEmbedded ? "" : "min-h-screen bg-background"}>
       {/* Header — only show when standalone */}
       {!isEmbedded && (
-        <header className="px-4 md:px-8 pt-4 pb-3 sticky top-0 z-40 bg-background/95 backdrop-blur-sm" style={{ paddingTop: 'calc(var(--safe-area-top) + 0.75rem)' }}>
+        <header className="px-4 md:px-8 pt-6 pb-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
                 <Music className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight">Agenda de Shows</h1>
-                <p className="text-xs text-muted-foreground truncate max-w-[120px] sm:max-w-none">
+                <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
+                <p className="text-xs text-muted-foreground">
                   {profile?.nome_artistico || profile?.nome || "Sua agenda"}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-xl"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={() => navigate("/meu-plano")}
                 title="Meu Plano"
               >
-                <Crown className="h-5 w-5" />
+                <Crown className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-xl"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={() => navigate("/modulos")}
                 title="Módulos"
               >
-                <Puzzle className="h-5 w-5" />
+                <Puzzle className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-xl"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={() => window.location.reload()}
                 title="Atualizar página"
               >
-                <RefreshCw className="h-5 w-5" />
+                <RefreshCw className="h-4 w-4" />
               </Button>
               {hasModule("export_png") ? (
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-11 w-11 rounded-xl border-border"
+                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border"
                   onClick={() => setExportOpen(true)}
                   disabled={shows.length === 0}
                 >
-                  <Image className="h-5 w-5" />
+                  <Image className="h-4 w-4" />
                 </Button>
               ) : (
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-11 w-11 rounded-xl border-border opacity-70"
+                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border opacity-70"
                   onClick={() => navigate("/modulos")}
                 >
-                  <Lock className="h-5 w-5" />
+                  <Lock className="h-4 w-4" />
                 </Button>
               )}
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-xl"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={signOut}
               >
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-4 w-4" />
               </Button>
               <Button
                 variant={pushEnabled ? "default" : "outline"}
                 size="icon"
-                className="h-11 w-11 rounded-xl"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
                 onClick={togglePush}
                 title={pushEnabled ? "Desativar notificações" : "Ativar notificações"}
               >
-                <Bell className="h-5 w-5" />
+                <Bell className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -187,7 +187,7 @@ export default function Dashboard() {
         )}
         {/* Quick nav for modules */}
         {!isEmbedded && (
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {[
               { label: "Financeiro", icon: DollarSign, path: "/financeiro" },
               { label: "Equipe", icon: Users, path: "/equipe" },
@@ -199,7 +199,8 @@ export default function Dashboard() {
                 <Button
                   key={item.path}
                   variant="outline"
-                  className="rounded-xl gap-2 shrink-0 border-border h-11 px-4 text-sm"
+                  size="sm"
+                  className="rounded-xl gap-2 shrink-0 border-border"
                   onClick={() => navigate(item.path)}
                 >
                   <Icon className="h-4 w-4" />
