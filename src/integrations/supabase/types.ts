@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_access_audit_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_value: string | null
+          notes: string | null
+          performed_at: string
+          performed_by_user_id: string
+          previous_value: string | null
+          reason: string | null
+          resource_code: string
+          resource_type: string
+          target_user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_value?: string | null
+          notes?: string | null
+          performed_at?: string
+          performed_by_user_id: string
+          previous_value?: string | null
+          reason?: string | null
+          resource_code: string
+          resource_type: string
+          target_user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_value?: string | null
+          notes?: string | null
+          performed_at?: string
+          performed_by_user_id?: string
+          previous_value?: string | null
+          reason?: string | null
+          resource_code?: string
+          resource_type?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
       admin_notifications: {
         Row: {
           created_at: string
@@ -343,6 +391,96 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      manual_module_overrides: {
+        Row: {
+          created_at: string
+          granted_at: string
+          granted_by_user_id: string
+          id: string
+          is_active: boolean
+          module_name: string
+          notes: string | null
+          reason: string | null
+          revoked_at: string | null
+          revoked_by_user_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string
+          granted_by_user_id: string
+          id?: string
+          is_active?: boolean
+          module_name: string
+          notes?: string | null
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by_user_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string
+          granted_by_user_id?: string
+          id?: string
+          is_active?: boolean
+          module_name?: string
+          notes?: string | null
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by_user_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      manual_plan_overrides: {
+        Row: {
+          created_at: string
+          granted_at: string
+          granted_by_user_id: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          plan_code: string
+          reason: string | null
+          revoked_at: string | null
+          revoked_by_user_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_at?: string
+          granted_by_user_id: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          plan_code?: string
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by_user_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_at?: string
+          granted_by_user_id?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          plan_code?: string
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by_user_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       module_catalog: {
         Row: {
