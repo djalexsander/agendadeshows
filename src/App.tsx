@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AdminModeProvider } from "@/hooks/useAdminMode";
 import { CompanyProvider } from "@/hooks/useCompany";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
+import { TrialBanner } from "@/components/TrialBanner";
+import { TrialExpiredModal } from "@/components/TrialExpiredModal";
 import Login from "./pages/Login";
 import PlanChoice from "./pages/PlanChoice";
 import TrialExpired from "./pages/TrialExpired";
@@ -96,16 +98,20 @@ function AppRoutes() {
       case "trial":
       case "active":
         return (
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/meu-plano" element={<ClientBasePlan />} />
-            <Route path="/modulos" element={<ModulesUpgrade />} />
-            <Route path="/financeiro" element={<Financeiro />} />
-            <Route path="/equipe" element={<Equipe />} />
-            <Route path="/usuarios" element={<CompanyUsers />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <>
+            <TrialBanner />
+            <TrialExpiredModal />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/meu-plano" element={<ClientBasePlan />} />
+              <Route path="/modulos" element={<ModulesUpgrade />} />
+              <Route path="/financeiro" element={<Financeiro />} />
+              <Route path="/equipe" element={<Equipe />} />
+              <Route path="/usuarios" element={<CompanyUsers />} />
+              <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </>
         );
 
       case "trial_expired":
