@@ -55,6 +55,9 @@ export function getEffectivePlanStatus(profile: PlanProfile | null): EffectivePl
     if (profile.current_period_end && new Date(profile.current_period_end) > now && profile.is_paid) {
       return "active";
     }
+    // After trial: convert to basic plan (keep access, modules limited to paid only)
+    // Status "ativo" means they stay active on basic plan
+    if (status === "ativo" || status === "active") return "active";
     return "trial_expired";
   }
 
