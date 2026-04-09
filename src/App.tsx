@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AdminModeProvider } from "@/hooks/useAdminMode";
 import { CompanyProvider } from "@/hooks/useCompany";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
+import { TrialBanner } from "@/components/TrialBanner";
+import { TrialExpiredModal } from "@/components/TrialExpiredModal";
 import Login from "./pages/Login";
 import PlanChoice from "./pages/PlanChoice";
 import TrialExpired from "./pages/TrialExpired";
