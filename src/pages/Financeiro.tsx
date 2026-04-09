@@ -259,6 +259,12 @@ function FinanceiroContent() {
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const activeFilters = Object.values(filters).filter(Boolean).length;
 
+  const handleMarkPaid = useCallback(async (id: string) => {
+    const res = await updateEntry(id, { status: "pago", data_pagamento: format(new Date(), "yyyy-MM-dd") });
+    if (res.error) toast.error("Erro ao atualizar");
+    else toast.success("Marcado como pago!");
+  }, [updateEntry]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
