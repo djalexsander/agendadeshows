@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
