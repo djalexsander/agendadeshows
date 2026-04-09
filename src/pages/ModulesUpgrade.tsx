@@ -82,7 +82,7 @@ function GracePeriodBanner() {
   );
 }
 
-  const { user, profile } = useAuth();
+  export default function ModulesUpgrade() {
   const { hasModule, loading: modulesLoading, refreshModules } = useModules();
   const { hasPendingRequest, loading: requestsLoading } = useModuleRequests();
   const { modules: catalog, loading: catalogLoading } = useModuleCatalog();
