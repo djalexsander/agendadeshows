@@ -276,61 +276,61 @@ function FinanceiroContent() {
   return (
     <>
       {/* Summary cards - clickable */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <button
-          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-green-500/50 active:scale-[0.97] transition-all"
+          className="rounded-2xl bg-card border border-border p-3 sm:p-4 flex flex-col items-start gap-2 text-left hover:border-green-500/50 active:scale-[0.97] transition-all"
           onClick={() => setDetailDrawer("entradas")}
         >
           <div className="flex items-center justify-between w-full">
-            <div className="h-8 w-8 rounded-xl bg-green-500/15 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-green-500/15 flex items-center justify-center">
               <TrendingUp className="h-4 w-4 text-green-500" />
             </div>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-xs sm:text-lg font-bold text-green-500 truncate w-full">{fmt(advancedTotals.totalEntradas)}</p>
-          <p className="text-[9px] sm:text-xs text-muted-foreground">Entradas</p>
+          <p className="text-sm sm:text-lg font-bold text-green-500 truncate w-full">{fmt(advancedTotals.totalEntradas)}</p>
+          <p className="text-xs text-muted-foreground">Entradas</p>
         </button>
 
         <button
-          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-red-500/50 active:scale-[0.97] transition-all"
+          className="rounded-2xl bg-card border border-border p-3 sm:p-4 flex flex-col items-start gap-2 text-left hover:border-red-500/50 active:scale-[0.97] transition-all"
           onClick={() => setDetailDrawer("saidas")}
         >
           <div className="flex items-center justify-between w-full">
-            <div className="h-8 w-8 rounded-xl bg-red-500/15 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-red-500/15 flex items-center justify-center">
               <TrendingDown className="h-4 w-4 text-red-500" />
             </div>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-xs sm:text-lg font-bold text-red-500 truncate w-full">{fmt(advancedTotals.totalSaidas)}</p>
-          <p className="text-[9px] sm:text-xs text-muted-foreground">Saídas</p>
+          <p className="text-sm sm:text-lg font-bold text-red-500 truncate w-full">{fmt(advancedTotals.totalSaidas)}</p>
+          <p className="text-xs text-muted-foreground">Saídas</p>
         </button>
 
         <button
-          className="rounded-2xl bg-card border border-yellow-500/30 p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-yellow-500/60 active:scale-[0.97] transition-all"
+          className="rounded-2xl bg-card border border-yellow-500/30 p-3 sm:p-4 flex flex-col items-start gap-2 text-left hover:border-yellow-500/60 active:scale-[0.97] transition-all"
           onClick={() => setDetailDrawer("pendentes")}
         >
           <div className="flex items-center justify-between w-full">
-            <div className="h-8 w-8 rounded-xl bg-yellow-500/15 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-yellow-500/15 flex items-center justify-center">
               <Clock className="h-4 w-4 text-yellow-500" />
             </div>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-xs sm:text-lg font-bold text-yellow-500 truncate w-full">{fmt(advancedTotals.totalPendentes)}</p>
-          <p className="text-[9px] sm:text-xs text-muted-foreground">Pendente</p>
+          <p className="text-sm sm:text-lg font-bold text-yellow-500 truncate w-full">{fmt(advancedTotals.totalPendentes)}</p>
+          <p className="text-xs text-muted-foreground">Pendente</p>
         </button>
 
         <button
-          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-primary/50 active:scale-[0.97] transition-all"
+          className="rounded-2xl bg-card border border-border p-3 sm:p-4 flex flex-col items-start gap-2 text-left hover:border-primary/50 active:scale-[0.97] transition-all"
           onClick={() => setDetailDrawer("saldo")}
         >
           <div className="flex items-center justify-between w-full">
-            <div className="h-8 w-8 rounded-xl bg-primary/15 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-primary/15 flex items-center justify-center">
               <Wallet className="h-4 w-4 text-primary" />
             </div>
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className={`text-xs sm:text-lg font-bold truncate w-full ${advancedTotals.saldoConfirmado >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(advancedTotals.saldoConfirmado)}</p>
-          <p className="text-[9px] sm:text-xs text-muted-foreground">Saldo</p>
+          <p className={`text-sm sm:text-lg font-bold truncate w-full ${advancedTotals.saldoConfirmado >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(advancedTotals.saldoConfirmado)}</p>
+          <p className="text-xs text-muted-foreground">Saldo</p>
         </button>
       </div>
 
@@ -735,18 +735,18 @@ export default function Financeiro() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-4 md:px-8 pt-6 pb-4">
+      <header className="px-4 md:px-8 pt-4 pb-3 sticky top-0 z-40 bg-background/95 backdrop-blur-sm" style={{ paddingTop: 'calc(var(--safe-area-top) + 0.75rem)' }}>
         <div className="flex items-center gap-3 max-w-3xl mx-auto">
-          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" className="rounded-xl shrink-0 h-11 w-11" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">Financeiro</h1>
+            <h1 className="text-lg font-bold tracking-tight">Financeiro</h1>
           </div>
         </div>
       </header>
-      <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4">
+      <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4" style={{ paddingBottom: 'calc(var(--safe-area-bottom) + 2.5rem)' }}>
         <ModuleGate moduleName="financeiro">
           <FinanceiroContent />
         </ModuleGate>

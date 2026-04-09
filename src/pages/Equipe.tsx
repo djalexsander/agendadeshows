@@ -108,18 +108,18 @@ export default function Equipe() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="px-4 md:px-8 pt-6 pb-4">
+      <header className="px-4 md:px-8 pt-4 pb-3 sticky top-0 z-40 bg-background/95 backdrop-blur-sm" style={{ paddingTop: 'calc(var(--safe-area-top) + 0.75rem)' }}>
         <div className="flex items-center gap-3 max-w-3xl mx-auto">
-          <Button variant="ghost" size="icon" className="rounded-xl shrink-0" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" className="rounded-xl shrink-0 h-11 w-11" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-bold tracking-tight">Equipe</h1>
+            <h1 className="text-lg font-bold tracking-tight">Equipe</h1>
           </div>
         </div>
       </header>
-      <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4">
+      <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4" style={{ paddingBottom: 'calc(var(--safe-area-bottom) + 2.5rem)' }}>
         <ModuleGate moduleName="equipe">
           <EquipeContent />
         </ModuleGate>
