@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Pencil, Search, Trash2, Globe, Shield, Info } from "lucide-react";
+import { Pencil, Search, Trash2, Globe, Shield, Info, KeyRound } from "lucide-react";
+import { AdminAccessControlDialog } from "@/components/admin/AdminAccessControl";
 import { getEffectivePlanStatus, type EffectivePlanStatus } from "@/lib/planStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
