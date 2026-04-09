@@ -134,30 +134,30 @@ export default function AdminLayout() {
   }, [toast]);
 
   const ModeToggle = ({ className }: { className?: string }) => (
-    <div className={cn("flex gap-1 p-1 bg-muted rounded-xl", className)}>
+    <div className={cn("flex gap-1 p-1 bg-muted rounded-xl min-w-0 w-full max-w-full overflow-hidden", className)}>
       <button
         onClick={() => handleModeSwitch("admin")}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+          "flex flex-1 basis-0 min-w-0 items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[10px] font-medium transition-all sm:gap-2 sm:px-3 sm:text-xs",
           !isEmpresaMode
             ? "bg-primary text-primary-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <ShieldCheck className="h-3.5 w-3.5" />
-        Administração
+        <ShieldCheck className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
+        <span className="min-w-0 truncate">Administração</span>
       </button>
       <button
         onClick={() => handleModeSwitch("empresa")}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+          "flex flex-1 basis-0 min-w-0 items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-[10px] font-medium transition-all sm:gap-2 sm:px-3 sm:text-xs",
           isEmpresaMode
             ? "bg-primary text-primary-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
         )}
       >
-        <Building2 className="h-3.5 w-3.5" />
-        Minha Empresa
+        <Building2 className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
+        <span className="min-w-0 truncate">Minha Empresa</span>
       </button>
     </div>
   );
@@ -222,8 +222,8 @@ export default function AdminLayout() {
 
       {/* Mobile header */}
       <div className="flex-1 flex flex-col">
-        <header className="md:hidden flex flex-col border-b border-border bg-card sticky top-0 z-50" style={{ paddingTop: 'var(--safe-area-top)' }}>
-          <div className="flex items-center justify-between px-4 pt-3 pb-2">
+        <header className="md:hidden flex flex-col border-b border-border bg-card sticky top-0 z-50 w-full max-w-full overflow-x-hidden" style={{ paddingTop: 'calc(var(--safe-area-top) + 0.25rem)' }}>
+          <div className="flex items-center justify-between px-3 sm:px-4 pt-3 pb-2 gap-3">
             <div className="flex items-center gap-2">
               <Music className="h-5 w-5 text-primary" />
               <span className="font-bold text-base">
@@ -244,11 +244,11 @@ export default function AdminLayout() {
             </div>
           </div>
           {/* Mode toggle mobile */}
-          <div className="px-4 pb-2">
+          <div className="px-3 sm:px-4 pb-2">
             <ModeToggle className="w-full" />
           </div>
           {/* Nav items */}
-          <div className="flex items-center gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
+          <div className="flex items-center justify-between gap-1.5 px-3 sm:px-4 pb-3 w-full max-w-full">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}

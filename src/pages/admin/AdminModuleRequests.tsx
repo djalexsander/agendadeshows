@@ -101,36 +101,38 @@ export default function AdminModuleRequests() {
   ];
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto w-full max-w-full overflow-x-hidden">
+      <div className="flex items-start gap-3 min-w-0">
         <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
           <Puzzle className="h-5 w-5 text-primary" />
         </div>
-        <div>
+        <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight">Solicitações de Módulos</h1>
-          <p className="text-xs text-muted-foreground">Analise e aprove ou rejeite solicitações de add-ons dos clientes.</p>
+          <p className="text-xs text-muted-foreground break-words">Analise e aprove ou rejeite solicitações de add-ons dos clientes.</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        {filterButtons.map((f) => (
-          <Button
-            key={f.key}
-            size="sm"
-            variant={filter === f.key ? "default" : "outline"}
-            className="rounded-xl text-xs h-8"
-            onClick={() => setFilter(f.key)}
-          >
-            {f.label}
-            {f.key !== "all" && (
-              <span className="ml-1.5 opacity-60">
-                ({requests.filter((r) => f.key === "all" || r.status === f.key).length})
-              </span>
-            )}
-          </Button>
-        ))}
+      <div className="w-full overflow-x-auto scrollbar-none">
+        <div className="flex min-w-max items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+          {filterButtons.map((f) => (
+            <Button
+              key={f.key}
+              size="sm"
+              variant={filter === f.key ? "default" : "outline"}
+              className="rounded-xl text-xs h-8 whitespace-nowrap"
+              onClick={() => setFilter(f.key)}
+            >
+              {f.label}
+              {f.key !== "all" && (
+                <span className="ml-1.5 opacity-60">
+                  ({requests.filter((r) => f.key === "all" || r.status === f.key).length})
+                </span>
+              )}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
@@ -142,7 +144,42 @@ export default function AdminModuleRequests() {
           Nenhuma solicitação encontrada.
         </div>
       ) : (
-        <div className="rounded-xl border border-border overflow-x-auto">
+        <>
+          <div className="space-y-3 md:hidden">
+            {filtered.map((req) => (
+              <div key={req.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
+                <div className="space-y-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{req.user_nome || "—"}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{req.user_email}</p>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Módulo</p>
+                    <p className="text-sm">{MODULE_LABELS[req.module_name] ?? req.module_name}</p>
+                  </div>
+                  <div className="shrink-0">{statusBadge(req.status)}</div>
+                </div>
+                <p className="text-[11px] text-muted-foreground">{format(new Date(req.requested_at), "dd/MM/yyyy HH:mm")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {req.status === "pending" && (
+                    <>
+                      <Button size="sm" variant="default" className="rounded-xl text-xs flex-1 min-w-[120px]" onClick={() => openAction(req, "approve")}>
+                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Aprovar
+                      </Button>
+                      <Button size="sm" variant="outline" className="rounded-xl text-xs text-destructive border-destructive/30 flex-1 min-w-[120px]" onClick={() => openAction(req, "reject")}>
+                        <XCircle className="h-3.5 w-3.5 mr-1" /> Rejeitar
+                      </Button>
+                    </>
+                  )}
+                  <Button size="sm" variant="ghost" className="rounded-xl text-xs text-destructive hover:text-destructive hover:bg-destructive/10 px-3" onClick={() => setDeleteTarget(req)}>
+                    <Trash2 className="h-3.5 w-3.5 mr-1" /> Excluir
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden md:block rounded-xl border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -207,7 +244,8 @@ export default function AdminModuleRequests() {
               ))}
             </TableBody>
           </Table>
-        </div>
+          </div>
+        </>
       )}
 
       {/* Confirm Action Dialog */}
