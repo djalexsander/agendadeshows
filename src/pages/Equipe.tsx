@@ -44,7 +44,7 @@ function EquipeContent() {
     <>
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{members.length} membro{members.length !== 1 ? "s" : ""}</p>
-        <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)}>
+        <Button className="rounded-xl gap-1.5 h-11 px-4" onClick={() => setDialogOpen(true)}>
           <Plus className="h-4 w-4" /> Adicionar
         </Button>
       </div>
@@ -87,11 +87,11 @@ function EquipeContent() {
             <DialogDescription>Adicione uma pessoa à sua equipe</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div><Label>Nome *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome completo" /></div>
-            <div><Label>Função</Label><Input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="Ex: Técnico de som" /></div>
-            <div><Label>Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(00) 00000-0000" /></div>
-            <div><Label>E-mail</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@exemplo.com" /></div>
-            <div><Label>Observações</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Anotações" /></div>
+            <div className="space-y-1.5"><Label>Nome *</Label><Input className="h-12" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome completo" /></div>
+            <div className="space-y-1.5"><Label>Função</Label><Input className="h-12" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} placeholder="Ex: Técnico de som" /></div>
+            <div className="space-y-1.5"><Label>Telefone</Label><Input className="h-12" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(00) 00000-0000" inputMode="tel" /></div>
+            <div className="space-y-1.5"><Label>E-mail</Label><Input className="h-12" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@exemplo.com" /></div>
+            <div className="space-y-1.5"><Label>Observações</Label><Input className="h-12" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Anotações" /></div>
             <Button className="w-full h-12 gap-2" disabled={saving} onClick={handleSave}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {saving ? "Salvando..." : "Adicionar"}

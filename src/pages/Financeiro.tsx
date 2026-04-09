@@ -393,36 +393,36 @@ function FinanceiroContent() {
       )}
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-2 items-center">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex gap-2 items-center flex-wrap">
           <Button
             size="sm"
             variant={showFilters ? "default" : "outline"}
-            className="rounded-xl text-xs gap-1.5"
+            className="rounded-xl text-xs gap-1.5 h-10"
             onClick={() => setShowFilters(!showFilters)}
           >
             <Filter className="h-3.5 w-3.5" />
             Filtros
             {activeFilters > 0 && (
-              <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">{activeFilters}</Badge>
+              <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] min-h-0 min-w-0">{activeFilters}</Badge>
             )}
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="rounded-xl text-xs gap-1.5"
+            className="rounded-xl text-xs gap-1.5 h-10"
             onClick={() => setExportOpen(true)}
           >
             <Download className="h-3.5 w-3.5" />
             Exportar
           </Button>
           {activeFilters > 0 && (
-            <Button size="sm" variant="ghost" className="text-xs text-muted-foreground" onClick={() => setFilters({})}>
+            <Button size="sm" variant="ghost" className="text-xs text-muted-foreground h-10" onClick={() => setFilters({})}>
               <X className="h-3 w-3 mr-1" /> Limpar
             </Button>
           )}
         </div>
-        <Button size="sm" className="rounded-xl gap-1.5" onClick={handleNewEntry}>
+        <Button className="rounded-xl gap-1.5 h-10 px-4" onClick={handleNewEntry}>
           <Plus className="h-4 w-4" /> Novo
         </Button>
       </div>
