@@ -104,6 +104,33 @@ export function useFinancialEntries() {
     return { error: null };
   }, [user, fetchEntries]);
 
+  const updateEntry = useCallback(async (id: string, updates: Partial<{
+    title: string;
+    type: string;
+    amount: number;
+    event_name: string;
+    event_date: string;
+    notes: string;
+    data_lancamento: string;
+    data_vencimento: string;
+    data_pagamento: string;
+    categoria: string;
+    forma_pagamento: string;
+    status: string;
+    pessoa: string;
+    comprovante_url: string;
+    parcelas: number;
+    parcela_atual: number;
+    recorrencia: string;
+    show_id: string;
+  }>) => {
+    if (!user) return { error: "Não autenticado" };
+    const { error } = await (supabase.from("financial_entries") as any).update(updates).eq("id", id);
+    if (error) return { error: error.message };
+    await fetchEntries();
+    return { error: null };
+  }, [user, fetchEntries]);
+
   const deleteEntry = useCallback(async (id: string) => {
     await (supabase.from("financial_entries") as any).delete().eq("id", id);
     await fetchEntries();
@@ -164,6 +191,7 @@ export function useFinancialEntries() {
     allEntries: entries,
     loading,
     addEntry,
+    updateEntry,
     deleteEntry,
     refresh: fetchEntries,
     totals: { ...totals, saldo: totals.entradas - totals.saidas },

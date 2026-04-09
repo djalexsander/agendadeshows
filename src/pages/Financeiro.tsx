@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -113,7 +113,7 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 
 function FinanceiroContent() {
   const { user } = useAuth();
-  const { entries, loading, addEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
+  const { entries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -123,6 +123,7 @@ function FinanceiroContent() {
   const [uploading, setUploading] = useState(false);
   const [comprovante, setComprovante] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "events">("list");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const currentCategories = form.type === "entrada" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
   const allFilterCategories = [...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])];
@@ -153,39 +154,79 @@ function FinanceiroContent() {
     if (!form.data_lancamento) { toast.error("Selecione a data do lançamento"); return; }
     setSaving(true);
 
-    const parcelas = parseInt(form.parcelas) || 1;
     const selectedShow = form.show_id ? shows.find((s) => s.id === form.show_id) : null;
+    const payload = {
+      title: form.title,
+      type: form.type,
+      amount: parseFloat(form.amount),
+      notes: form.notes || undefined,
+      data_lancamento: format(form.data_lancamento!, "yyyy-MM-dd"),
+      data_vencimento: form.data_vencimento ? format(form.data_vencimento, "yyyy-MM-dd") : null,
+      data_pagamento: form.data_pagamento ? format(form.data_pagamento, "yyyy-MM-dd") : null,
+      categoria: form.categoria || null,
+      forma_pagamento: form.forma_pagamento || null,
+      status: form.status,
+      pessoa: form.pessoa || null,
+      comprovante_url: comprovante || null,
+      recorrencia: form.recorrencia,
+      show_id: form.show_id || null,
+      event_name: selectedShow ? (selectedShow.evento || selectedShow.cidade) : null,
+      event_date: selectedShow ? selectedShow.date : null,
+    };
 
-    for (let i = 0; i < parcelas; i++) {
-      const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
-      const res = await addEntry({
-        title: form.title + suffix,
-        type: form.type,
-        amount: parseFloat(form.amount),
-        notes: form.notes || undefined,
-        data_lancamento: format(form.data_lancamento!, "yyyy-MM-dd"),
-        data_vencimento: form.data_vencimento ? format(form.data_vencimento, "yyyy-MM-dd") : undefined,
-        data_pagamento: form.data_pagamento ? format(form.data_pagamento, "yyyy-MM-dd") : undefined,
-        categoria: form.categoria || undefined,
-        forma_pagamento: form.forma_pagamento || undefined,
-        status: form.status,
-        pessoa: form.pessoa || undefined,
-        comprovante_url: comprovante || undefined,
-        parcelas,
-        parcela_atual: i + 1,
-        recorrencia: form.recorrencia,
-        show_id: form.show_id || undefined,
-        event_name: selectedShow ? (selectedShow.evento || selectedShow.cidade) : undefined,
-        event_date: selectedShow ? selectedShow.date : undefined,
-      });
-      if (res.error) { toast.error("Erro ao salvar"); setSaving(false); return; }
+    if (editingId) {
+      const res = await updateEntry(editingId, payload);
+      if (res.error) { toast.error("Erro ao atualizar"); setSaving(false); return; }
+      toast.success("Lançamento atualizado!");
+    } else {
+      const parcelas = parseInt(form.parcelas) || 1;
+      for (let i = 0; i < parcelas; i++) {
+        const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
+        const res = await addEntry({
+          ...payload,
+          title: form.title + suffix,
+          parcelas,
+          parcela_atual: i + 1,
+        });
+        if (res.error) { toast.error("Erro ao salvar"); setSaving(false); return; }
+      }
+      toast.success(parcelas > 1 ? `${parcelas} parcelas adicionadas!` : "Lançamento adicionado!");
     }
 
     setSaving(false);
-    toast.success(parcelas > 1 ? `${parcelas} parcelas adicionadas!` : "Lançamento adicionado!");
     setForm({ ...defaultForm });
     setComprovante(null);
+    setEditingId(null);
     setDialogOpen(false);
+  };
+
+  const handleEdit = (e: typeof entries[0]) => {
+    setEditingId(e.id);
+    setForm({
+      title: e.title,
+      type: e.type,
+      amount: String(e.amount),
+      notes: e.notes || "",
+      data_lancamento: e.data_lancamento ? new Date(e.data_lancamento + "T12:00:00") : undefined,
+      data_vencimento: e.data_vencimento ? new Date(e.data_vencimento + "T12:00:00") : undefined,
+      data_pagamento: e.data_pagamento ? new Date(e.data_pagamento + "T12:00:00") : undefined,
+      categoria: e.categoria || "",
+      forma_pagamento: e.forma_pagamento || "",
+      status: e.status,
+      pessoa: e.pessoa || "",
+      show_id: e.show_id || "",
+      parcelas: String(e.parcelas),
+      recorrencia: e.recorrencia,
+    });
+    setComprovante(e.comprovante_url || null);
+    setDialogOpen(true);
+  };
+
+  const handleNewEntry = () => {
+    setEditingId(null);
+    setForm({ ...defaultForm });
+    setComprovante(null);
+    setDialogOpen(true);
   };
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -311,7 +352,7 @@ function FinanceiroContent() {
             </Button>
           )}
         </div>
-        <Button size="sm" className="rounded-xl gap-1.5" onClick={() => setDialogOpen(true)}>
+        <Button size="sm" className="rounded-xl gap-1.5" onClick={handleNewEntry}>
           <Plus className="h-4 w-4" /> Novo
         </Button>
       </div>
@@ -416,13 +457,21 @@ function FinanceiroContent() {
                   {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
                   <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
                   {e.data_lancamento && <span className="text-[10px] text-muted-foreground">{format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}</span>}
-                  <Button variant="ghost" size="icon" className="h-7 w-7 ml-auto shrink-0" onClick={() => deleteEntry(e.id)}>
-                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                  </Button>
+                  <div className="flex items-center gap-0.5 ml-auto shrink-0">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(e)}>
+                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteEntry(e.id)}>
+                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </Button>
+                  </div>
                 </div>
                 <span className={`text-sm font-bold shrink-0 hidden sm:block ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
                   {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
                 </span>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 hidden sm:flex" onClick={() => handleEdit(e)}>
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 hidden sm:flex" onClick={() => deleteEntry(e.id)}>
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
@@ -433,12 +482,12 @@ function FinanceiroContent() {
       )}
 
       {/* Dialog - Novo Lançamento */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(o) => { if (!o) { setEditingId(null); setForm({ ...defaultForm }); setComprovante(null); } setDialogOpen(o); }}>
         <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-primary" />
-              Novo lançamento
+              {editingId ? "Editar lançamento" : "Novo lançamento"}
             </DialogTitle>
             <DialogDescription>Vincule ao evento para controle completo por show</DialogDescription>
           </DialogHeader>
@@ -590,8 +639,8 @@ function FinanceiroContent() {
             <Separator />
 
             <Button className="w-full h-12 gap-2" disabled={saving} onClick={handleSave}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              {saving ? "Salvando..." : parseInt(form.parcelas) > 1 ? `Adicionar ${form.parcelas} parcelas` : "Adicionar"}
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : editingId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {saving ? "Salvando..." : editingId ? "Salvar alterações" : parseInt(form.parcelas) > 1 ? `Adicionar ${form.parcelas} parcelas` : "Adicionar"}
             </Button>
           </div>
         </DialogContent>
