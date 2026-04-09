@@ -694,6 +694,13 @@ function FinanceiroContent() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <FinancialDetailDrawer
+        type={detailDrawer}
+        onClose={() => setDetailDrawer(null)}
+        entries={entries}
+        categories={[...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])]}
+      />
     </>
   );
 }
