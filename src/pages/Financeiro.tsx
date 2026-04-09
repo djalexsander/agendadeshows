@@ -711,7 +711,13 @@ function FinanceiroContent() {
         categories={[...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])]}
       />
 
-      <FinancialExportDialog
+      <FinancialEntryViewModal
+        entry={viewEntry}
+        onClose={() => setViewEntry(null)}
+        onEdit={handleEdit}
+        onDelete={(id) => { deleteEntry(id); }}
+        onMarkPaid={handleMarkPaid}
+      />
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         entries={entries}
