@@ -173,7 +173,7 @@ export default function PlanChoice() {
 
         {/* Disclaimer */}
         <p className="text-center text-xs text-muted-foreground px-4">
-          Após os 7 dias de teste, o acesso será bloqueado caso não haja assinatura do plano mensal ativa.
+          Após os {trialDays} dias de teste, o acesso será bloqueado caso não haja assinatura do plano mensal ativa.
         </p>
 
         <Button variant="ghost" onClick={signOut} className="w-full gap-2">
