@@ -398,6 +398,13 @@ export default function AdminClients() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AdminAccessControlDialog
+        open={!!accessControlTarget}
+        onOpenChange={(o) => !o && setAccessControlTarget(null)}
+        targetUserId={accessControlTarget?.user_id ?? ""}
+        targetUserName={accessControlTarget?.nome ?? ""}
+      />
     </div>
   );
 }
