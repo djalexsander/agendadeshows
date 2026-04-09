@@ -150,7 +150,30 @@ export default function AdminSettings() {
         )}
       </div>
 
-      {/* Instruções de pagamento */}
+
+      {/* Duração do Trial */}
+      <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-primary" />
+          <h2 className="font-semibold">Duração do Teste Grátis</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Quantidade de dias de acesso completo para novos usuários que iniciarem o teste grátis.
+        </p>
+        <Select value={String(trialDays)} onValueChange={(v) => setTrialDays(Number(v))}>
+          <SelectTrigger className="w-full bg-secondary/50 border-border">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="3">3 dias</SelectItem>
+            <SelectItem value="5">5 dias</SelectItem>
+            <SelectItem value="7">7 dias</SelectItem>
+            <SelectItem value="14">14 dias</SelectItem>
+            <SelectItem value="30">30 dias</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-primary" />
