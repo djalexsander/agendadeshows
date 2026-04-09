@@ -98,16 +98,20 @@ function AppRoutes() {
       case "trial":
       case "active":
         return (
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/meu-plano" element={<ClientBasePlan />} />
-            <Route path="/modulos" element={<ModulesUpgrade />} />
-            <Route path="/financeiro" element={<Financeiro />} />
-            <Route path="/equipe" element={<Equipe />} />
-            <Route path="/usuarios" element={<CompanyUsers />} />
-            <Route path="/relatorios" element={<Relatorios />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          <>
+            <TrialBanner />
+            <TrialExpiredModal />
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/meu-plano" element={<ClientBasePlan />} />
+              <Route path="/modulos" element={<ModulesUpgrade />} />
+              <Route path="/financeiro" element={<Financeiro />} />
+              <Route path="/equipe" element={<Equipe />} />
+              <Route path="/usuarios" element={<CompanyUsers />} />
+              <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </>
         );
 
       case "trial_expired":
