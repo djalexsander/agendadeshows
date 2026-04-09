@@ -13,10 +13,16 @@ interface UserModule {
   active: boolean;
 }
 
+interface ModuleAccess {
+  module_name: string;
+  origin: "manual" | "payment" | "trial" | "none";
+}
+
 export function useModules() {
   const { user, role } = useAuth();
   const { isTrialActive } = useTrialStatus();
   const [modules, setModules] = useState<UserModule[]>([]);
+  const [manualModules, setManualModules] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const isAdmin = role === "admin";
@@ -24,25 +30,55 @@ export function useModules() {
   const fetchModules = useCallback(async () => {
     if (!user) {
       setModules([]);
+      setManualModules([]);
       setLoading(false);
       return;
     }
 
-    // Admin or active trial: all modules
-    if (isAdmin || isTrialActive) {
+    // Admin: all modules
+    if (isAdmin) {
       setModules(ALL_MODULE_NAMES.map((name) => ({ id: name, module_name: name, active: true })));
+      setManualModules([]);
       setLoading(false);
       return;
     }
 
     setLoading(true);
-    const { data } = await supabase
-      .from("user_modules")
-      .select("id, module_name, active")
-      .eq("user_id", user.id)
-      .eq("active", true);
 
-    setModules(data ?? []);
+    // Fetch paid modules and manual overrides in parallel
+    const [paidRes, manualRes] = await Promise.all([
+      supabase
+        .from("user_modules")
+        .select("id, module_name, active")
+        .eq("user_id", user.id)
+        .eq("active", true),
+      (supabase.from("manual_module_overrides") as any)
+        .select("module_name")
+        .eq("user_id", user.id)
+        .eq("is_active", true),
+    ]);
+
+    const paidModules = paidRes.data ?? [];
+    const manualMods: string[] = (manualRes.data ?? []).map((m: any) => m.module_name);
+    setManualModules(manualMods);
+
+    // During trial: all modules active
+    if (isTrialActive) {
+      setModules(ALL_MODULE_NAMES.map((name) => ({ id: name, module_name: name, active: true })));
+    } else {
+      // Merge paid + manual (deduplicated)
+      const activeNames = new Set<string>();
+      paidModules.forEach((m) => activeNames.add(m.module_name));
+      manualMods.forEach((name) => activeNames.add(name));
+
+      const merged: UserModule[] = Array.from(activeNames).map((name) => ({
+        id: name,
+        module_name: name,
+        active: true,
+      }));
+      setModules(merged);
+    }
+
     setLoading(false);
   }, [user, isAdmin, isTrialActive]);
 
@@ -58,5 +94,19 @@ export function useModules() {
     [modules, isAdmin, isTrialActive]
   );
 
-  return { modules, loading, hasModule, refreshModules: fetchModules };
+  /**
+   * Returns the origin of access for a given module.
+   * Priority: manual > payment > trial > none
+   */
+  const getModuleOrigin = useCallback(
+    (name: string): "manual" | "payment" | "trial" | "none" => {
+      if (manualModules.includes(name)) return "manual";
+      if (modules.some((m) => m.module_name === name && !manualModules.includes(name))) return isTrialActive ? "trial" : "payment";
+      if (isTrialActive) return "trial";
+      return "none";
+    },
+    [modules, manualModules, isTrialActive]
+  );
+
+  return { modules, loading, hasModule, getModuleOrigin, refreshModules: fetchModules };
 }
