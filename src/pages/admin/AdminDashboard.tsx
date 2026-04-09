@@ -41,6 +41,7 @@ interface AdminNotification {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0, pendentes_pagamento: 0, pendentes_aprovacao: 0 });
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
