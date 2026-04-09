@@ -190,8 +190,8 @@ export default function AdminFinancial() {
             <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
               <card.icon className="h-4 w-4 md:h-5 md:w-5" />
             </div>
-            <p className="text-sm md:text-2xl font-bold truncate">R$ {card.valor.toFixed(2)}</p>
-            <p className="text-[10px] md:text-sm text-muted-foreground">{card.label} ({card.qtd})</p>
+            <p className="text-sm md:text-2xl font-bold truncate">R$ {card.valor.toFixed(2).replace(/\.00$/, '')}</p>
+            <p className="text-[10px] md:text-sm text-muted-foreground truncate">{card.label} ({card.qtd})</p>
           </div>
         ))}
       </div>
