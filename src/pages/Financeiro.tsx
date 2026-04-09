@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany } from "@/hooks/useCompany";
 import { FinancialExportDialog } from "@/components/FinancialExportDialog";
+import { FinancialEntryViewModal } from "@/components/FinancialEntryViewModal";
 
 const CATEGORIAS_ENTRADA = [
   "Cachê do show",
@@ -128,6 +129,7 @@ function FinanceiroContent() {
   const { shows } = useSupabaseShows();
   const [detailDrawer, setDetailDrawer] = useState<DetailDrawerType>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [viewEntry, setViewEntry] = useState<typeof entries[0] | null>(null);
 
   const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
 
@@ -256,6 +258,12 @@ function FinanceiroContent() {
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const activeFilters = Object.values(filters).filter(Boolean).length;
+
+  const handleMarkPaid = useCallback(async (id: string) => {
+    const res = await updateEntry(id, { status: "pago", data_pagamento: format(new Date(), "yyyy-MM-dd") });
+    if (res.error) toast.error("Erro ao atualizar");
+    else toast.success("Marcado como pago!");
+  }, [updateEntry]);
 
   if (loading) {
     return (
@@ -481,62 +489,50 @@ function FinanceiroContent() {
             const st = getStatusStyle(e.status);
             const isOverdue = e.status === "vencido" || (e.status === "pendente" && e.data_vencimento && e.data_vencimento < new Date().toISOString().slice(0, 10));
             return (
-              <div key={e.id} className={cn("rounded-xl bg-secondary/40 border p-3 sm:p-4 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-3", isOverdue ? "border-red-500/40" : "border-border/50")}>
-                <div className="flex items-center gap-3">
-                  <div className={`h-8 w-8 sm:h-9 sm:w-9 rounded-lg flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
-                    {e.type === "entrada" ? <TrendingUp className="h-4 w-4 text-green-500" /> : <TrendingDown className="h-4 w-4 text-red-500" />}
+              <div
+                key={e.id}
+                className={cn(
+                  "rounded-xl bg-secondary/40 border p-3 sm:p-4 cursor-pointer hover:bg-secondary/60 active:scale-[0.99] transition-all",
+                  isOverdue ? "border-red-500/40" : "border-border/50"
+                )}
+                onClick={() => setViewEntry(e)}
+              >
+                {/* Event name - primary */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    {e.event_name ? (
+                      <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md flex items-center gap-1.5 truncate">
+                        <Music className="h-3 w-3 shrink-0" />
+                        {e.event_name}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">Sem evento</span>
+                    )}
+                    {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
                   </div>
-                  <div className="flex-1 min-w-0 sm:hidden">
-                    <p className="font-medium text-foreground text-sm truncate">{e.title}</p>
-                  </div>
-                  <span className={`text-sm font-bold shrink-0 sm:hidden ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
+                  <span className={`text-sm font-bold shrink-0 ml-2 ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
                     {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
                   </span>
                 </div>
-                <div className="flex-1 min-w-0 hidden sm:block">
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-foreground text-sm truncate">{e.title}</p>
-                    {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+
+                {/* Type icon + title */}
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className={`h-6 w-6 rounded-md flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
+                    {e.type === "entrada" ? <TrendingUp className="h-3 w-3 text-green-500" /> : <TrendingDown className="h-3 w-3 text-red-500" />}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                    {e.event_name && (
-                      <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                        <Music className="h-2.5 w-2.5" />{e.event_name}
-                      </span>
-                    )}
-                    {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
-                    <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
-                    {e.data_lancamento && <span className="text-[10px] text-muted-foreground">{format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}</span>}
-                  </div>
+                  <p className="text-sm text-foreground truncate">{e.title}</p>
                 </div>
-                {/* Mobile detail row */}
-                <div className="flex items-center gap-2 flex-wrap sm:hidden">
-                  {e.event_name && (
-                    <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <Music className="h-2.5 w-2.5" />{e.event_name}
+
+                {/* Status + date */}
+                <div className="flex items-center gap-2 pl-8">
+                  <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
+                  {e.data_lancamento && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}
                     </span>
                   )}
                   {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
-                  <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
-                  {e.data_lancamento && <span className="text-[10px] text-muted-foreground">{format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}</span>}
-                  <div className="flex items-center gap-0.5 ml-auto shrink-0">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEdit(e)}>
-                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteEntry(e.id)}>
-                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                    </Button>
-                  </div>
                 </div>
-                <span className={`text-sm font-bold shrink-0 hidden sm:block ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
-                  {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
-                </span>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 hidden sm:flex" onClick={() => handleEdit(e)}>
-                  <Pencil className="h-4 w-4 text-muted-foreground" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 hidden sm:flex" onClick={() => deleteEntry(e.id)}>
-                  <Trash2 className="h-4 w-4 text-muted-foreground" />
-                </Button>
               </div>
             );
           })}
@@ -713,6 +709,14 @@ function FinanceiroContent() {
         onClose={() => setDetailDrawer(null)}
         entries={entries}
         categories={[...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])]}
+      />
+
+      <FinancialEntryViewModal
+        entry={viewEntry}
+        onClose={() => setViewEntry(null)}
+        onEdit={handleEdit}
+        onDelete={(id) => { deleteEntry(id); }}
+        onMarkPaid={handleMarkPaid}
       />
 
       <FinancialExportDialog
