@@ -184,7 +184,7 @@ export default function AdminFinancial() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-2 md:gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-3 gap-2 md:gap-4">
         {summaryCards.map((card) => (
           <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-1.5 md:space-y-2">
             <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
