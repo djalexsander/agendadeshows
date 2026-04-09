@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Pencil, Search, Trash2, Globe, Shield, Info } from "lucide-react";
+import { Pencil, Search, Trash2, Globe, Shield, Info, KeyRound } from "lucide-react";
+import { AdminAccessControlDialog } from "@/components/admin/AdminAccessControl";
 import { getEffectivePlanStatus, type EffectivePlanStatus } from "@/lib/planStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +57,7 @@ export default function AdminClients() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ClientProfile | null>(null);
   const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
+  const [accessControlTarget, setAccessControlTarget] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -247,6 +249,9 @@ export default function AdminClients() {
                 </span>
               ); })()}
               <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-purple-400 hover:text-purple-300" title="Controle de acesso" onClick={() => setAccessControlTarget(c)}>
+                  <KeyRound className="h-4 w-4" />
+                </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => openEdit(c)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -393,6 +398,13 @@ export default function AdminClients() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AdminAccessControlDialog
+        open={!!accessControlTarget}
+        onOpenChange={(o) => !o && setAccessControlTarget(null)}
+        targetUserId={accessControlTarget?.user_id ?? ""}
+        targetUserName={accessControlTarget?.nome ?? ""}
+      />
     </div>
   );
 }
