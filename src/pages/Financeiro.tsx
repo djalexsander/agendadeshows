@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -113,7 +113,7 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 
 function FinanceiroContent() {
   const { user } = useAuth();
-  const { entries, loading, addEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
+  const { entries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -123,6 +123,7 @@ function FinanceiroContent() {
   const [uploading, setUploading] = useState(false);
   const [comprovante, setComprovante] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "events">("list");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const currentCategories = form.type === "entrada" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
   const allFilterCategories = [...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])];
@@ -153,39 +154,79 @@ function FinanceiroContent() {
     if (!form.data_lancamento) { toast.error("Selecione a data do lançamento"); return; }
     setSaving(true);
 
-    const parcelas = parseInt(form.parcelas) || 1;
     const selectedShow = form.show_id ? shows.find((s) => s.id === form.show_id) : null;
+    const payload = {
+      title: form.title,
+      type: form.type,
+      amount: parseFloat(form.amount),
+      notes: form.notes || undefined,
+      data_lancamento: format(form.data_lancamento!, "yyyy-MM-dd"),
+      data_vencimento: form.data_vencimento ? format(form.data_vencimento, "yyyy-MM-dd") : null,
+      data_pagamento: form.data_pagamento ? format(form.data_pagamento, "yyyy-MM-dd") : null,
+      categoria: form.categoria || null,
+      forma_pagamento: form.forma_pagamento || null,
+      status: form.status,
+      pessoa: form.pessoa || null,
+      comprovante_url: comprovante || null,
+      recorrencia: form.recorrencia,
+      show_id: form.show_id || null,
+      event_name: selectedShow ? (selectedShow.evento || selectedShow.cidade) : null,
+      event_date: selectedShow ? selectedShow.date : null,
+    };
 
-    for (let i = 0; i < parcelas; i++) {
-      const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
-      const res = await addEntry({
-        title: form.title + suffix,
-        type: form.type,
-        amount: parseFloat(form.amount),
-        notes: form.notes || undefined,
-        data_lancamento: format(form.data_lancamento!, "yyyy-MM-dd"),
-        data_vencimento: form.data_vencimento ? format(form.data_vencimento, "yyyy-MM-dd") : undefined,
-        data_pagamento: form.data_pagamento ? format(form.data_pagamento, "yyyy-MM-dd") : undefined,
-        categoria: form.categoria || undefined,
-        forma_pagamento: form.forma_pagamento || undefined,
-        status: form.status,
-        pessoa: form.pessoa || undefined,
-        comprovante_url: comprovante || undefined,
-        parcelas,
-        parcela_atual: i + 1,
-        recorrencia: form.recorrencia,
-        show_id: form.show_id || undefined,
-        event_name: selectedShow ? (selectedShow.evento || selectedShow.cidade) : undefined,
-        event_date: selectedShow ? selectedShow.date : undefined,
-      });
-      if (res.error) { toast.error("Erro ao salvar"); setSaving(false); return; }
+    if (editingId) {
+      const res = await updateEntry(editingId, payload);
+      if (res.error) { toast.error("Erro ao atualizar"); setSaving(false); return; }
+      toast.success("Lançamento atualizado!");
+    } else {
+      const parcelas = parseInt(form.parcelas) || 1;
+      for (let i = 0; i < parcelas; i++) {
+        const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
+        const res = await addEntry({
+          ...payload,
+          title: form.title + suffix,
+          parcelas,
+          parcela_atual: i + 1,
+        });
+        if (res.error) { toast.error("Erro ao salvar"); setSaving(false); return; }
+      }
+      toast.success(parcelas > 1 ? `${parcelas} parcelas adicionadas!` : "Lançamento adicionado!");
     }
 
     setSaving(false);
-    toast.success(parcelas > 1 ? `${parcelas} parcelas adicionadas!` : "Lançamento adicionado!");
     setForm({ ...defaultForm });
     setComprovante(null);
+    setEditingId(null);
     setDialogOpen(false);
+  };
+
+  const handleEdit = (e: typeof entries[0]) => {
+    setEditingId(e.id);
+    setForm({
+      title: e.title,
+      type: e.type,
+      amount: String(e.amount),
+      notes: e.notes || "",
+      data_lancamento: e.data_lancamento ? new Date(e.data_lancamento + "T12:00:00") : undefined,
+      data_vencimento: e.data_vencimento ? new Date(e.data_vencimento + "T12:00:00") : undefined,
+      data_pagamento: e.data_pagamento ? new Date(e.data_pagamento + "T12:00:00") : undefined,
+      categoria: e.categoria || "",
+      forma_pagamento: e.forma_pagamento || "",
+      status: e.status,
+      pessoa: e.pessoa || "",
+      show_id: e.show_id || "",
+      parcelas: String(e.parcelas),
+      recorrencia: e.recorrencia,
+    });
+    setComprovante(e.comprovante_url || null);
+    setDialogOpen(true);
+  };
+
+  const handleNewEntry = () => {
+    setEditingId(null);
+    setForm({ ...defaultForm });
+    setComprovante(null);
+    setDialogOpen(true);
   };
 
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
