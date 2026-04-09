@@ -12,13 +12,22 @@ export default function PlanChoice() {
   const { toast } = useToast();
   const { config, loading: configLoading } = useBasePlanConfig();
   const [loading, setLoading] = useState<"trial" | "monthly" | null>(null);
+  const [trialDays, setTrialDays] = useState(7);
+
+  useEffect(() => {
+    supabase.from("signup_config").select("trial_days").limit(1).then(({ data }) => {
+      if (data && data.length > 0 && (data[0] as any).trial_days) {
+        setTrialDays((data[0] as any).trial_days);
+      }
+    });
+  }, []);
 
   const handleStartTrial = async () => {
     if (!user) return;
     setLoading("trial");
 
     const now = new Date();
-    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const trialEnd = new Date(now.getTime() + trialDays * 24 * 60 * 60 * 1000);
 
     const { error } = await supabase
       .from("profiles")
@@ -36,7 +45,7 @@ export default function PlanChoice() {
       return;
     }
 
-    toast({ title: "Teste grátis ativado! 🎉", description: "Você tem 7 dias de acesso completo." });
+    toast({ title: "Teste grátis ativado! 🎉", description: `Você tem ${trialDays} dias de acesso completo.` });
     window.location.reload();
   };
 
@@ -92,13 +101,13 @@ export default function PlanChoice() {
             </div>
             <div>
               <h2 className="text-lg font-bold">Comece agora grátis</h2>
-              <p className="text-sm text-muted-foreground">Teste o aplicativo gratuitamente por 7 dias</p>
+              <p className="text-sm text-muted-foreground">Teste o aplicativo gratuitamente por {trialDays} dias</p>
             </div>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso completo por 7 dias
+              Acesso completo por {trialDays} dias
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
@@ -164,7 +173,7 @@ export default function PlanChoice() {
 
         {/* Disclaimer */}
         <p className="text-center text-xs text-muted-foreground px-4">
-          Após os 7 dias de teste, o acesso será bloqueado caso não haja assinatura do plano mensal ativa.
+          Após os {trialDays} dias de teste, o acesso será bloqueado caso não haja assinatura do plano mensal ativa.
         </p>
 
         <Button variant="ghost" onClick={signOut} className="w-full gap-2">

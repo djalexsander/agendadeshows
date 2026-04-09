@@ -793,6 +793,7 @@ export type Database = {
           created_at: string
           id: string
           instrucoes_pagamento: string | null
+          trial_days: number
           updated_at: string
           valor_padrao: number
         }
@@ -801,6 +802,7 @@ export type Database = {
           created_at?: string
           id?: string
           instrucoes_pagamento?: string | null
+          trial_days?: number
           updated_at?: string
           valor_padrao?: number
         }
@@ -809,6 +811,7 @@ export type Database = {
           created_at?: string
           id?: string
           instrucoes_pagamento?: string | null
+          trial_days?: number
           updated_at?: string
           valor_padrao?: number
         }
