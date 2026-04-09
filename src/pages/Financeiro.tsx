@@ -718,6 +718,8 @@ function FinanceiroContent() {
         onDelete={(id) => { deleteEntry(id); }}
         onMarkPaid={handleMarkPaid}
       />
+
+      <FinancialExportDialog
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         entries={entries}
