@@ -75,14 +75,14 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-4 md:space-y-6 w-full">
       <div>
         <h1 className="text-2xl font-bold">Configurações</h1>
         <p className="text-muted-foreground text-sm">Configurações do cadastro público</p>
       </div>
 
       {/* Link público */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+      <div className="rounded-2xl bg-card border border-border p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Link className="h-5 w-5 text-primary" />
           <h2 className="font-semibold">Link Público de Cadastro</h2>
@@ -99,7 +99,7 @@ export default function AdminSettings() {
       </div>
 
       {/* Ativar/desativar cadastro */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+      <div className="rounded-2xl bg-card border border-border p-4 md:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {cadastroAtivo ? <ToggleRight className="h-5 w-5 text-[hsl(140,60%,55%)]" /> : <ToggleLeft className="h-5 w-5 text-muted-foreground" />}
@@ -115,7 +115,7 @@ export default function AdminSettings() {
       </div>
 
       {/* Plano Base Atual — informativo */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+      <div className="rounded-2xl bg-card border border-border p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
           <DollarSign className="h-5 w-5 text-primary" />
           <h2 className="font-semibold">Plano Base Atual</h2>
@@ -152,7 +152,7 @@ export default function AdminSettings() {
 
 
       {/* Duração do Trial */}
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+      <div className="rounded-2xl bg-card border border-border p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
           <h2 className="font-semibold">Duração do Teste Grátis</h2>
@@ -174,7 +174,7 @@ export default function AdminSettings() {
         </Select>
       </div>
 
-      <div className="rounded-2xl bg-card border border-border p-6 space-y-4">
+      <div className="rounded-2xl bg-card border border-border p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Settings className="h-5 w-5 text-primary" />
           <h2 className="font-semibold">Instruções de Pagamento</h2>
