@@ -352,13 +352,6 @@ export default function ClientBasePlan() {
                 )}
               </Button>
 
-              {/* Manual fallback link */}
-              <button
-                onClick={() => { setShowCpfInput(false); setShowManualForm(true); }}
-                className="w-full text-xs text-muted-foreground hover:text-foreground underline transition-colors"
-              >
-                Prefiro enviar comprovante manualmente
-              </button>
 
               <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5" />
