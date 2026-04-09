@@ -125,7 +125,7 @@ export default function AdminModulePayments() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground text-sm">Nenhum pagamento encontrado.</div>
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="rounded-xl border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>

@@ -142,7 +142,7 @@ export default function AdminModuleRequests() {
           Nenhuma solicitação encontrada.
         </div>
       ) : (
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="rounded-xl border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
