@@ -101,13 +101,13 @@ export default function PlanChoice() {
             </div>
             <div>
               <h2 className="text-lg font-bold">Comece agora grátis</h2>
-              <p className="text-sm text-muted-foreground">Teste o aplicativo gratuitamente por 7 dias</p>
+              <p className="text-sm text-muted-foreground">Teste o aplicativo gratuitamente por {trialDays} dias</p>
             </div>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso completo por 7 dias
+              Acesso completo por {trialDays} dias
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
