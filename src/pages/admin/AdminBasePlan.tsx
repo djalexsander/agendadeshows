@@ -106,20 +106,20 @@ export default function AdminBasePlan() {
   const pendingCount = payments.filter((p) => p.status === "pending_review").length;
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold">Plano Base</h1>
           <p className="text-muted-foreground text-sm">Gerenciar assinaturas e configuração do plano mensal</p>
         </div>
-        <Button onClick={openConfigEdit} variant="outline" className="gap-2 rounded-xl w-full sm:w-auto">
+        <Button onClick={openConfigEdit} variant="outline" className="gap-2 rounded-xl">
           <Settings className="h-4 w-4" /> Configurar Plano
         </Button>
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
         <div className="rounded-2xl bg-card border border-border p-3 md:p-4 space-y-1">
           <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-yellow-500/15 flex items-center justify-center">
             <Clock className="h-4 w-4 md:h-5 md:w-5 text-yellow-400" />
@@ -151,20 +151,18 @@ export default function AdminBasePlan() {
       </div>
 
       {/* Filters */}
-      <div className="w-full overflow-x-auto scrollbar-none">
-        <div className="flex min-w-max gap-2">
-          {(["all", "pending_review", "approved", "rejected"] as const).map((f) => (
-            <Button
-              key={f}
-              variant={filter === f ? "default" : "outline"}
-              size="sm"
-              className="rounded-xl whitespace-nowrap"
-              onClick={() => setFilter(f)}
-            >
-              {f === "all" ? "Todas" : f === "pending_review" ? "Pendentes" : f === "approved" ? "Aprovadas" : "Rejeitadas"}
-            </Button>
-          ))}
-        </div>
+      <div className="flex gap-2 flex-wrap overflow-x-auto scrollbar-none">
+        {(["all", "pending_review", "approved", "rejected"] as const).map((f) => (
+          <Button
+            key={f}
+            variant={filter === f ? "default" : "outline"}
+            size="sm"
+            className="rounded-xl"
+            onClick={() => setFilter(f)}
+          >
+            {f === "all" ? "Todas" : f === "pending_review" ? "Pendentes" : f === "approved" ? "Aprovadas" : "Rejeitadas"}
+          </Button>
+        ))}
       </div>
 
       {/* Payment list */}
@@ -181,12 +179,12 @@ export default function AdminBasePlan() {
             <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${statusColor(p.status)}`}>
               {statusLabel(p.status)}
             </span>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+            <div className="flex items-center justify-between md:justify-end gap-2">
               {p.status === "pending_review" && (
                 <>
                   <Button
                     size="sm"
-                    className="gap-1 rounded-xl bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)] w-full sm:w-auto"
+                    className="gap-1 rounded-xl bg-[hsl(140_60%_45%)] hover:bg-[hsl(140_60%_40%)]"
                     onClick={() => setActionDialog({ type: "approve", payment: p })}
                   >
                     <CheckCircle className="h-4 w-4" /> Aprovar
@@ -194,7 +192,7 @@ export default function AdminBasePlan() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="gap-1 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10 w-full sm:w-auto"
+                    className="gap-1 rounded-xl text-destructive border-destructive/30 hover:bg-destructive/10"
                     onClick={() => setActionDialog({ type: "reject", payment: p })}
                   >
                     <XCircle className="h-4 w-4" /> Rejeitar
@@ -204,7 +202,7 @@ export default function AdminBasePlan() {
               <Button
                 size="sm"
                 variant="ghost"
-                className="rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 px-2 self-end sm:self-auto"
+                className="rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10 px-2"
                 onClick={() => setDeleteTarget(p)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -295,7 +293,7 @@ export default function AdminBasePlan() {
                 className="h-10 bg-secondary/50 border-border"
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Valor (R$)</Label>
                 <Input

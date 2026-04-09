@@ -66,7 +66,7 @@ export default function AdminModuleCatalog() {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto w-full max-w-full overflow-x-hidden">
+    <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center gap-3">
         <Tag className="h-5 w-5 text-primary" />
         <h1 className="text-xl font-bold tracking-tight">Catálogo de Módulos</h1>
@@ -78,38 +78,7 @@ export default function AdminModuleCatalog() {
           <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <>
-          <div className="space-y-3 md:hidden">
-            {modules.map((mod) => (
-              <div key={mod.id} className="rounded-xl border border-border bg-card p-4 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{mod.display_name}</p>
-                    <p className="font-mono text-xs text-muted-foreground truncate">{mod.module_name}</p>
-                  </div>
-                  <Switch checked={mod.active} onCheckedChange={() => handleToggle(mod)} />
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Valor</p>
-                    <p>{mod.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Cobrança</p>
-                    <p>{mod.billing_period === "monthly" ? "Mensal" : "Único"}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Ordem: {mod.sort_order}</p>
-                  <Button size="sm" variant="ghost" className="rounded-lg" onClick={() => openEdit(mod)}>
-                    <Pencil className="h-4 w-4 mr-1" /> Editar
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="hidden md:block rounded-xl border border-border overflow-x-auto">
+        <div className="rounded-xl border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -144,8 +113,7 @@ export default function AdminModuleCatalog() {
               ))}
             </TableBody>
           </Table>
-          </div>
-        </>
+        </div>
       )}
 
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
@@ -162,7 +130,7 @@ export default function AdminModuleCatalog() {
               <label className="text-sm font-medium">Descrição</label>
               <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Valor (R$)</label>
                 <Input

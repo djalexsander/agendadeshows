@@ -59,7 +59,7 @@ export default function AdminPix() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-6 w-full max-w-full overflow-x-hidden">
+    <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-6 w-full">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
           <QrCode className="h-5 w-5 text-primary" />
@@ -70,7 +70,7 @@ export default function AdminPix() {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-card border border-border p-4 md:p-6 space-y-5 w-full max-w-full">
+      <div className="rounded-2xl bg-card border border-border p-6 space-y-5">
         <div className="grid grid-cols-1 gap-4">
           <div className="space-y-1.5">
             <Label>Tipo de Chave</Label>
@@ -106,8 +106,8 @@ export default function AdminPix() {
         </Button>
       </div>
 
-      <div className="rounded-xl bg-secondary/30 border border-border p-4 w-full max-w-full">
-        <p className="text-sm text-muted-foreground text-center break-words">
+      <div className="rounded-xl bg-secondary/30 border border-border p-4">
+        <p className="text-sm text-muted-foreground text-center">
           💡 O QR Code e o código Pix copia e cola são gerados automaticamente para cada cliente na tela de pagamento, com base no valor do plano cadastrado.
         </p>
       </div>

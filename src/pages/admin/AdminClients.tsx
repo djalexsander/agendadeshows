@@ -196,7 +196,7 @@ export default function AdminClients() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl md:text-2xl font-bold">Clientes</h1>
@@ -278,7 +278,7 @@ export default function AdminClients() {
               <Label>Nome *</Label>
               <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="h-10 bg-secondary/50 border-border" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Telefone</Label>
                 <Input value={form.telefone} onChange={(e) => setForm({ ...form, telefone: e.target.value })} className="h-10 bg-secondary/50 border-border" />

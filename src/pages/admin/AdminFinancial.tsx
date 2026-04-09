@@ -172,19 +172,19 @@ export default function AdminFinancial() {
   const filterLabels: Record<ViewFilter, string> = { ativos: "Ativos", ocultados: "Ocultados", todos: "Todos" };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6">
+      <div className="flex items-center justify-between gap-2">
         <div>
           <h1 className="text-xl md:text-2xl font-bold">Financeiro</h1>
           <p className="text-muted-foreground text-xs md:text-sm">Controle de pagamentos</p>
         </div>
-        <Button onClick={openNew} className="gap-2 rounded-xl text-xs md:text-sm w-full sm:w-auto" size="sm">
+        <Button onClick={openNew} className="gap-2 rounded-xl text-xs md:text-sm" size="sm">
           <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Novo</span> Pagamento
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-3 gap-2 md:gap-4">
         {summaryCards.map((card) => (
           <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-1.5 md:space-y-2">
             <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
@@ -197,14 +197,13 @@ export default function AdminFinancial() {
       </div>
 
       {/* Filter tabs */}
-      <div className="w-full overflow-x-auto scrollbar-none">
-        <div className="flex min-w-max items-center gap-2">
+      <div className="flex items-center gap-2">
         {(["ativos", "ocultados", "todos"] as const).map((f) => (
           <Button
             key={f}
             size="sm"
             variant={viewFilter === f ? "default" : "outline"}
-            className="rounded-xl text-xs whitespace-nowrap"
+            className="rounded-xl text-xs"
             onClick={() => setViewFilter(f)}
           >
             {filterLabels[f]}
@@ -214,7 +213,6 @@ export default function AdminFinancial() {
             })()}
           </Button>
         ))}
-        </div>
       </div>
 
       {/* List */}
@@ -291,7 +289,7 @@ export default function AdminFinancial() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Valor (R$) *</Label>
                 <Input type="number" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} className="h-10 bg-secondary/50 border-border" />
@@ -309,7 +307,7 @@ export default function AdminFinancial() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Forma de Pagamento</Label>
                 <Select value={form.forma_pagamento} onValueChange={(v) => setForm({ ...form, forma_pagamento: v })}>
