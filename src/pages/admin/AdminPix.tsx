@@ -59,7 +59,7 @@ export default function AdminPix() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-6 w-full">
+    <div className="p-6 md:p-8 max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
           <QrCode className="h-5 w-5 text-primary" />
@@ -71,7 +71,7 @@ export default function AdminPix() {
       </div>
 
       <div className="rounded-2xl bg-card border border-border p-6 space-y-5">
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Tipo de Chave</Label>
             <Select value={form.tipo_chave} onValueChange={(v) => setForm({ ...form, tipo_chave: v })}>
@@ -90,7 +90,7 @@ export default function AdminPix() {
             <Input value={form.chave_pix} onChange={(e) => setForm({ ...form, chave_pix: e.target.value })} className="h-10 bg-secondary/50 border-border" />
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Nome do Beneficiário</Label>
             <Input value={form.nome_beneficiario} onChange={(e) => setForm({ ...form, nome_beneficiario: e.target.value })} className="h-10 bg-secondary/50 border-border" />

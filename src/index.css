@@ -133,13 +133,7 @@
 }
 
 /* Prevent horizontal scroll globally */
-html, body {
+#root {
   overflow-x: hidden;
   width: 100%;
-  max-width: 100vw;
-}
-
-#root {
-  width: 100%;
-  max-width: 100%;
 }

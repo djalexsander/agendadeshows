@@ -184,14 +184,14 @@ export default function AdminFinancial() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 xs:grid-cols-3 gap-2 md:gap-4">
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
         {summaryCards.map((card) => (
           <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-1.5 md:space-y-2">
             <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
               <card.icon className="h-4 w-4 md:h-5 md:w-5" />
             </div>
-            <p className="text-sm md:text-2xl font-bold truncate">R$ {card.valor.toFixed(2).replace(/\.00$/, '')}</p>
-            <p className="text-[10px] md:text-sm text-muted-foreground truncate">{card.label} ({card.qtd})</p>
+            <p className="text-sm md:text-2xl font-bold truncate">R$ {card.valor.toFixed(2)}</p>
+            <p className="text-[10px] md:text-sm text-muted-foreground">{card.label} ({card.qtd})</p>
           </div>
         ))}
       </div>

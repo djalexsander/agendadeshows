@@ -163,7 +163,7 @@ export default function Dashboard() {
         </header>
       )}
 
-      <div className={`max-w-6xl mx-auto w-full ${isEmbedded ? 'p-4 md:p-8' : 'px-4 md:px-8 pb-8'} space-y-6`}>
+      <div className={`max-w-6xl mx-auto ${isEmbedded ? 'p-6 md:p-8' : 'px-4 md:px-8 pb-8'} space-y-6`}>
         {/* Embedded header */}
         {isEmbedded && (
           <div className="flex items-center justify-between">
@@ -210,7 +210,7 @@ export default function Dashboard() {
           </div>
         )}
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div
             className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
             onClick={() => {
@@ -276,7 +276,7 @@ export default function Dashboard() {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Calendar */}
-          <div className="rounded-2xl bg-card border border-border p-3 md:p-6 overflow-hidden">
+          <div className="rounded-2xl bg-card border border-border p-4 md:p-6">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Calendário
             </h2>
@@ -290,22 +290,22 @@ export default function Dashboard() {
               modifiers={modifiers}
               modifiersClassNames={{ hasShow: "has-show-date" }}
               className="w-full pointer-events-auto"
-               classNames={{
+              classNames={{
                 months: "flex flex-col w-full",
-                month: "space-y-2 w-full",
+                month: "space-y-3 w-full",
                 caption: "flex justify-center pt-1 relative items-center",
-                caption_label: "text-sm sm:text-base font-semibold capitalize",
+                caption_label: "text-base font-semibold capitalize",
                 nav: "space-x-2 flex items-center",
                 nav_button:
-                  "h-8 w-8 sm:h-10 sm:w-10 bg-secondary/50 hover:bg-secondary rounded-xl p-0 flex items-center justify-center text-foreground opacity-80 hover:opacity-100 transition-opacity",
+                  "h-10 w-10 bg-secondary/50 hover:bg-secondary rounded-xl p-0 flex items-center justify-center text-foreground opacity-80 hover:opacity-100 transition-opacity",
                 nav_button_previous: "absolute left-1",
                 nav_button_next: "absolute right-1",
                 table: "w-full border-collapse",
                 head_row: "flex w-full",
-                head_cell: "text-muted-foreground rounded-md flex-1 font-medium text-[10px] sm:text-xs uppercase text-center",
+                head_cell: "text-muted-foreground rounded-md flex-1 font-medium text-xs uppercase",
                 row: "flex w-full mt-1",
-                cell: "flex-1 text-center text-xs sm:text-sm p-0.5 relative",
-                day: "h-9 sm:h-11 w-full rounded-xl font-medium hover:bg-secondary/60 transition-colors flex flex-col items-center justify-center gap-0.5",
+                cell: "flex-1 text-center text-sm p-0.5 relative",
+                day: "h-11 w-full rounded-xl font-medium hover:bg-secondary/60 transition-colors flex flex-col items-center justify-center gap-0.5",
                 day_range_end: "day-range-end",
                 day_selected:
                   "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
