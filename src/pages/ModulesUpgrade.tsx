@@ -143,7 +143,7 @@ function SubscriptionSummaryCard() {
 export default function ModulesUpgrade() {
   const { user, profile } = useAuth();
   const { isTrialActive, trialDaysLeft } = useTrialStatus();
-  const { hasModule, loading: modulesLoading, refreshModules } = useModules();
+  const { hasModule, getModuleOrigin, loading: modulesLoading, refreshModules } = useModules();
   const { hasPendingRequest, loading: requestsLoading } = useModuleRequests();
   const { modules: catalog, loading: catalogLoading } = useModuleCatalog();
   const { hasPendingPayment, getLatestPayment, createAsaasModulePayment, refreshPayments, loading: paymentsLoading } = useClientModulePayments();
@@ -166,7 +166,9 @@ export default function ModulesUpgrade() {
 
   const loading = modulesLoading || requestsLoading || catalogLoading || paymentsLoading || selectionsLoading;
 
-  const getModuleStatus = (mod: CatalogModule): "trial_unlocked" | "active" | "pending" | "rejected" | "selected" | "available" => {
+  const getModuleStatus = (mod: CatalogModule): "trial_unlocked" | "active" | "manual" | "pending" | "rejected" | "selected" | "available" => {
+    // Manual override takes highest priority
+    if (getModuleOrigin(mod.module_name) === "manual") return "manual";
     // During trial: all modules are unlocked (not "active")
     if (isTrialActive) {
       return isSelected(mod.module_name) ? "selected" : "trial_unlocked";
