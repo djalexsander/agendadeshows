@@ -123,9 +123,11 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 
 function FinanceiroContent() {
   const { user } = useAuth();
+  const { company } = useCompany();
   const { entries, allEntries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
   const [detailDrawer, setDetailDrawer] = useState<DetailDrawerType>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
 
