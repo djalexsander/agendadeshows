@@ -292,7 +292,9 @@ export default function ModulesUpgrade() {
                 const isModuleSelected = status === "selected";
 
                 const borderClass =
-                  status === "active"
+                  status === "manual"
+                    ? "border-purple-500/30 bg-purple-500/5"
+                    : status === "active"
                     ? "border-primary/40 bg-primary/5"
                     : isModuleSelected
                     ? "border-primary/40 bg-primary/10"
@@ -309,22 +311,30 @@ export default function ModulesUpgrade() {
                     {/* Header row */}
                     <div className="flex items-start gap-3">
                       <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        status === "active" || isModuleSelected ? "bg-primary/20" : isTrialUnlocked ? "bg-emerald-500/15" : status === "pending" ? "bg-yellow-500/15" : status === "rejected" ? "bg-red-500/15" : "bg-secondary"
+                        status === "manual" ? "bg-purple-500/15" : status === "active" || isModuleSelected ? "bg-primary/20" : isTrialUnlocked ? "bg-emerald-500/15" : status === "pending" ? "bg-yellow-500/15" : status === "rejected" ? "bg-red-500/15" : "bg-secondary"
                       }`}>
                         <Icon className={`h-5 w-5 ${
-                          status === "active" || isModuleSelected ? "text-primary" : isTrialUnlocked ? "text-emerald-500" : status === "pending" ? "text-yellow-500" : status === "rejected" ? "text-red-500" : "text-muted-foreground"
+                          status === "manual" ? "text-purple-500" : status === "active" || isModuleSelected ? "text-primary" : isTrialUnlocked ? "text-emerald-500" : status === "pending" ? "text-yellow-500" : status === "rejected" ? "text-red-500" : "text-muted-foreground"
                         }`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-semibold text-foreground">{mod.display_name}</h3>
-                          {status === "active" && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
+                          {(status === "active" || status === "manual") && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
                           {status === "pending" && <Clock className="h-4 w-4 text-yellow-500 shrink-0" />}
                           {status === "rejected" && <XCircle className="h-4 w-4 text-red-500 shrink-0" />}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{mod.description}</p>
                       </div>
                     </div>
+
+                    {/* Manual label */}
+                    {status === "manual" && (
+                      <div className="flex items-center gap-1.5">
+                        <ShieldCheck className="h-3 w-3 text-purple-400" />
+                        <span className="text-xs font-medium text-purple-400">Liberado</span>
+                      </div>
+                    )}
 
                     {/* Trial unlocked label */}
                     {(isTrialUnlocked || (isTrialActive && isModuleSelected)) && (
@@ -340,7 +350,11 @@ export default function ModulesUpgrade() {
                         {formatPrice(mod.price, mod.billing_period)}
                       </span>
 
-                      {status === "active" ? (
+                      {status === "manual" ? (
+                        <Button size="sm" variant="secondary" disabled className="rounded-xl gap-1.5 text-xs">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Liberado
+                        </Button>
+                      ) : status === "active" ? (
                         <Button size="sm" variant="secondary" disabled className="rounded-xl gap-1.5 text-xs">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Ativo
                         </Button>
