@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Puzzle, DollarSign, Users, UsersRound, FileBarChart, ImageDown, MapPinned, ArrowLeft,
-  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw,
+  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw, AlertTriangle, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import { useModuleCatalog, type CatalogModule } from "@/hooks/useModuleCatalog";
 import { useClientModulePayments } from "@/hooks/useClientModulePayments";
 import { useTrialModuleSelections } from "@/hooks/useTrialModuleSelections";
 import { useAuth } from "@/hooks/useAuth";
+import { useTrialStatus } from "@/hooks/useTrialStatus";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -145,6 +146,8 @@ export default function ModulesUpgrade() {
           </div>
         </div>
       </header>
+
+      <GracePeriodBanner />
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4">
         <p className="text-sm text-muted-foreground">
