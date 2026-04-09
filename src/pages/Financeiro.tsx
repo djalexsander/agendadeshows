@@ -17,6 +17,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ModuleGate } from "@/components/modules/ModuleGate";
 import { useFinancialEntries, FinancialFilters } from "@/hooks/useFinancialEntries";
+import { FinancialDetailDrawer, DetailDrawerType } from "@/components/FinancialDetailDrawer";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
