@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ModuleGate } from "@/components/modules/ModuleGate";
 import { useFinancialEntries, FinancialFilters } from "@/hooks/useFinancialEntries";
+import { FinancialDetailDrawer, DetailDrawerType } from "@/components/FinancialDetailDrawer";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -120,8 +121,21 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 
 function FinanceiroContent() {
   const { user } = useAuth();
-  const { entries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
+  const { entries, allEntries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
+  const [detailDrawer, setDetailDrawer] = useState<DetailDrawerType>(null);
+
+  const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
+
+  const advancedTotals = useMemo(() => {
+    const totalEntradas = entries.filter((e) => e.type === "entrada").reduce((s, e) => s + Number(e.amount), 0);
+    const totalSaidas = entries.filter((e) => e.type === "saida").reduce((s, e) => s + Number(e.amount), 0);
+    const totalPendentes = entries.filter((e) => e.status === "pendente").reduce((s, e) => s + Number(e.amount), 0);
+    const entradasConfirmadas = entries.filter((e) => e.type === "entrada" && CONFIRMED_STATUSES.includes(e.status)).reduce((s, e) => s + Number(e.amount), 0);
+    const saidasConfirmadas = entries.filter((e) => e.type === "saida" && CONFIRMED_STATUSES.includes(e.status)).reduce((s, e) => s + Number(e.amount), 0);
+    const saldoConfirmado = entradasConfirmadas - saidasConfirmadas;
+    return { totalEntradas, totalSaidas, totalPendentes, entradasConfirmadas, saidasConfirmadas, saldoConfirmado };
+  }, [entries]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -249,35 +263,63 @@ function FinanceiroContent() {
 
   return (
     <>
-      {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
-        <div className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-green-500/15 flex items-center justify-center shrink-0">
-            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
+      {/* Summary cards - clickable */}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        <button
+          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-green-500/50 active:scale-[0.97] transition-all"
+          onClick={() => setDetailDrawer("entradas")}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="h-8 w-8 rounded-xl bg-green-500/15 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            </div>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
-          <div className="min-w-0 w-full">
-            <p className="text-xs sm:text-lg font-bold text-green-500 truncate">{fmt(totals.entradas)}</p>
-            <p className="text-[9px] sm:text-xs text-muted-foreground">Entradas</p>
+          <p className="text-xs sm:text-lg font-bold text-green-500 truncate w-full">{fmt(advancedTotals.totalEntradas)}</p>
+          <p className="text-[9px] sm:text-xs text-muted-foreground">Entradas</p>
+        </button>
+
+        <button
+          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-red-500/50 active:scale-[0.97] transition-all"
+          onClick={() => setDetailDrawer("saidas")}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="h-8 w-8 rounded-xl bg-red-500/15 flex items-center justify-center">
+              <TrendingDown className="h-4 w-4 text-red-500" />
+            </div>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
-        </div>
-        <div className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-red-500/15 flex items-center justify-center shrink-0">
-            <TrendingDown className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+          <p className="text-xs sm:text-lg font-bold text-red-500 truncate w-full">{fmt(advancedTotals.totalSaidas)}</p>
+          <p className="text-[9px] sm:text-xs text-muted-foreground">Saídas</p>
+        </button>
+
+        <button
+          className="rounded-2xl bg-card border border-yellow-500/30 p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-yellow-500/60 active:scale-[0.97] transition-all"
+          onClick={() => setDetailDrawer("pendentes")}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="h-8 w-8 rounded-xl bg-yellow-500/15 flex items-center justify-center">
+              <Clock className="h-4 w-4 text-yellow-500" />
+            </div>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
-          <div className="min-w-0 w-full">
-            <p className="text-xs sm:text-lg font-bold text-red-500 truncate">{fmt(totals.saidas)}</p>
-            <p className="text-[9px] sm:text-xs text-muted-foreground">Saídas</p>
+          <p className="text-xs sm:text-lg font-bold text-yellow-500 truncate w-full">{fmt(advancedTotals.totalPendentes)}</p>
+          <p className="text-[9px] sm:text-xs text-muted-foreground">Pendente</p>
+        </button>
+
+        <button
+          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-primary/50 active:scale-[0.97] transition-all"
+          onClick={() => setDetailDrawer("saldo")}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="h-8 w-8 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Wallet className="h-4 w-4 text-primary" />
+            </div>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
-        </div>
-        <div className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-            <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-          </div>
-          <div className="min-w-0 w-full">
-            <p className={`text-xs sm:text-lg font-bold truncate ${totals.saldo >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(totals.saldo)}</p>
-            <p className="text-[9px] sm:text-xs text-muted-foreground">Saldo</p>
-          </div>
-        </div>
+          <p className={`text-xs sm:text-lg font-bold truncate w-full ${advancedTotals.saldoConfirmado >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(advancedTotals.saldoConfirmado)}</p>
+          <p className="text-[9px] sm:text-xs text-muted-foreground">Saldo</p>
+        </button>
       </div>
 
       {/* Event summaries toggle */}
@@ -652,6 +694,13 @@ function FinanceiroContent() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <FinancialDetailDrawer
+        type={detailDrawer}
+        onClose={() => setDetailDrawer(null)}
+        entries={entries}
+        categories={[...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])]}
+      />
     </>
   );
 }
