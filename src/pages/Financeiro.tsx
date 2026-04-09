@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight } from "lucide-react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,8 @@ import { FinancialDetailDrawer, DetailDrawerType } from "@/components/FinancialD
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useCompany } from "@/hooks/useCompany";
+import { FinancialExportDialog } from "@/components/FinancialExportDialog";
 
 const CATEGORIAS_ENTRADA = [
   "Cachê do show",
@@ -121,9 +123,11 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 
 function FinanceiroContent() {
   const { user } = useAuth();
+  const { company } = useCompany();
   const { entries, allEntries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
   const [detailDrawer, setDetailDrawer] = useState<DetailDrawerType>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
 
@@ -394,6 +398,15 @@ function FinanceiroContent() {
             {activeFilters > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">{activeFilters}</Badge>
             )}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl text-xs gap-1.5"
+            onClick={() => setExportOpen(true)}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Exportar
           </Button>
           {activeFilters > 0 && (
             <Button size="sm" variant="ghost" className="text-xs text-muted-foreground" onClick={() => setFilters({})}>
@@ -700,6 +713,14 @@ function FinanceiroContent() {
         onClose={() => setDetailDrawer(null)}
         entries={entries}
         categories={[...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])]}
+      />
+
+      <FinancialExportDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        entries={entries}
+        eventSummaries={eventSummaries}
+        companyName={company?.name || "Minha Empresa"}
       />
     </>
   );
