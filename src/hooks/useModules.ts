@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTrialStatus } from "@/hooks/useTrialStatus";
 
 export type ModuleName = "financeiro" | "equipe" | "relatorios" | "export_png" | "gps" | "agenda_compartilhada";
 
@@ -14,6 +15,7 @@ interface UserModule {
 
 export function useModules() {
   const { user, role } = useAuth();
+  const { isTrialActive } = useTrialStatus();
   const [modules, setModules] = useState<UserModule[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,8 +28,8 @@ export function useModules() {
       return;
     }
 
-    // Admin always has all modules
-    if (isAdmin) {
+    // Admin or active trial: all modules
+    if (isAdmin || isTrialActive) {
       setModules(ALL_MODULE_NAMES.map((name) => ({ id: name, module_name: name, active: true })));
       setLoading(false);
       return;
@@ -42,7 +44,7 @@ export function useModules() {
 
     setModules(data ?? []);
     setLoading(false);
-  }, [user, isAdmin]);
+  }, [user, isAdmin, isTrialActive]);
 
   useEffect(() => {
     fetchModules();
@@ -50,10 +52,10 @@ export function useModules() {
 
   const hasModule = useCallback(
     (name: ModuleName) => {
-      if (isAdmin) return true;
+      if (isAdmin || isTrialActive) return true;
       return modules.some((m) => m.module_name === name);
     },
-    [modules, isAdmin]
+    [modules, isAdmin, isTrialActive]
   );
 
   return { modules, loading, hasModule, refreshModules: fetchModules };
