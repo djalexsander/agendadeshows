@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Puzzle, DollarSign, Users, UsersRound, FileBarChart, ImageDown, MapPinned, ArrowLeft,
   CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw, AlertTriangle, Zap,
+  ShieldCheck, Unlock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
@@ -12,6 +14,8 @@ import { useModuleRequests } from "@/hooks/useModuleRequests";
 import { useModuleCatalog, type CatalogModule } from "@/hooks/useModuleCatalog";
 import { useClientModulePayments } from "@/hooks/useClientModulePayments";
 import { useTrialModuleSelections } from "@/hooks/useTrialModuleSelections";
+import { useSubscriptionSummary } from "@/hooks/useSubscriptionSummary";
+import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrialStatus } from "@/hooks/useTrialStatus";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
@@ -32,6 +36,10 @@ function formatPrice(price: number, billingPeriod: string) {
   return billingPeriod === "monthly" ? `${formatted}/mês` : `${formatted} único`;
 }
 
+function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 interface PixPaymentData {
   paymentId: string;
   payload: string;
@@ -48,42 +56,93 @@ function GracePeriodBanner() {
 
   if (isGracePeriod) {
     return (
-      <div className="max-w-3xl mx-auto px-4 md:px-8 pt-2">
-        <div className="rounded-2xl border-2 border-yellow-500/40 bg-yellow-500/10 p-5 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-yellow-500/20 flex items-center justify-center shrink-0">
-              <Zap className="h-6 w-6 text-yellow-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-yellow-400 text-base">Oferta especial de conversão</h3>
-              <p className="text-sm text-yellow-400/80">
-                Você ainda tem <strong>{graceDaysLeft} dia{graceDaysLeft !== 1 ? "s" : ""}</strong> para ativar módulos com condições especiais.
-              </p>
-            </div>
+      <div className="rounded-2xl border-2 border-yellow-500/40 bg-yellow-500/10 p-5 space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="h-11 w-11 rounded-xl bg-yellow-500/20 flex items-center justify-center shrink-0">
+            <Zap className="h-6 w-6 text-yellow-400" />
           </div>
-          <p className="text-xs text-yellow-400/70">
-            Seu teste gratuito terminou, mas seu plano básico continua ativo. Ative os módulos que você usou durante o trial para não perder o acesso.
-          </p>
+          <div>
+            <h3 className="font-bold text-yellow-400 text-base">Oferta especial de conversão</h3>
+            <p className="text-sm text-yellow-400/80">
+              Você ainda tem <strong>{graceDaysLeft} dia{graceDaysLeft !== 1 ? "s" : ""}</strong> para ativar módulos com condições especiais.
+            </p>
+          </div>
         </div>
+        <p className="text-xs text-yellow-400/70">
+          Seu teste gratuito terminou, mas seu plano básico continua ativo. Ative os módulos que você usou durante o trial para não perder o acesso.
+        </p>
       </div>
     );
   }
 
-  // Post-grace: simpler reminder
   return (
-    <div className="max-w-3xl mx-auto px-4 md:px-8 pt-2">
-      <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-3">
-        <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0" />
-        <p className="text-sm text-muted-foreground">
-          Seu teste gratuito terminou. Ative os módulos abaixo para desbloquear funcionalidades extras.
-        </p>
+    <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-3">
+      <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0" />
+      <p className="text-sm text-muted-foreground">
+        Seu teste gratuito terminou. Ative os módulos abaixo para desbloquear funcionalidades extras.
+      </p>
+    </div>
+  );
+}
+
+function SubscriptionSummaryCard() {
+  const { isTrialActive } = useTrialStatus();
+  const summary = useSubscriptionSummary();
+  const navigate = useNavigate();
+
+  if (summary.loading) return null;
+
+  const hasSelectedModules = summary.modules.length > 0;
+
+  return (
+    <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <ShieldCheck className="h-5 w-5 text-primary" />
+        <h3 className="font-bold text-foreground">Resumo da assinatura</h3>
       </div>
+
+      <div className="space-y-2 text-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-muted-foreground">{summary.basePlanName}</span>
+          <span className="font-medium text-foreground">{formatCurrency(summary.basePrice)}/mês</span>
+        </div>
+
+        {summary.modules.map((m) => (
+          <div key={m.module_name} className="flex items-center justify-between">
+            <span className="text-muted-foreground">+ {m.display_name}</span>
+            <span className="font-medium text-foreground">{formatCurrency(m.price)}/mês</span>
+          </div>
+        ))}
+
+        <div className="border-t border-border pt-2 flex items-center justify-between">
+          <span className="font-bold text-foreground">Total mensal</span>
+          <span className="font-bold text-primary text-lg">{formatCurrency(summary.total)}/mês</span>
+        </div>
+      </div>
+
+      {hasSelectedModules && (
+        <Button
+          className="w-full rounded-xl gap-2"
+          size="lg"
+          onClick={() => navigate("/meu-plano")}
+        >
+          <Sparkles className="h-4 w-4" />
+          Ativar plano com meus módulos
+        </Button>
+      )}
+
+      {!hasSelectedModules && (
+        <p className="text-xs text-muted-foreground text-center">
+          Selecione módulos acima para montar seu plano.
+        </p>
+      )}
     </div>
   );
 }
 
 export default function ModulesUpgrade() {
   const { user, profile } = useAuth();
+  const { isTrialActive, trialDaysLeft } = useTrialStatus();
   const { hasModule, loading: modulesLoading, refreshModules } = useModules();
   const { hasPendingRequest, loading: requestsLoading } = useModuleRequests();
   const { modules: catalog, loading: catalogLoading } = useModuleCatalog();
@@ -107,7 +166,11 @@ export default function ModulesUpgrade() {
 
   const loading = modulesLoading || requestsLoading || catalogLoading || paymentsLoading || selectionsLoading;
 
-  const getModuleStatus = (mod: CatalogModule): "active" | "pending" | "rejected" | "selected" | "available" => {
+  const getModuleStatus = (mod: CatalogModule): "trial_unlocked" | "active" | "pending" | "rejected" | "selected" | "available" => {
+    // During trial: all modules are unlocked (not "active")
+    if (isTrialActive) {
+      return isSelected(mod.module_name) ? "selected" : "trial_unlocked";
+    }
     if (hasModule(mod.module_name as ModuleName)) return "active";
     if (isPreSubscription && isSelected(mod.module_name)) return "selected";
     if (hasPendingPayment(mod.module_name) || hasPendingRequest(mod.module_name as ModuleName)) return "pending";
@@ -127,7 +190,6 @@ export default function ModulesUpgrade() {
   const handleContractModule = async (mod: CatalogModule) => {
     setPixLoading(true);
     setPixModuleName(mod.module_name);
-
     const { data, error } = await createAsaasModulePayment(mod.module_name);
     if (error) {
       toast.error(error);
@@ -159,10 +221,8 @@ export default function ModulesUpgrade() {
     setRefreshing(true);
     await Promise.all([refreshPayments(), refreshModules()]);
     setRefreshing(false);
-    // The useEffect below will detect activation and close the dialog
   };
 
-  // Auto-detect module activation after refresh
   useEffect(() => {
     if (pixData && hasModule(pixData.moduleName as ModuleName)) {
       const mod = catalog.find((m) => m.module_name === pixData.moduleName);
@@ -188,121 +248,146 @@ export default function ModulesUpgrade() {
         </div>
       </header>
 
-      <GracePeriodBanner />
-
       <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4">
+        <GracePeriodBanner />
+
+        {/* Trial info banner */}
+        {isTrialActive && (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-start gap-3">
+            <Unlock className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-emerald-400">
+                Todos os módulos estão liberados durante o teste gratuito
+              </p>
+              <p className="text-xs text-emerald-400/70 mt-1">
+                Restam <strong>{trialDaysLeft} dia{trialDaysLeft !== 1 ? "s" : ""}</strong> de teste. Selecione os módulos que deseja manter após o período de teste.
+              </p>
+            </div>
+          </div>
+        )}
+
         <p className="text-sm text-muted-foreground">
-          {isPreSubscription
+          {isTrialActive
+            ? "Todos os módulos estão liberados. Selecione os que deseja incluir na sua assinatura futura."
+            : isPreSubscription
             ? "Monte seu plano ideal. Selecione os módulos que deseja incluir na sua assinatura."
             : "Amplie seu app com funcionalidades extras. Ative apenas o que precisar."}
         </p>
-
-        {isPreSubscription && (
-          <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-blue-400 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 shrink-0" />
-            Os módulos selecionados serão somados ao plano base na sua assinatura.
-          </div>
-        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {catalog.map((mod) => {
-              const status = getModuleStatus(mod);
-              const Icon = ICON_MAP[mod.module_name] || Puzzle;
-              const isTogglingThis = toggling === mod.module_name;
-              const isLoadingThis = pixLoading && pixModuleName === mod.module_name;
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {catalog.map((mod) => {
+                const status = getModuleStatus(mod);
+                const Icon = ICON_MAP[mod.module_name] || Puzzle;
+                const isTogglingThis = toggling === mod.module_name;
+                const isLoadingThis = pixLoading && pixModuleName === mod.module_name;
+                const isTrialUnlocked = status === "trial_unlocked";
+                const isModuleSelected = status === "selected";
 
-              return (
-                <div
-                  key={mod.module_name}
-                  className={`rounded-2xl border p-5 flex flex-col gap-4 transition-colors ${
-                    status === "active"
-                      ? "border-primary/40 bg-primary/5"
-                      : status === "selected"
-                      ? "border-primary/40 bg-primary/10"
-                      : status === "pending"
-                      ? "border-yellow-500/30 bg-yellow-500/5"
-                      : status === "rejected"
-                      ? "border-red-500/30 bg-red-500/5"
-                      : "border-border bg-card hover:border-primary/20"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
-                      status === "active" || status === "selected" ? "bg-primary/20" : status === "pending" ? "bg-yellow-500/15" : status === "rejected" ? "bg-red-500/15" : "bg-secondary"
-                    }`}>
-                      <Icon className={`h-5 w-5 ${
-                        status === "active" || status === "selected" ? "text-primary" : status === "pending" ? "text-yellow-500" : status === "rejected" ? "text-red-500" : "text-muted-foreground"
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">{mod.display_name}</h3>
-                        {status === "active" && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
-                        {status === "selected" && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
-                        {status === "pending" && <Clock className="h-4 w-4 text-yellow-500 shrink-0" />}
-                        {status === "rejected" && <XCircle className="h-4 w-4 text-red-500 shrink-0" />}
+                const borderClass =
+                  status === "active"
+                    ? "border-primary/40 bg-primary/5"
+                    : isModuleSelected
+                    ? "border-primary/40 bg-primary/10"
+                    : isTrialUnlocked
+                    ? "border-emerald-500/20 bg-emerald-500/5"
+                    : status === "pending"
+                    ? "border-yellow-500/30 bg-yellow-500/5"
+                    : status === "rejected"
+                    ? "border-red-500/30 bg-red-500/5"
+                    : "border-border bg-card hover:border-primary/20";
+
+                return (
+                  <div key={mod.module_name} className={`rounded-2xl border p-5 flex flex-col gap-3 transition-colors ${borderClass}`}>
+                    {/* Header row */}
+                    <div className="flex items-start gap-3">
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        status === "active" || isModuleSelected ? "bg-primary/20" : isTrialUnlocked ? "bg-emerald-500/15" : status === "pending" ? "bg-yellow-500/15" : status === "rejected" ? "bg-red-500/15" : "bg-secondary"
+                      }`}>
+                        <Icon className={`h-5 w-5 ${
+                          status === "active" || isModuleSelected ? "text-primary" : isTrialUnlocked ? "text-emerald-500" : status === "pending" ? "text-yellow-500" : status === "rejected" ? "text-red-500" : "text-muted-foreground"
+                        }`} />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">{mod.description}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-foreground">{mod.display_name}</h3>
+                          {status === "active" && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
+                          {status === "pending" && <Clock className="h-4 w-4 text-yellow-500 shrink-0" />}
+                          {status === "rejected" && <XCircle className="h-4 w-4 text-red-500 shrink-0" />}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{mod.description}</p>
+                      </div>
+                    </div>
+
+                    {/* Trial unlocked label */}
+                    {(isTrialUnlocked || (isTrialActive && isModuleSelected)) && (
+                      <div className="flex items-center gap-1.5">
+                        <Unlock className="h-3 w-3 text-emerald-500" />
+                        <span className="text-xs font-medium text-emerald-500">Incluído no teste</span>
+                      </div>
+                    )}
+
+                    {/* Footer: price + action */}
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-sm font-bold text-foreground">
+                        {formatPrice(mod.price, mod.billing_period)}
+                      </span>
+
+                      {status === "active" ? (
+                        <Button size="sm" variant="secondary" disabled className="rounded-xl gap-1.5 text-xs">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Ativo
+                        </Button>
+                      ) : (isTrialActive || isPreSubscription) && (isTrialUnlocked || isModuleSelected) ? (
+                        /* Toggle for trial / pre-subscription */
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {isModuleSelected ? "No plano" : "Adicionar"}
+                          </span>
+                          <Switch
+                            checked={isModuleSelected}
+                            disabled={isTogglingThis}
+                            onCheckedChange={() => handleToggleTrialModule(mod)}
+                          />
+                        </div>
+                      ) : isPreSubscription && status === "available" ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">Adicionar</span>
+                          <Switch
+                            checked={false}
+                            disabled={isTogglingThis}
+                            onCheckedChange={() => handleToggleTrialModule(mod)}
+                          />
+                        </div>
+                      ) : status === "pending" ? (
+                        <Button size="sm" variant="outline" disabled className="rounded-xl gap-1.5 text-xs border-yellow-500/30 text-yellow-500">
+                          <Clock className="h-3.5 w-3.5" /> Aguardando
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="rounded-xl gap-1.5 text-xs"
+                          onClick={() => handleContractModule(mod)}
+                          disabled={isLoadingThis}
+                        >
+                          {isLoadingThis ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                          {status === "rejected" ? "Reenviar" : "Contratar"}
+                        </Button>
+                      )}
                     </div>
                   </div>
+                );
+              })}
+            </div>
 
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className="text-sm font-bold text-foreground">
-                      {formatPrice(mod.price, mod.billing_period)}
-                    </span>
-
-                    {status === "active" ? (
-                      <Button size="sm" variant="secondary" disabled className="rounded-xl gap-1.5 text-xs">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Ativo
-                      </Button>
-                    ) : status === "selected" ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-xl gap-1.5 text-xs border-primary/30 text-primary"
-                        onClick={() => handleToggleTrialModule(mod)}
-                        disabled={isTogglingThis}
-                      >
-                        {isTogglingThis ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Minus className="h-3.5 w-3.5" />}
-                        Selecionado
-                      </Button>
-                    ) : status === "pending" ? (
-                      <Button size="sm" variant="outline" disabled className="rounded-xl gap-1.5 text-xs border-yellow-500/30 text-yellow-500">
-                        <Clock className="h-3.5 w-3.5" /> Aguardando
-                      </Button>
-                    ) : isPreSubscription ? (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="rounded-xl gap-1.5 text-xs"
-                        onClick={() => handleToggleTrialModule(mod)}
-                        disabled={isTogglingThis}
-                      >
-                        {isTogglingThis ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-                        Adicionar ao plano
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="rounded-xl gap-1.5 text-xs"
-                        onClick={() => handleContractModule(mod)}
-                        disabled={isLoadingThis}
-                      >
-                        {isLoadingThis ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                        {status === "rejected" ? "Reenviar" : "Contratar"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+            {/* Subscription summary */}
+            {isPreSubscription && <SubscriptionSummaryCard />}
+          </>
         )}
       </div>
 
