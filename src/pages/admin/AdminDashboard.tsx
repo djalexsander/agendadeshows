@@ -205,7 +205,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6 w-full max-w-full overflow-x-hidden">
       <div>
         <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
         <p className="text-muted-foreground text-xs md:text-sm">Visão geral da plataforma</p>

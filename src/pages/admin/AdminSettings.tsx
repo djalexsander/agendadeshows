@@ -90,8 +90,8 @@ export default function AdminSettings() {
         <p className="text-sm text-muted-foreground">
           Compartilhe este link para que novos clientes possam criar conta.
         </p>
-        <div className="flex gap-2">
-          <Input value={publicLink} readOnly className="h-10 bg-secondary/50 border-border flex-1 text-sm font-mono" />
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Input value={publicLink} readOnly className="h-10 bg-secondary/50 border-border flex-1 text-sm font-mono min-w-0" />
           <Button variant="outline" size="icon" className="h-10 w-10 shrink-0" onClick={copyLink}>
             <Copy className="h-4 w-4" />
           </Button>
