@@ -2,20 +2,19 @@ import { useTrialStatus } from "@/hooks/useTrialStatus";
 import { useModules } from "@/hooks/useModules";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Lock, Puzzle } from "lucide-react";
+import { Lock, Puzzle, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 export function TrialExpiredModal() {
-  const { isTrialExpired, hadTrial } = useTrialStatus();
+  const { isTrialExpired, isGracePeriod, graceDaysLeft, hadTrial } = useTrialStatus();
   const { modules } = useModules();
   const { role } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Show modal only once per session for clients whose trial expired and have no paid modules
     if (role !== "client" || !hadTrial || !isTrialExpired) return;
     const hasPaidModules = modules.some((m) => m.active);
     if (hasPaidModules) return;
@@ -40,12 +39,18 @@ export function TrialExpiredModal() {
           </div>
           <DialogTitle className="text-center">Seu teste gratuito terminou</DialogTitle>
           <DialogDescription className="text-center">
-            Você aproveitou o período de teste com acesso total. Para continuar usando os módulos, ative-os no seu plano.
+            {isGracePeriod
+              ? `Você ainda tem ${graceDaysLeft} dia${graceDaysLeft !== 1 ? "s" : ""} para ativar seus módulos com condições especiais. Seu plano básico continua ativo.`
+              : "Seu plano foi convertido para o básico. Ative módulos adicionais para desbloquear mais funcionalidades."
+            }
           </DialogDescription>
         </DialogHeader>
         <Button className="w-full rounded-xl gap-2" onClick={() => { setOpen(false); navigate("/modulos"); }}>
-          <Lock className="h-4 w-4" />
-          Ver módulos disponíveis
+          <Sparkles className="h-4 w-4" />
+          Ativar módulos
+        </Button>
+        <Button variant="ghost" className="w-full rounded-xl" onClick={() => setOpen(false)}>
+          Continuar com plano básico
         </Button>
       </DialogContent>
     </Dialog>
