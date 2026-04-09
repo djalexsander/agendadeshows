@@ -105,14 +105,31 @@ export default function AdminClients() {
     }
     setLoading(true);
 
-    await supabase.from("profiles").update({
+    // If switching to trial, set trial dates
+    const isSwitchingToTrial = form.status_plano === "trial";
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const graceEnd = new Date(trialEnd.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    const updatePayload: any = {
       nome: form.nome, telefone: form.telefone,
-      cidade: form.cidade, estado: form.estado, status_plano: form.status_plano,
+      cidade: form.cidade, estado: form.estado,
+      status_plano: isSwitchingToTrial ? "ativo" : form.status_plano,
       valor_plano: form.valor_plano ? parseFloat(form.valor_plano) : 0,
       vencimento: form.vencimento || null,
       current_period_end: form.vencimento ? new Date(form.vencimento + "T23:59:59Z").toISOString() : null,
       observacoes: form.observacoes,
-    } as any).eq("id", editingClient!.id);
+    };
+
+    if (isSwitchingToTrial) {
+      updatePayload.plan_type = "free_trial_7_days";
+      updatePayload.trial_started_at = now.toISOString();
+      updatePayload.trial_ends_at = trialEnd.toISOString();
+      updatePayload.grace_ends_at = graceEnd.toISOString();
+      updatePayload.is_paid = false;
+    }
+
+    await supabase.from("profiles").update(updatePayload).eq("id", editingClient!.id);
 
 
     // Save company max_users override
@@ -321,14 +338,15 @@ export default function AdminClients() {
                   <SelectTrigger className="h-10 bg-secondary/50 border-border">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    <SelectItem value="aguardando_pagamento">Aguard. Pagamento</SelectItem>
-                    <SelectItem value="pagamento_em_analise">Pagto. em Análise</SelectItem>
-                    <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
-                    <SelectItem value="ativo">Ativo</SelectItem>
-                    <SelectItem value="inativo">Inativo</SelectItem>
-                    <SelectItem value="rejeitado">Rejeitado</SelectItem>
-                  </SelectContent>
+                    <SelectContent className="bg-popover border-border">
+                      <SelectItem value="ativo">Ativo</SelectItem>
+                      <SelectItem value="trial">Trial</SelectItem>
+                      <SelectItem value="aguardando_pagamento">Aguard. Pagamento</SelectItem>
+                      <SelectItem value="pagamento_em_analise">Pagto. em Análise</SelectItem>
+                      <SelectItem value="pendente_pagamento">Pendente Pagamento</SelectItem>
+                      <SelectItem value="inativo">Inativo</SelectItem>
+                      <SelectItem value="rejeitado">Rejeitado</SelectItem>
+                    </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
