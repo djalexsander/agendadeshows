@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Puzzle, DollarSign, Users, UsersRound, FileBarChart, ImageDown, MapPinned, ArrowLeft,
-  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw,
+  CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw, AlertTriangle, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import { useModuleCatalog, type CatalogModule } from "@/hooks/useModuleCatalog";
 import { useClientModulePayments } from "@/hooks/useClientModulePayments";
 import { useTrialModuleSelections } from "@/hooks/useTrialModuleSelections";
 import { useAuth } from "@/hooks/useAuth";
+import { useTrialStatus } from "@/hooks/useTrialStatus";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -38,6 +39,47 @@ interface PixPaymentData {
   expirationDate: string;
   amount: number;
   moduleName: string;
+}
+
+function GracePeriodBanner() {
+  const { isGracePeriod, graceDaysLeft, isTrialExpired, hadTrial } = useTrialStatus();
+
+  if (!hadTrial || !isTrialExpired) return null;
+
+  if (isGracePeriod) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 md:px-8 pt-2">
+        <div className="rounded-2xl border-2 border-yellow-500/40 bg-yellow-500/10 p-5 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-yellow-500/20 flex items-center justify-center shrink-0">
+              <Zap className="h-6 w-6 text-yellow-400" />
+            </div>
+            <div>
+              <h3 className="font-bold text-yellow-400 text-base">Oferta especial de conversão</h3>
+              <p className="text-sm text-yellow-400/80">
+                Você ainda tem <strong>{graceDaysLeft} dia{graceDaysLeft !== 1 ? "s" : ""}</strong> para ativar módulos com condições especiais.
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-yellow-400/70">
+            Seu teste gratuito terminou, mas seu plano básico continua ativo. Ative os módulos que você usou durante o trial para não perder o acesso.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Post-grace: simpler reminder
+  return (
+    <div className="max-w-3xl mx-auto px-4 md:px-8 pt-2">
+      <div className="rounded-2xl border border-border bg-card p-4 flex items-center gap-3">
+        <AlertTriangle className="h-5 w-5 text-muted-foreground shrink-0" />
+        <p className="text-sm text-muted-foreground">
+          Seu teste gratuito terminou. Ative os módulos abaixo para desbloquear funcionalidades extras.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default function ModulesUpgrade() {
@@ -145,6 +187,8 @@ export default function ModulesUpgrade() {
           </div>
         </div>
       </header>
+
+      <GracePeriodBanner />
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 pb-10 space-y-4">
         <p className="text-sm text-muted-foreground">
