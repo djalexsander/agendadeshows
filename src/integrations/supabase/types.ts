@@ -617,6 +617,7 @@ export type Database = {
           data_envio_comprovante: string | null
           email: string
           estado: string | null
+          grace_ends_at: string | null
           id: string
           is_paid: boolean | null
           nome: string
@@ -647,6 +648,7 @@ export type Database = {
           data_envio_comprovante?: string | null
           email?: string
           estado?: string | null
+          grace_ends_at?: string | null
           id?: string
           is_paid?: boolean | null
           nome?: string
@@ -677,6 +679,7 @@ export type Database = {
           data_envio_comprovante?: string | null
           email?: string
           estado?: string | null
+          grace_ends_at?: string | null
           id?: string
           is_paid?: boolean | null
           nome?: string
