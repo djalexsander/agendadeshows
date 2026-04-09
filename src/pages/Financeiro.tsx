@@ -399,6 +399,15 @@ function FinanceiroContent() {
               <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">{activeFilters}</Badge>
             )}
           </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="rounded-xl text-xs gap-1.5"
+            onClick={() => setExportOpen(true)}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Exportar
+          </Button>
           {activeFilters > 0 && (
             <Button size="sm" variant="ghost" className="text-xs text-muted-foreground" onClick={() => setFilters({})}>
               <X className="h-3 w-3 mr-1" /> Limpar
