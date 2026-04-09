@@ -222,33 +222,33 @@ export default function AdminLayout() {
 
       {/* Mobile header */}
       <div className="flex-1 flex flex-col">
-        <header className="md:hidden flex flex-col border-b border-border bg-card sticky top-0 z-50">
-          <div className="flex items-center justify-between p-4">
+        <header className="md:hidden flex flex-col border-b border-border bg-card sticky top-0 z-50" style={{ paddingTop: 'var(--safe-area-top)' }}>
+          <div className="flex items-center justify-between px-4 pt-3 pb-2">
             <div className="flex items-center gap-2">
               <Music className="h-5 w-5 text-primary" />
-              <span className="font-bold text-sm">
+              <span className="font-bold text-base">
                 {isEmpresaMode ? "Minha Empresa" : "Admin"}
               </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => window.location.reload()}
-                className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50"
+                className="h-11 w-11 flex items-center justify-center text-muted-foreground rounded-xl hover:bg-secondary/50"
                 title="Atualizar"
               >
                 <RefreshCw className="h-5 w-5" />
               </button>
-              <button onClick={signOut} className="p-2 text-muted-foreground">
+              <button onClick={signOut} className="h-11 w-11 flex items-center justify-center text-muted-foreground rounded-xl hover:bg-secondary/50">
                 <LogOut className="h-5 w-5" />
               </button>
             </div>
           </div>
           {/* Mode toggle mobile */}
-          <div className="px-4 pb-3">
+          <div className="px-4 pb-2">
             <ModeToggle className="w-full" />
           </div>
           {/* Nav items */}
-          <div className="flex items-center gap-1 overflow-x-auto px-4 pb-3">
+          <div className="flex items-center gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -256,8 +256,8 @@ export default function AdminLayout() {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    "p-2 rounded-lg transition-colors flex-shrink-0",
-                    isActive ? "bg-primary/15 text-primary" : "text-muted-foreground"
+                    "h-11 w-11 flex items-center justify-center rounded-xl transition-colors flex-shrink-0",
+                    isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-secondary/50"
                   )
                 }
               >
