@@ -163,7 +163,7 @@ export default function AdminLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex w-full max-w-full overflow-x-hidden">
       {/* Sidebar */}
       <aside className="w-64 bg-card border-r border-border flex-col hidden md:flex">
         <div className="p-6 flex items-center gap-3 border-b border-border">
@@ -266,7 +266,7 @@ export default function AdminLayout() {
             ))}
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <Outlet />
         </main>
       </div>
