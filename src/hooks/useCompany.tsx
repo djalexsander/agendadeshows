@@ -165,6 +165,32 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) return { error: error.message };
+
+    // Send invitation email
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("nome")
+        .eq("user_id", user.id)
+        .single();
+
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "agenda-invitation",
+          recipientEmail: email,
+          idempotencyKey: `invite-${company.id}-${email}-${Date.now()}`,
+          templateData: {
+            companyName: company.name,
+            inviterName: profile?.nome || "Um administrador",
+            role,
+            acceptUrl: window.location.origin,
+          },
+        },
+      });
+    } catch (emailErr) {
+      console.warn("Invitation email failed (invite still created):", emailErr);
+    }
+
     await refreshInvitations();
     return { error: null };
   }, [company, user, refreshInvitations]);
