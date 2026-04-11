@@ -53,6 +53,7 @@ function AppRoutes() {
   if (!user) {
     return (
       <Routes>
+        <Route path="/unsubscribe" element={<Unsubscribe />} />
         <Route path="*" element={<Login />} />
       </Routes>
     );
