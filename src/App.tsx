@@ -33,6 +33,7 @@ import Equipe from "./pages/Equipe";
 import Relatorios from "./pages/Relatorios";
 import ClientBasePlan from "./pages/ClientBasePlan";
 import CompanyUsers from "./pages/CompanyUsers";
+import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
