@@ -166,23 +166,10 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     });
 
     if (insertErr) {
-      // Duplicate pending invitation — update it instead
-      if (insertErr.code === "23505") {
-        const { error: updateErr } = await (supabase.from("company_invitations") as any)
-          .update({
-            role,
-            invited_by: user.id,
-            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-            token: crypto.randomUUID(),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("company_id", company.id)
-          .eq("email", email)
-          .eq("status", "pending");
-        if (updateErr) return { error: updateErr.message };
-      } else {
+      if (insertErr.code !== "23505") {
         return { error: insertErr.message };
       }
+      // 23505 = invitation already pending — just re-send the email below
     }
 
     // Send invitation email
