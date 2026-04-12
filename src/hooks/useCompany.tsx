@@ -157,34 +157,19 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   const inviteMember = useCallback(async (email: string, role: CompanyRole) => {
     if (!company || !user) return { error: "Sem empresa" };
 
-    // Check for existing pending invitation
-    const { data: existing } = await (supabase.from("company_invitations") as any)
-      .select("id, status")
-      .eq("company_id", company.id)
-      .eq("email", email)
-      .eq("status", "pending")
-      .maybeSingle();
+    // Try insert first; if duplicate, update existing pending invitation
+    const { error: insertErr } = await (supabase.from("company_invitations") as any).insert({
+      company_id: company.id,
+      email,
+      role,
+      invited_by: user.id,
+    });
 
-    if (existing) {
-      // Update existing invitation (role, expiration, token)
-      const { error: updateErr } = await (supabase.from("company_invitations") as any)
-        .update({
-          role,
-          invited_by: user.id,
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          token: crypto.randomUUID(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existing.id);
-      if (updateErr) return { error: updateErr.message };
-    } else {
-      const { error } = await (supabase.from("company_invitations") as any).insert({
-        company_id: company.id,
-        email,
-        role,
-        invited_by: user.id,
-      });
-      if (error) return { error: error.message };
+    if (insertErr) {
+      if (insertErr.code !== "23505") {
+        return { error: insertErr.message };
+      }
+      // 23505 = invitation already pending — just re-send the email below
     }
 
     // Send invitation email
