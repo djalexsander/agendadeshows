@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
     }
 
     const asaasPaymentId = payment.id;
+    const externalReference = payment.externalReference || "";
     if (!asaasPaymentId) {
       console.log("Missing payment id");
       return new Response("ok", { status: 200 });
@@ -48,8 +49,8 @@ Deno.serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const now = new Date().toISOString();
 
-    // --- Try base_plan_payments first ---
-    const { data: basePlanPayment, error: findBaseError } = await supabase
+    // --- Try base_plan_payments first (by asaas_payment_id) ---
+    let { data: basePlanPayment, error: findBaseError } = await supabase
       .from("base_plan_payments")
       .select("*")
       .eq("asaas_payment_id", asaasPaymentId)
@@ -59,8 +60,31 @@ Deno.serve(async (req) => {
       console.error("DB find base error:", findBaseError);
     }
 
+    // Fallback: search by user_id from externalReference (format: base_plan:userId)
+    if (!basePlanPayment && externalReference.startsWith("base_plan:")) {
+      const userId = externalReference.replace("base_plan:", "");
+      console.log(`Fallback lookup for base_plan by user_id: ${userId}`);
+      const { data: fallback } = await supabase
+        .from("base_plan_payments")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("status", "pending_review")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (fallback) {
+        basePlanPayment = fallback;
+        // Update the record with the asaas_payment_id for future lookups
+        await supabase
+          .from("base_plan_payments")
+          .update({ asaas_payment_id: asaasPaymentId })
+          .eq("id", fallback.id);
+        console.log(`Linked asaas_payment_id ${asaasPaymentId} to base_plan_payment ${fallback.id}`);
+      }
+    }
+
     // --- Try module_payments ---
-    const { data: modulePayment, error: findModError } = await supabase
+    let { data: modulePayment, error: findModError } = await supabase
       .from("module_payments")
       .select("*")
       .eq("asaas_payment_id", asaasPaymentId)
@@ -70,8 +94,35 @@ Deno.serve(async (req) => {
       console.error("DB find module error:", findModError);
     }
 
+    // Fallback: search by user_id + module from externalReference (format: module:userId:moduleName)
+    if (!modulePayment && externalReference.startsWith("module:")) {
+      const parts = externalReference.split(":");
+      if (parts.length >= 3) {
+        const userId = parts[1];
+        const moduleName = parts.slice(2).join(":");
+        console.log(`Fallback lookup for module by user_id: ${userId}, module: ${moduleName}`);
+        const { data: fallback } = await supabase
+          .from("module_payments")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("module_name", moduleName)
+          .eq("status", "pending_review")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (fallback) {
+          modulePayment = fallback;
+          await supabase
+            .from("module_payments")
+            .update({ asaas_payment_id: asaasPaymentId })
+            .eq("id", fallback.id);
+          console.log(`Linked asaas_payment_id ${asaasPaymentId} to module_payment ${fallback.id}`);
+        }
+      }
+    }
+
     if (!basePlanPayment && !modulePayment) {
-      console.log(`No payment found for asaas_payment_id: ${asaasPaymentId}`);
+      console.log(`No payment found for asaas_payment_id: ${asaasPaymentId}, externalRef: ${externalReference}`);
       return new Response("ok", { status: 200 });
     }
 

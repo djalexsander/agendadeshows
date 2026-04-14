@@ -54,9 +54,9 @@ async function findOrCreateCustomer(email: string, name: string, cpfCnpj?: strin
   return customer.id;
 }
 
-async function createPixPayment(customerId: string, amount: number, description: string) {
+async function createPixPayment(customerId: string, amount: number, description: string, externalReference?: string) {
   const dueDate = new Date();
-  dueDate.setDate(dueDate.getDate() + 1);
+  dueDate.setDate(dueDate.getDate() + 3);
   return await asaasFetch("/payments", {
     method: "POST",
     body: JSON.stringify({
@@ -65,6 +65,7 @@ async function createPixPayment(customerId: string, amount: number, description:
       value: amount,
       dueDate: dueDate.toISOString().split("T")[0],
       description,
+      externalReference: externalReference || undefined,
     }),
   });
 }
@@ -203,7 +204,8 @@ Deno.serve(async (req) => {
     );
 
     // Create PIX payment
-    const payment = await createPixPayment(customerId, amount, `Módulo: ${catalogModule.display_name}`);
+    const externalRef = `module:${user.id}:${moduleName}`;
+    const payment = await createPixPayment(customerId, amount, `Módulo: ${catalogModule.display_name}`, externalRef);
 
     // Get QR code
     const pixData = await getPixQrCode(payment.id);
