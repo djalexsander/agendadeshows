@@ -161,6 +161,10 @@ Deno.serve(async (req) => {
             current_period_start: periodStart.toISOString(),
             current_period_end: periodEnd.toISOString(),
             valor_plano: basePlanPayment.amount,
+            // Clear trial fields when base plan is activated
+            trial_started_at: null,
+            trial_ends_at: null,
+            grace_ends_at: null,
           })
           .eq("user_id", basePlanPayment.user_id);
 
