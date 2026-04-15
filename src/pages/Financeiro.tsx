@@ -709,6 +709,8 @@ function FinanceiroContent() {
         onClose={() => setDetailDrawer(null)}
         entries={entries}
         categories={[...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])]}
+        eventSummaries={eventSummaries}
+        companyName={company?.name || "Minha Empresa"}
       />
 
       <FinancialEntryViewModal
