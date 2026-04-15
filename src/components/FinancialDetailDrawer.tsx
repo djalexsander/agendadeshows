@@ -3,11 +3,14 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, TrendingDown, Search, Music, X } from "lucide-react";
+import { TrendingUp, TrendingDown, Search, Music, X, FileText, Image, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { FinancialEntry } from "@/hooks/useFinancialEntries";
+import { toast } from "sonner";
+import type { FinancialEntry, EventSummary } from "@/hooks/useFinancialEntries";
+import { exportFinancialPDF } from "@/lib/exportFinancialPDF";
+import { exportFinancialPNG } from "@/lib/exportFinancialPNG";
 
 const STATUS_OPTIONS = [
   { value: "pendente", label: "Pendente", color: "text-yellow-500 bg-yellow-500/10" },
