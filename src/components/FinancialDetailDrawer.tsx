@@ -144,6 +144,48 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories, even
             </div>
           )}
 
+          {/* Export buttons */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 rounded-xl gap-2 text-xs"
+              onClick={() => {
+                const titleLabel = titleMap[type || "entradas"];
+                const data = {
+                  companyName: companyName || "Relatório",
+                  periodLabel: titleLabel,
+                  entries: filtered,
+                  eventSummaries: eventSummaries.filter((ev) => filtered.some((e) => e.show_id === ev.show_id)),
+                  contentType: "detalhado" as const,
+                };
+                exportFinancialPDF(data);
+                toast.success("PDF exportado!");
+              }}
+            >
+              <FileText className="h-3.5 w-3.5" /> PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 rounded-xl gap-2 text-xs"
+              onClick={() => {
+                const titleLabel = titleMap[type || "entradas"];
+                const data = {
+                  companyName: companyName || "Relatório",
+                  periodLabel: titleLabel,
+                  entries: filtered,
+                  eventSummaries: eventSummaries.filter((ev) => filtered.some((e) => e.show_id === ev.show_id)),
+                  contentType: "detalhado" as const,
+                };
+                exportFinancialPNG(data);
+                toast.success("PNG exportado!");
+              }}
+            >
+              <Image className="h-3.5 w-3.5" /> PNG
+            </Button>
+          </div>
+
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
