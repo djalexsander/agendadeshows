@@ -3,11 +3,14 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, TrendingDown, Search, Music, X } from "lucide-react";
+import { TrendingUp, TrendingDown, Search, Music, X, FileText, Image, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { FinancialEntry } from "@/hooks/useFinancialEntries";
+import { toast } from "sonner";
+import type { FinancialEntry, EventSummary } from "@/hooks/useFinancialEntries";
+import { exportFinancialPDF } from "@/lib/exportFinancialPDF";
+import { exportFinancialPNG } from "@/lib/exportFinancialPNG";
 
 const STATUS_OPTIONS = [
   { value: "pendente", label: "Pendente", color: "text-yellow-500 bg-yellow-500/10" },
@@ -28,13 +31,15 @@ interface Props {
   onClose: () => void;
   entries: FinancialEntry[];
   categories: string[];
+  eventSummaries?: EventSummary[];
+  companyName?: string;
 }
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
 
-export function FinancialDetailDrawer({ type, onClose, entries, categories }: Props) {
+export function FinancialDetailDrawer({ type, onClose, entries, categories, eventSummaries = [], companyName = "" }: Props) {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategoria, setFilterCategoria] = useState("all");
@@ -138,6 +143,48 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories }: Pr
               <p className="text-[10px] text-muted-foreground mt-1">{filtered.length} lançamento(s)</p>
             </div>
           )}
+
+          {/* Export buttons */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 rounded-xl gap-2 text-xs"
+              onClick={() => {
+                const titleLabel = titleMap[type || "entradas"];
+                const data = {
+                  companyName: companyName || "Relatório",
+                  periodLabel: titleLabel,
+                  entries: filtered,
+                  eventSummaries: eventSummaries.filter((ev) => filtered.some((e) => e.show_id === ev.show_id)),
+                  contentType: "detalhado" as const,
+                };
+                exportFinancialPDF(data);
+                toast.success("PDF exportado!");
+              }}
+            >
+              <FileText className="h-3.5 w-3.5" /> PDF
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 rounded-xl gap-2 text-xs"
+              onClick={() => {
+                const titleLabel = titleMap[type || "entradas"];
+                const data = {
+                  companyName: companyName || "Relatório",
+                  periodLabel: titleLabel,
+                  entries: filtered,
+                  eventSummaries: eventSummaries.filter((ev) => filtered.some((e) => e.show_id === ev.show_id)),
+                  contentType: "detalhado" as const,
+                };
+                exportFinancialPNG(data);
+                toast.success("PNG exportado!");
+              }}
+            >
+              <Image className="h-3.5 w-3.5" /> PNG
+            </Button>
+          </div>
 
           {/* Search */}
           <div className="relative">
