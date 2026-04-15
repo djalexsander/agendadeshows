@@ -39,7 +39,7 @@ const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 
 const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
 
-export function FinancialDetailDrawer({ type, onClose, entries, categories }: Props) {
+export function FinancialDetailDrawer({ type, onClose, entries, categories, eventSummaries = [], companyName = "" }: Props) {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCategoria, setFilterCategoria] = useState("all");
