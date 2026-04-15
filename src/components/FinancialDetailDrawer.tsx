@@ -31,6 +31,8 @@ interface Props {
   onClose: () => void;
   entries: FinancialEntry[];
   categories: string[];
+  eventSummaries?: EventSummary[];
+  companyName?: string;
 }
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
