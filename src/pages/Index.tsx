@@ -71,23 +71,23 @@ const Index = () => {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <CalendarDays className="h-6 w-6 text-primary" />
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{monthShows.length}</p>
-              <p className="text-sm text-muted-foreground">Eventos no mês</p>
+              <p className="text-2xl sm:text-3xl font-bold leading-none">{monthShows.length}</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Eventos no mês</p>
             </div>
           </div>
-          <div className="rounded-2xl bg-card border border-border p-5 flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
-              <BarChart3 className="h-6 w-6 text-accent-foreground" />
+          <div className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-accent-foreground" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{shows.length}</p>
-              <p className="text-sm text-muted-foreground">Total de eventos</p>
+              <p className="text-2xl sm:text-3xl font-bold leading-none">{shows.length}</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Total de eventos</p>
             </div>
           </div>
         </div>
