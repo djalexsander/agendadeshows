@@ -26,7 +26,7 @@ import { FinancialExportDialog } from "@/components/FinancialExportDialog";
 import { FinancialEntryViewModal } from "@/components/FinancialEntryViewModal";
 
 const CATEGORIAS_ENTRADA = [
-  "Cachê do show",
+  "Cachê do evento",
   "Sinal",
   "Pagamento final",
   "Reembolso",
