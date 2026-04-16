@@ -185,15 +185,15 @@ const Index = () => {
           {/* Shows List Card */}
           <div className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-              Shows em <span className="capitalize text-foreground">{format(currentMonth, "MMMM", { locale: ptBR })}</span>
+              Eventos em <span className="capitalize text-foreground">{format(currentMonth, "MMMM", { locale: ptBR })}</span>
             </h2>
 
             {monthShows.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
                 <div className="h-14 w-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3">
-                  <Music className="h-7 w-7 text-muted-foreground" />
+                  <CalendarDays className="h-7 w-7 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground text-sm">Nenhum show neste mês</p>
+                <p className="text-muted-foreground text-sm">Nenhum evento neste mês</p>
                 <p className="text-muted-foreground/60 text-xs mt-1">Toque em uma data para adicionar</p>
               </div>
             ) : (
