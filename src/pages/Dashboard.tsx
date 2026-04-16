@@ -212,63 +212,70 @@ export default function Dashboard() {
         )}
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {/* Card 1: Eventos no mês */}
           <div
-            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
             onClick={() => {
               const el = document.getElementById("month-shows-list");
               if (el) el.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-bold">{monthShows.length}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Eventos no mês</p>
+            <div>
+              <p className="text-2xl sm:text-3xl font-bold leading-none">{monthShows.length}</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Eventos no mês</p>
             </div>
           </div>
+
+          {/* Card 2: Total de eventos */}
           <div
-            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
             onClick={() => setAllShowsOpen(true)}
           >
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
-              <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-accent-foreground" />
             </div>
-            <div className="min-w-0">
-              <p className="text-xl sm:text-2xl font-bold">{shows.length}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Total de eventos</p>
+            <div>
+              <p className="text-2xl sm:text-3xl font-bold leading-none">{shows.length}</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Total de eventos</p>
             </div>
           </div>
+
+          {/* Card 3: Próximo evento */}
           <div
-            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
             onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
           >
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm sm:text-lg font-bold truncate">
+            <div>
+              <p className="text-lg sm:text-xl font-bold leading-tight">
                 {nextShow
-                  ? format(parseISO(nextShow.date), "dd/MM/yyyy")
+                  ? format(parseISO(nextShow.date), "dd/MM/yy")
                   : "—"}
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                {nextShow ? "Próximo evento" : "Sem próximo"}
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
+                {nextShow ? "Próximo evento" : "Sem eventos"}
               </p>
             </div>
           </div>
+
+          {/* Card 4: Próxima cidade */}
           <div
-            className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
             onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
           >
-            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-accent flex items-center justify-center shrink-0">
-              <Navigation className="h-5 w-5 sm:h-6 sm:w-6 text-accent-foreground" />
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
+              <Navigation className="h-4 w-4 sm:h-5 sm:w-5 text-accent-foreground" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm sm:text-lg font-bold truncate">
+            <div>
+              <p className="text-base sm:text-lg font-bold leading-tight line-clamp-1">
                 {nextShow ? nextShow.cidade : "—"}
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Próxima cidade</p>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Próxima cidade</p>
             </div>
           </div>
         </div>
@@ -383,7 +390,7 @@ export default function Dashboard() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3 flex-1 overflow-y-auto max-h-[500px] pr-1">
+              <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[500px] pr-1">
                 {monthShows
                   .sort((a, b) => a.date.localeCompare(b.date))
                   .map((show) => {
@@ -394,25 +401,28 @@ export default function Dashboard() {
                       <button
                         key={show.id}
                         onClick={() => handleShowClick(show.date)}
-                        className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-4 transition-colors flex items-center gap-4 group"
+                        className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-3 sm:p-4 transition-colors flex items-center gap-3 sm:gap-4 group"
                       >
-                        <div className="h-12 w-12 rounded-xl bg-primary/15 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-lg font-bold text-primary leading-none">
+                        <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex flex-col items-center justify-center shrink-0">
+                          <span className="text-base sm:text-lg font-bold text-primary leading-none">
                             {dayNum}
                           </span>
-                          <span className="text-[10px] uppercase text-primary/70 leading-none mt-0.5">
+                          <span className="text-[9px] sm:text-[10px] uppercase text-primary/70 leading-none mt-0.5">
                             {dayName}
                           </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground truncate">{show.cidade}</p>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <MapPin className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">{show.estado}</span>
+                          <p className="font-semibold text-sm sm:text-base text-foreground line-clamp-1">{show.cidade}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span className="text-xs sm:text-sm text-muted-foreground">{show.estado}</span>
+                            {show.horario && (
+                              <span className="text-[10px] sm:text-xs text-muted-foreground/70">· {show.horario}</span>
+                            )}
                           </div>
                         </div>
                         <span
-                          className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
+                          className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 whitespace-nowrap ${
                             show.status === "confirmado"
                               ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
                               : show.status === "finalizado"
@@ -448,39 +458,47 @@ export default function Dashboard() {
 
       {/* All events dialog */}
       <Dialog open={allShowsOpen} onOpenChange={setAllShowsOpen}>
-        <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[85vh] flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              Todos os eventos ({shows.length})
+              Todos os eventos
             </DialogTitle>
-            <DialogDescription>Lista completa de eventos cadastrados</DialogDescription>
+            <DialogDescription>{shows.length} evento{shows.length !== 1 ? "s" : ""} cadastrado{shows.length !== 1 ? "s" : ""}</DialogDescription>
           </DialogHeader>
           {shows.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">Nenhum evento cadastrado</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="h-14 w-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3">
+                <CalendarDays className="h-7 w-7 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">Nenhum evento cadastrado</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Toque em uma data para adicionar</p>
+            </div>
           ) : (
-            <div className="space-y-2 py-2">
+            <div className="space-y-2 py-2 overflow-y-auto flex-1">
               {[...shows].sort((a, b) => b.date.localeCompare(a.date)).map((s) => (
                 <button
                   key={s.id}
                   className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-3 flex items-center gap-3 transition-colors"
                   onClick={() => { setAllShowsOpen(false); handleShowClick(s.date); }}
                 >
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <CalendarDays className="h-4 w-4 text-primary" />
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-primary leading-none">{format(parseISO(s.date), "dd")}</span>
+                    <span className="text-[8px] uppercase text-primary/60 leading-none mt-0.5">{format(parseISO(s.date), "MMM", { locale: ptBR })}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm text-foreground truncate">{s.evento || s.cidade}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
+                    <p className="font-medium text-sm text-foreground line-clamp-1">{s.evento || s.cidade}</p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                       <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                        <MapPin className="h-2.5 w-2.5" />{s.cidade}/{s.estado}
+                        <MapPin className="h-2.5 w-2.5 shrink-0" />{s.cidade}{s.estado ? `/${s.estado}` : ""}
                       </span>
                       <span className="text-[10px] text-muted-foreground">
                         {format(parseISO(s.date), "dd/MM/yyyy")}
                       </span>
+                      {s.horario && <span className="text-[10px] text-muted-foreground">{s.horario}</span>}
                     </div>
                   </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium whitespace-nowrap shrink-0 ${
                     s.status === "confirmado" ? "bg-green-500/20 text-green-500" :
                     s.status === "finalizado" ? "bg-blue-500/20 text-blue-400" :
                     "bg-yellow-500/20 text-yellow-400"
