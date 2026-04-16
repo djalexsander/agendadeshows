@@ -89,7 +89,7 @@ export default function Dashboard() {
               <div>
                 <h1 className="text-xl font-bold tracking-tight">Minha Agenda</h1>
                 <p className="text-xs text-muted-foreground">
-                  {profile?.nome_artistico || profile?.nome || "Sua agenda"}
+                  {profile?.nome || "Sua agenda"}
                 </p>
               </div>
             </div>
@@ -170,7 +170,7 @@ export default function Dashboard() {
             <div>
               <h1 className="text-2xl font-bold">Minha Agenda</h1>
               <p className="text-muted-foreground text-sm">
-                {profile?.nome_artistico || profile?.nome || "Sua agenda pessoal"}
+                {profile?.nome || "Sua agenda pessoal"}
               </p>
             </div>
             <Button
@@ -268,7 +268,7 @@ export default function Dashboard() {
               <p className="text-sm sm:text-lg font-bold truncate">
                 {nextShow ? nextShow.cidade : "—"}
               </p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Cidade próximo</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Próxima cidade</p>
             </div>
           </div>
         </div>
