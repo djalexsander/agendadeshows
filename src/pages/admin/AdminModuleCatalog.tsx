@@ -5,17 +5,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Loader2, Tag } from "lucide-react";
+import { Pencil, Loader2, Tag, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function AdminModuleCatalog() {
-  const { modules, loading, updateModule, toggleModuleActive } = useAdminModuleCatalog();
+  const { modules, loading, updateModule, createModule, deleteModule, toggleModuleActive } = useAdminModuleCatalog();
   const [editing, setEditing] = useState<CatalogModule | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<CatalogModule | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [form, setForm] = useState({
+    module_name: "",
     display_name: "",
     description: "",
     price: 0,
@@ -26,7 +30,9 @@ export default function AdminModuleCatalog() {
 
   const openEdit = (mod: CatalogModule) => {
     setEditing(mod);
+    setCreating(false);
     setForm({
+      module_name: mod.module_name,
       display_name: mod.display_name,
       description: mod.description || "",
       price: mod.price,
@@ -36,7 +42,45 @@ export default function AdminModuleCatalog() {
     });
   };
 
+  const openCreate = () => {
+    setEditing(null);
+    setCreating(true);
+    setForm({
+      module_name: "",
+      display_name: "",
+      description: "",
+      price: 0,
+      billing_period: "monthly",
+      sort_order: modules.length > 0 ? Math.max(...modules.map(m => m.sort_order)) + 1 : 1,
+      max_users_default: 1,
+    });
+  };
+
   const handleSave = async () => {
+    if (creating) {
+      if (!form.module_name.trim() || !form.display_name.trim()) {
+        toast.error("Preencha o código e o nome do módulo.");
+        return;
+      }
+      setSaving(true);
+      const { error } = await createModule({
+        module_name: form.module_name.trim().toLowerCase().replace(/\s+/g, "_"),
+        display_name: form.display_name.trim(),
+        description: form.description || undefined,
+        price: form.price,
+        billing_period: form.billing_period,
+        sort_order: form.sort_order,
+      });
+      setSaving(false);
+      if (error) {
+        toast.error("Erro ao criar módulo.");
+      } else {
+        toast.success("Módulo criado com sucesso!");
+        setCreating(false);
+      }
+      return;
+    }
+
     if (!editing) return;
     setSaving(true);
     const updates: any = {
@@ -59,17 +103,38 @@ export default function AdminModuleCatalog() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleting) return;
+    setSaving(true);
+    const { error } = await deleteModule(deleting.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Erro ao excluir módulo.");
+    } else {
+      toast.success(`${deleting.display_name} removido do catálogo.`);
+    }
+    setDeleting(null);
+  };
+
   const handleToggle = async (mod: CatalogModule) => {
     const { error } = await toggleModuleActive(mod.id, !mod.active);
     if (error) toast.error("Erro ao alterar status.");
     else toast.success(`${mod.display_name} ${!mod.active ? "ativado" : "desativado"} no catálogo.`);
   };
 
+  const isDialogOpen = !!editing || creating;
+
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3">
-        <Tag className="h-5 w-5 text-primary" />
-        <h1 className="text-xl font-bold tracking-tight">Catálogo de Módulos</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Tag className="h-5 w-5 text-primary" />
+          <h1 className="text-xl font-bold tracking-tight">Catálogo de Módulos</h1>
+        </div>
+        <Button size="sm" className="rounded-lg gap-2" onClick={openCreate}>
+          <Plus className="h-4 w-4" />
+          Novo módulo
+        </Button>
       </div>
       <p className="text-sm text-muted-foreground">Gerencie os módulos disponíveis para os clientes.</p>
 
@@ -105,9 +170,14 @@ export default function AdminModuleCatalog() {
                     <Switch checked={mod.active} onCheckedChange={() => handleToggle(mod)} />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant="ghost" className="rounded-lg" onClick={() => openEdit(mod)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button size="sm" variant="ghost" className="rounded-lg" onClick={() => openEdit(mod)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="rounded-lg text-destructive hover:text-destructive" onClick={() => setDeleting(mod)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -116,12 +186,25 @@ export default function AdminModuleCatalog() {
         </div>
       )}
 
-      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+      {/* Create / Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(o) => { if (!o) { setEditing(null); setCreating(false); } }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar módulo — {editing?.module_name}</DialogTitle>
+            <DialogTitle>{creating ? "Novo módulo" : `Editar módulo — ${editing?.module_name}`}</DialogTitle>
+            <DialogDescription>{creating ? "Preencha os dados do novo módulo" : "Altere os dados do módulo"}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            {creating && (
+              <div>
+                <label className="text-sm font-medium">Código interno</label>
+                <Input
+                  placeholder="ex: meu_modulo"
+                  value={form.module_name}
+                  onChange={(e) => setForm({ ...form, module_name: e.target.value })}
+                />
+                <p className="text-[10px] text-muted-foreground mt-1">Identificador único, sem espaços (use underline)</p>
+              </div>
+            )}
             <div>
               <label className="text-sm font-medium">Nome exibido</label>
               <Input value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} />
@@ -175,14 +258,32 @@ export default function AdminModuleCatalog() {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => { setEditing(null); setCreating(false); }}>Cancelar</Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Salvar
+              {creating ? "Criar" : "Salvar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir módulo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{deleting?.display_name}</strong>? Essa ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

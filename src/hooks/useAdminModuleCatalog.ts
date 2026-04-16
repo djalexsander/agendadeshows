@@ -29,9 +29,34 @@ export function useAdminModuleCatalog() {
     return { error };
   };
 
+  const createModule = async (newModule: { module_name: string; display_name: string; description?: string; price: number; billing_period: string; sort_order: number }) => {
+    const { error } = await supabase
+      .from("module_catalog")
+      .insert({
+        module_name: newModule.module_name,
+        display_name: newModule.display_name,
+        description: newModule.description || null,
+        price: newModule.price,
+        billing_period: newModule.billing_period,
+        sort_order: newModule.sort_order,
+        active: true,
+      });
+    if (!error) await fetchModules();
+    return { error };
+  };
+
+  const deleteModule = async (id: string) => {
+    const { error } = await supabase
+      .from("module_catalog")
+      .delete()
+      .eq("id", id);
+    if (!error) await fetchModules();
+    return { error };
+  };
+
   const toggleModuleActive = async (id: string, active: boolean) => {
     return updateModule(id, { active });
   };
 
-  return { modules, loading, refreshModules: fetchModules, updateModule, toggleModuleActive };
+  return { modules, loading, refreshModules: fetchModules, updateModule, createModule, deleteModule, toggleModuleActive };
 }
