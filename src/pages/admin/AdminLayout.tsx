@@ -46,7 +46,6 @@ const adminNavItems = [
 
 const empresaNavItems = [
   { to: "/admin/empresa", icon: CalendarDays, label: "Agenda", end: true },
-  { to: "/admin/empresa/equipe", icon: Users, label: "Equipe" },
   { to: "/admin/empresa/financeiro", icon: DollarSign, label: "Financeiro" },
   { to: "/admin/empresa/relatorios", icon: FileBarChart, label: "Relatórios" },
   { to: "/admin/empresa/usuarios", icon: UsersRound, label: "Usuários" },

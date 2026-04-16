@@ -190,7 +190,6 @@ export default function Dashboard() {
           <div className="flex gap-2 overflow-x-auto pb-1">
             {[
               { label: "Financeiro", icon: DollarSign, path: "/financeiro" },
-              { label: "Equipe", icon: Users, path: "/equipe" },
               { label: "Relatórios", icon: FileBarChart, path: "/relatorios" },
               ...(hasModule("agenda_compartilhada") ? [{ label: "Usuários", icon: UsersRound, path: "/usuarios" }] : []),
             ].map((item) => {
