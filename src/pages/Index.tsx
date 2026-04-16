@@ -197,7 +197,7 @@ const Index = () => {
                 <p className="text-muted-foreground/60 text-xs mt-1">Toque em uma data para adicionar</p>
               </div>
             ) : (
-              <div className="space-y-3 flex-1 overflow-y-auto max-h-[500px] pr-1">
+              <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[500px] pr-1">
                 {monthShows
                   .sort((a, b) => a.date.localeCompare(b.date))
                   .map((show) => {
@@ -208,20 +208,20 @@ const Index = () => {
                       <button
                         key={show.id}
                         onClick={() => handleShowClick(show.date)}
-                        className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-4 transition-colors flex items-center gap-4 group"
+                        className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-3 sm:p-4 transition-colors flex items-center gap-3 sm:gap-4 group"
                       >
-                        <div className="h-12 w-12 rounded-xl bg-primary/15 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-lg font-bold text-primary leading-none">{dayNum}</span>
-                          <span className="text-[10px] uppercase text-primary/70 leading-none mt-0.5">{dayName}</span>
+                        <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex flex-col items-center justify-center shrink-0">
+                          <span className="text-base sm:text-lg font-bold text-primary leading-none">{dayNum}</span>
+                          <span className="text-[9px] sm:text-[10px] uppercase text-primary/70 leading-none mt-0.5">{dayName}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground truncate">{show.cidade}</p>
+                          <p className="font-semibold text-sm sm:text-base text-foreground line-clamp-1">{show.cidade}</p>
                           <div className="flex items-center gap-1 mt-0.5">
-                            <MapPin className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">{show.estado}</span>
+                            <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span className="text-xs sm:text-sm text-muted-foreground">{show.estado}</span>
                           </div>
                         </div>
-                        <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${
+                        <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 whitespace-nowrap ${
                           (show.status || "pendente") === "confirmado"
                             ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
                             : (show.status || "pendente") === "finalizado"
