@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, Music, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, CalendarDays, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -598,7 +598,7 @@ function FinanceiroContent() {
               </div>
               <div>
                 <Label className="text-xs">Título *</Label>
-                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={form.type === "entrada" ? "Ex: Cachê do show" : "Ex: Pedágio ida e volta"} />
+                <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={form.type === "entrada" ? "Ex: Cachê do evento" : "Ex: Pedágio ida e volta"} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
