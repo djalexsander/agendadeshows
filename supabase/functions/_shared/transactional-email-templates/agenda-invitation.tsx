@@ -69,10 +69,10 @@ export const template = {
     `Convite: acesse a agenda de ${data.companyName || 'uma empresa'}`,
   displayName: 'Convite de Agenda Compartilhada',
   previewData: {
-    companyName: 'Banda Example',
+    companyName: 'Empresa Exemplo',
     inviterName: 'João Silva',
     role: 'collaborator',
-    acceptUrl: 'https://agendadeshows.lovable.app',
+    acceptUrl: 'https://appminhaagenda.alexproapps.com.br',
   },
 } satisfies TemplateEntry
 

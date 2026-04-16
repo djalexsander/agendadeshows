@@ -348,7 +348,7 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
     const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY")!;
     const vapidPublicKey = "BK7AUlCrJsddB2-FfvIxt8WzeQu56g7D_lZFWO7TPKgqo0FGKLfEuHSBV6LKrh7bq29nJj19cL6y06ASQCPomPM";
-    const vapidSubject = "mailto:admin@agendadeshows.lovable.app";
+    const vapidSubject = "mailto:admin@appminhaagenda.alexproapps.com.br";
 
     if (!anonKey) {
       return jsonResponse({ error: "Missing auth configuration" }, 500);
