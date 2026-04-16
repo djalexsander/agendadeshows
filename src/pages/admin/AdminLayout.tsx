@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   CalendarDays,
   LayoutDashboard,
-  CalendarDays,
   Users,
   UsersRound,
   CreditCard,
