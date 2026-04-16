@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Pencil, Trash2, Music, AlertTriangle, Users, Image, Clock, Navigation, Copy, Building2 } from "lucide-react";
+import { MapPin, Pencil, Trash2, CalendarDays, AlertTriangle, Users, Image, Clock, Navigation, Copy, Building2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -179,7 +179,7 @@ export function ShowDialog({
       <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <Music className="h-5 w-5 text-primary" />
+            <CalendarDays className="h-5 w-5 text-primary" />
             {existingShow && !isEditing ? "Detalhes do Evento" : existingShow ? "Editar Evento" : "Novo Evento"}
           </DialogTitle>
           <DialogDescription className="text-muted-foreground capitalize">

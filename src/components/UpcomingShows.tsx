@@ -13,7 +13,7 @@ export function UpcomingShows({ shows, onShowClick }: UpcomingShowsProps) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <Calendar className="h-10 w-10 mx-auto mb-3 opacity-40" />
-        <p className="text-base">Nenhum show agendado</p>
+        <p className="text-base">Nenhum evento agendado</p>
         <p className="text-sm mt-1">Toque em uma data para adicionar</p>
       </div>
     );

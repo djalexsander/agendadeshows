@@ -229,7 +229,7 @@ export function ExportPNGListDialog({ open, onClose, shows }: ExportPNGListDialo
 
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/40">
             <span className="text-sm text-muted-foreground">
-              <span className="text-foreground font-medium">{filtered.length}</span> show{filtered.length !== 1 ? "s" : ""}{" "}
+              <span className="text-foreground font-medium">{filtered.length}</span> evento{filtered.length !== 1 ? "s" : ""}{" "}
               {mode === "mensal" ? `em ${MESES[selectedMonth]}` : "no período"}
             </span>
           </div>

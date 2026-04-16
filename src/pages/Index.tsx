@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, FileDown, CalendarDays, BarChart3, MapPin } from "lucide-react";
+import { CalendarDays, FileDown, BarChart3, MapPin } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useShows } from "@/hooks/useShows";
@@ -49,11 +49,11 @@ const Index = () => {
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-              <Music className="h-5 w-5 text-primary" />
+              <CalendarDays className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
-              <p className="text-xs text-muted-foreground">Suas datas, sua música</p>
+              <h1 className="text-xl font-bold tracking-tight">Minha Agenda</h1>
+              <p className="text-xs text-muted-foreground">Gerencie sua agenda com facilidade</p>
             </div>
           </div>
           <Button
@@ -87,7 +87,7 @@ const Index = () => {
             </div>
             <div>
               <p className="text-2xl font-bold">{shows.length}</p>
-              <p className="text-sm text-muted-foreground">Total de shows</p>
+              <p className="text-sm text-muted-foreground">Total de eventos</p>
             </div>
           </div>
         </div>

@@ -117,7 +117,7 @@ export function ExportPDFDialog({ open, onClose, shows }: ExportPDFDialogProps) 
 
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/40">
             <span className="text-sm text-muted-foreground">
-              <span className="text-foreground font-medium">{filteredCount}</span> show{filteredCount !== 1 ? "s" : ""} no período
+              <span className="text-foreground font-medium">{filteredCount}</span> evento{filteredCount !== 1 ? "s" : ""} no período
             </span>
           </div>
 
