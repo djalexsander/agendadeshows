@@ -10,7 +10,7 @@ import { ptBR } from "date-fns/locale";
 import { ModuleGate } from "@/components/modules/ModuleGate";
 import { useSupabaseShows, Show } from "@/hooks/useSupabaseShows";
 import { useFinancialEntries } from "@/hooks/useFinancialEntries";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
+
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   confirmado: { label: "Confirmado", color: "bg-green-500/15 text-green-500" },
@@ -177,13 +177,13 @@ function TeamDialog({ open, onOpenChange, members }: { open: boolean; onOpenChan
   );
 }
 
-type DialogType = "all_events" | "confirmados" | "pendentes" | "finalizados" | "lancamentos" | "saldo" | "equipe" | null;
+type DialogType = "all_events" | "confirmados" | "pendentes" | "finalizados" | "lancamentos" | "saldo" | null;
 
 function RelatoriosContent() {
   const navigate = useNavigate();
   const { shows } = useSupabaseShows();
   const { entries, allEntries, totals, eventSummaries } = useFinancialEntries();
-  const { members } = useTeamMembers();
+  
   const [activeDialog, setActiveDialog] = useState<DialogType>(null);
 
   const statusCounts = shows.reduce<Record<string, number>>((acc, s) => {
@@ -206,7 +206,7 @@ function RelatoriosContent() {
     { label: "Finalizados", value: String(statusCounts["finalizado"] || 0), icon: BarChart3, color: "bg-blue-500/15 text-blue-500", dialog: "finalizados", subtitle: "Ver lista" },
     { label: "Lançamentos financeiros", value: String(allEntries.length), icon: DollarSign, color: "bg-primary/15 text-primary", dialog: "lancamentos", subtitle: "Ver lançamentos" },
     { label: "Saldo financeiro", value: fmt(totals.saldo), icon: DollarSign, color: totals.saldo >= 0 ? "bg-green-500/15 text-green-500" : "bg-red-500/15 text-red-500", dialog: "saldo", subtitle: "Ver detalhes" },
-    { label: "Membros da equipe", value: String(members.length), icon: Users, color: "bg-primary/15 text-primary", dialog: "equipe", subtitle: "Ver equipe" },
+    
   ];
 
   const handleClick = (dialog: DialogType) => {
@@ -276,11 +276,6 @@ function RelatoriosContent() {
         onOpenChange={(o) => !o && setActiveDialog(null)}
         totals={totals}
         eventSummaries={eventSummaries}
-      />
-      <TeamDialog
-        open={activeDialog === "equipe"}
-        onOpenChange={(o) => !o && setActiveDialog(null)}
-        members={members}
       />
     </>
   );
