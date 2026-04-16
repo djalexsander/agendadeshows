@@ -10,7 +10,7 @@ import { ptBR } from "date-fns/locale";
 import { ModuleGate } from "@/components/modules/ModuleGate";
 import { useSupabaseShows, Show } from "@/hooks/useSupabaseShows";
 import { useFinancialEntries } from "@/hooks/useFinancialEntries";
-import { useTeamMembers } from "@/hooks/useTeamMembers";
+
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   confirmado: { label: "Confirmado", color: "bg-green-500/15 text-green-500" },
@@ -141,49 +141,14 @@ function FinancialDetailDialog({ open, onOpenChange, totals, eventSummaries }: {
   );
 }
 
-function TeamDialog({ open, onOpenChange, members }: { open: boolean; onOpenChange: (o: boolean) => void; members: { id: string; name: string; role: string | null; phone: string | null; email: string | null }[] }) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            Equipe
-          </DialogTitle>
-          <DialogDescription>{members.length} membro(s)</DialogDescription>
-        </DialogHeader>
-        {members.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Nenhum membro cadastrado</p>
-        ) : (
-          <div className="space-y-2 py-2">
-            {members.map((m) => (
-              <div key={m.id} className="rounded-xl bg-secondary/40 border border-border/50 p-3 flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Users className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-foreground truncate">{m.name}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {m.role && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{m.role}</span>}
-                    {m.phone && <span className="text-[10px] text-muted-foreground">{m.phone}</span>}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
 
-type DialogType = "all_events" | "confirmados" | "pendentes" | "finalizados" | "lancamentos" | "saldo" | "equipe" | null;
+type DialogType = "all_events" | "confirmados" | "pendentes" | "finalizados" | "lancamentos" | "saldo" | null;
 
 function RelatoriosContent() {
   const navigate = useNavigate();
   const { shows } = useSupabaseShows();
   const { entries, allEntries, totals, eventSummaries } = useFinancialEntries();
-  const { members } = useTeamMembers();
+  
   const [activeDialog, setActiveDialog] = useState<DialogType>(null);
 
   const statusCounts = shows.reduce<Record<string, number>>((acc, s) => {
@@ -206,7 +171,7 @@ function RelatoriosContent() {
     { label: "Finalizados", value: String(statusCounts["finalizado"] || 0), icon: BarChart3, color: "bg-blue-500/15 text-blue-500", dialog: "finalizados", subtitle: "Ver lista" },
     { label: "Lançamentos financeiros", value: String(allEntries.length), icon: DollarSign, color: "bg-primary/15 text-primary", dialog: "lancamentos", subtitle: "Ver lançamentos" },
     { label: "Saldo financeiro", value: fmt(totals.saldo), icon: DollarSign, color: totals.saldo >= 0 ? "bg-green-500/15 text-green-500" : "bg-red-500/15 text-red-500", dialog: "saldo", subtitle: "Ver detalhes" },
-    { label: "Membros da equipe", value: String(members.length), icon: Users, color: "bg-primary/15 text-primary", dialog: "equipe", subtitle: "Ver equipe" },
+    
   ];
 
   const handleClick = (dialog: DialogType) => {
@@ -276,11 +241,6 @@ function RelatoriosContent() {
         onOpenChange={(o) => !o && setActiveDialog(null)}
         totals={totals}
         eventSummaries={eventSummaries}
-      />
-      <TeamDialog
-        open={activeDialog === "equipe"}
-        onOpenChange={(o) => !o && setActiveDialog(null)}
-        members={members}
       />
     </>
   );
