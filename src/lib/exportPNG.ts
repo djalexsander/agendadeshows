@@ -54,7 +54,7 @@ export function exportShowPNG(show: Show) {
   let y = px(50);
 
   // Title
-  drawText("AGENDA DE SHOWS", margin, y, 12, "rgba(139, 92, 246, 0.7)", "600");
+  drawText("MINHA AGENDA", margin, y, 12, "rgba(139, 92, 246, 0.7)", "600");
   y += px(12);
 
   const lineGrad = ctx.createLinearGradient(margin, y, margin + px(100), y);
@@ -104,7 +104,7 @@ export function exportShowPNG(show: Show) {
   drawText(`Exportado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, margin, y, 10, "rgba(255,255,255,0.25)", "400");
 
   const link = document.createElement("a");
-  link.download = `show-${show.date}.png`;
+  link.download = `evento-${show.date}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
@@ -155,7 +155,7 @@ export function exportShowsListPNG(shows: Show[], periodLabel?: string, startDat
   };
 
   // Title
-  drawText("AGENDA DE SHOWS", margin, y, 12, "rgba(139, 92, 246, 0.7)", "600");
+  drawText("MINHA AGENDA", margin, y, 12, "rgba(139, 92, 246, 0.7)", "600");
   y += px(12);
 
   const lineGrad = ctx.createLinearGradient(margin, y, margin + px(100), y);
@@ -174,11 +174,11 @@ export function exportShowsListPNG(shows: Show[], periodLabel?: string, startDat
     const parts: string[] = [];
     if (startDate) parts.push(`De ${format(parseISO(startDate), "dd/MM/yyyy")}`);
     if (endDate) parts.push(`${startDate ? "até" : "Até"} ${format(parseISO(endDate), "dd/MM/yyyy")}`);
-    subtitle = parts.length > 0 ? parts.join(" ") : "Todos os shows";
+    subtitle = parts.length > 0 ? parts.join(" ") : "Todos os eventos";
   }
   drawText(subtitle, margin, y, 22, "#ffffff", "700");
   y += px(14);
-  drawText(`${shows.length} show${shows.length !== 1 ? "s" : ""}`, margin, y, 13, "rgba(255,255,255,0.45)", "400");
+  drawText(`${shows.length} evento${shows.length !== 1 ? "s" : ""}`, margin, y, 13, "rgba(255,255,255,0.45)", "400");
   y += px(35);
 
   ctx.strokeStyle = "rgba(255,255,255,0.08)";
@@ -278,7 +278,7 @@ export function exportShowsListPNG(shows: Show[], periodLabel?: string, startDat
   );
 
   const link = document.createElement("a");
-  link.download = `agenda-shows.png`;
+  link.download = `agenda-eventos.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
