@@ -6,10 +6,10 @@ self.addEventListener('push', function(event) {
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: 'Agenda de Shows', body: event.data ? event.data.text() : 'Nova notificação' };
+    data = { title: 'Minha Agenda', body: event.data ? event.data.text() : 'Nova notificação' };
   }
 
-  const title = data.title || 'Agenda de Shows';
+  const title = data.title || 'Minha Agenda';
   const options = {
     body: data.body || 'Você tem uma nova notificação',
     icon: '/icon-192.png',
