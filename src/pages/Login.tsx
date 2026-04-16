@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Music, LogIn, Eye, EyeOff, UserPlus } from "lucide-react";
+import { CalendarDays, LogIn, Eye, EyeOff, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -124,11 +124,11 @@ export default function Login() {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-3">
           <div className="h-16 w-16 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto">
-            <Music className="h-8 w-8 text-primary" />
+            <CalendarDays className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Agenda de Shows</h1>
-            <p className="text-muted-foreground mt-1">Gerencie sua agenda musical</p>
+            <h1 className="text-3xl font-bold tracking-tight">Minha Agenda</h1>
+            <p className="text-muted-foreground mt-1">Gerencie sua agenda com facilidade</p>
           </div>
         </div>
 

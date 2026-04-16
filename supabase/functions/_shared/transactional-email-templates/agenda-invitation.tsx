@@ -4,7 +4,7 @@ import {
 } from 'npm:@react-email/components@0.0.22'
 import type { TemplateEntry } from './registry.ts'
 
-const SITE_NAME = "Agenda de Shows"
+const SITE_NAME = "Minha Agenda"
 
 interface AgendaInvitationProps {
   companyName?: string
@@ -26,7 +26,7 @@ const AgendaInvitationEmail = ({ companyName, inviterName, role, acceptUrl }: Ag
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
-          <Text style={logoText}>🎵 {SITE_NAME}</Text>
+          <Text style={logoText}>📅 {SITE_NAME}</Text>
         </Section>
 
         <Heading style={h1}>Convite para Agenda Compartilhada</Heading>
@@ -38,7 +38,7 @@ const AgendaInvitationEmail = ({ companyName, inviterName, role, acceptUrl }: Ag
         </Text>
 
         <Text style={text}>
-          Com a Agenda Compartilhada, você pode visualizar e gerenciar shows da equipe sem precisar de uma assinatura própria.
+          Com a Agenda Compartilhada, você pode visualizar e gerenciar eventos da equipe sem precisar de uma assinatura própria.
         </Text>
 
         {acceptUrl && (

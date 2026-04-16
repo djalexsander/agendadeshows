@@ -14,7 +14,7 @@ export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: stri
   // Title
   doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
-  doc.text("Agenda de Shows", pageW / 2, y, { align: "center" });
+  doc.text("Agenda de Eventos", pageW / 2, y, { align: "center" });
   y += 8;
 
   // Subtitle with period
@@ -24,7 +24,7 @@ export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: stri
   const periodParts: string[] = [];
   if (startDate) periodParts.push(`De ${format(parseISO(startDate), "dd/MM/yyyy")}`);
   if (endDate) periodParts.push(`${startDate ? "até" : "Até"} ${format(parseISO(endDate), "dd/MM/yyyy")}`);
-  const periodText = periodParts.length > 0 ? periodParts.join(" ") : "Todos os shows";
+  const periodText = periodParts.length > 0 ? periodParts.join(" ") : "Todos os eventos";
   doc.text(periodText, pageW / 2, y, { align: "center" });
   y += 5;
   doc.text(`Exportado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`, pageW / 2, y, { align: "center" });
@@ -38,7 +38,7 @@ export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: stri
 
   if (sorted.length === 0) {
     doc.setFontSize(12);
-    doc.text("Nenhum show cadastrado.", pageW / 2, y, { align: "center" });
+    doc.text("Nenhum evento cadastrado.", pageW / 2, y, { align: "center" });
   } else {
     // Table header
     doc.setFontSize(11);
@@ -98,8 +98,8 @@ export function exportShowsPDF(shows: Show[], startDate?: string, endDate?: stri
     doc.line(margin, y, pageW - margin, y);
     y += 8;
     doc.setFont("helvetica", "bold");
-    doc.text(`Total: ${sorted.length} show${sorted.length !== 1 ? "s" : ""}`, margin + 4, y);
+    doc.text(`Total: ${sorted.length} evento${sorted.length !== 1 ? "s" : ""}`, margin + 4, y);
   }
 
-  doc.save("agenda-de-shows.pdf");
+  doc.save("agenda-de-eventos.pdf");
 }

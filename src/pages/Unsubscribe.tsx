@@ -50,7 +50,7 @@ export default function Unsubscribe() {
           <>
             <MailX className="h-12 w-12 text-primary mx-auto" />
             <h1 className="text-xl font-bold text-foreground">Cancelar inscrição</h1>
-            <p className="text-sm text-muted-foreground">Deseja parar de receber e-mails do Agenda de Shows?</p>
+            <p className="text-sm text-muted-foreground">Deseja parar de receber e-mails do Minha Agenda?</p>
             <Button className="w-full" onClick={handleUnsubscribe} disabled={processing}>
               {processing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Confirmar cancelamento

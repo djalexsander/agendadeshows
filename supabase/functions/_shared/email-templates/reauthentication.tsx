@@ -17,7 +17,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logoText}>🎵 Agenda de Shows</Text>
+          <Text style={logoText}>📅 Minha Agenda</Text>
         </Section>
         <Heading style={h1}>Código de verificação</Heading>
         <Text style={text}>Use o código abaixo para confirmar sua identidade:</Text>

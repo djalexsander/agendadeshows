@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MapPin, Plus, Music, Users, Clock } from "lucide-react";
+import { MapPin, Plus, CalendarDays, Users, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -85,7 +85,7 @@ export function DayEventsDialog({
         <DialogContent className="sm:max-w-md mx-4 rounded-2xl bg-card border-border max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <Music className="h-5 w-5 text-primary" />
+              <CalendarDays className="h-5 w-5 text-primary" />
               Eventos do dia
             </DialogTitle>
             <DialogDescription className="text-muted-foreground capitalize">

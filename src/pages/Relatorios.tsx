@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, FileBarChart, CalendarDays, BarChart3, DollarSign, Users, ChevronRight, TrendingUp, TrendingDown, Wallet, Music, MapPin } from "lucide-react";
+import { ArrowLeft, FileBarChart, CalendarDays, BarChart3, DollarSign, Users, ChevronRight, TrendingUp, TrendingDown, Wallet, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -38,7 +38,7 @@ function ShowListDialog({ open, onOpenChange, title, shows }: { open: boolean; o
               return (
                 <div key={s.id} className="rounded-xl bg-secondary/40 border border-border/50 p-3 flex items-center gap-3">
                   <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Music className="h-4 w-4 text-primary" />
+                    <CalendarDays className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-foreground truncate">{s.evento || s.cidade}</p>
@@ -108,7 +108,7 @@ function FinancialDetailDialog({ open, onOpenChange, totals, eventSummaries }: {
                 {eventSummaries.map((ev) => (
                   <div key={ev.show_id} className="rounded-xl bg-secondary/40 border border-border/50 p-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <Music className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span className="font-medium text-sm truncate">{ev.event_name}</span>
                       {ev.event_date && (
                         <span className="text-[10px] text-muted-foreground shrink-0">

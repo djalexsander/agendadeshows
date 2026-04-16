@@ -18,7 +18,7 @@ export const RecoveryEmail = ({ siteName, confirmationUrl }: RecoveryEmailProps)
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logoText}>🎵 Agenda de Shows</Text>
+          <Text style={logoText}>📅 Minha Agenda</Text>
         </Section>
         <Heading style={h1}>Redefinir sua senha</Heading>
         <Text style={text}>

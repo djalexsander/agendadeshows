@@ -1,7 +1,7 @@
 {
-  "name": "Agenda de Shows",
-  "short_name": "Agenda Shows",
-  "description": "Gerencie sua agenda musical",
+  "name": "Minha Agenda",
+  "short_name": "Minha Agenda",
+  "description": "Gerencie sua agenda com facilidade",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",
