@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { Music, Image, CalendarDays, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, UsersRound, FileBarChart, Crown } from "lucide-react";
+import { CalendarDays, Image, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, UsersRound, FileBarChart, Crown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -84,10 +84,10 @@ export default function Dashboard() {
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Music className="h-5 w-5 text-primary" />
+                <CalendarDays className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight">Agenda de Shows</h1>
+                <h1 className="text-xl font-bold tracking-tight">Minha Agenda</h1>
                 <p className="text-xs text-muted-foreground">
                   {profile?.nome_artistico || profile?.nome || "Sua agenda"}
                 </p>
@@ -215,7 +215,6 @@ export default function Dashboard() {
           <div
             className="rounded-2xl bg-card border border-border p-3 sm:p-5 flex items-center gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
             onClick={() => {
-              // Show all events this month — scroll to the list
               const el = document.getElementById("month-shows-list");
               if (el) el.scrollIntoView({ behavior: "smooth" });
             }}
@@ -237,7 +236,7 @@ export default function Dashboard() {
             </div>
             <div className="min-w-0">
               <p className="text-xl sm:text-2xl font-bold">{shows.length}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Total de shows</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Total de eventos</p>
             </div>
           </div>
           <div
@@ -254,7 +253,7 @@ export default function Dashboard() {
                   : "—"}
               </p>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                {nextShow ? "Próximo show" : "Sem próximo"}
+                {nextShow ? "Próximo evento" : "Sem próximo"}
               </p>
             </div>
           </div>
@@ -332,7 +331,6 @@ export default function Dashboard() {
                   const statuses = new Set(dayShows.map((s) => s.status || "pendente"));
                   const hasMultipleEvents = dayShows.length > 1;
 
-                  // Priority: confirmado > pendente > finalizado
                   const primaryStatus = statuses.has("confirmado")
                     ? "confirmado"
                     : statuses.has("pendente")
@@ -365,10 +363,10 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Shows List */}
+          {/* Events List */}
           <div id="month-shows-list" className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-              Shows em{" "}
+              Eventos em{" "}
               <span className="capitalize text-foreground">
                 {format(currentMonth, "MMMM", { locale: ptBR })}
               </span>
@@ -377,9 +375,9 @@ export default function Dashboard() {
             {monthShows.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
                 <div className="h-14 w-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3">
-                  <Music className="h-7 w-7 text-muted-foreground" />
+                  <CalendarDays className="h-7 w-7 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground text-sm">Nenhum show neste mês</p>
+                <p className="text-muted-foreground text-sm">Nenhum evento neste mês</p>
                 <p className="text-muted-foreground/60 text-xs mt-1">
                   Toque em uma data para adicionar
                 </p>
@@ -448,13 +446,13 @@ export default function Dashboard() {
         shows={shows}
       />
 
-      {/* All shows dialog */}
+      {/* All events dialog */}
       <Dialog open={allShowsOpen} onOpenChange={setAllShowsOpen}>
         <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              Todos os shows ({shows.length})
+              Todos os eventos ({shows.length})
             </DialogTitle>
             <DialogDescription>Lista completa de eventos cadastrados</DialogDescription>
           </DialogHeader>
@@ -469,7 +467,7 @@ export default function Dashboard() {
                   onClick={() => { setAllShowsOpen(false); handleShowClick(s.date); }}
                 >
                   <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <Music className="h-4 w-4 text-primary" />
+                    <CalendarDays className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-foreground truncate">{s.evento || s.cidade}</p>

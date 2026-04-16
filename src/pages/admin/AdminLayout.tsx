@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAdminMode } from "@/hooks/useAdminMode";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Music,
+  CalendarDays,
   LayoutDashboard,
   CalendarDays,
   Users,
@@ -168,10 +168,10 @@ export default function AdminLayout() {
       <aside className="w-64 bg-card border-r border-border flex-col hidden md:flex">
         <div className="p-6 flex items-center gap-3 border-b border-border">
           <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <Music className="h-5 w-5 text-primary" />
+            <CalendarDays className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-tight">Agenda de Shows</h1>
+            <h1 className="text-sm font-bold tracking-tight">Minha Agenda</h1>
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
               {isEmpresaMode ? "Minha Empresa" : "Painel Master"}
             </p>
@@ -225,7 +225,7 @@ export default function AdminLayout() {
         <header className="md:hidden flex flex-col border-b border-border bg-card sticky top-0 z-50">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-2">
-              <Music className="h-5 w-5 text-primary" />
+              <CalendarDays className="h-5 w-5 text-primary" />
               <span className="font-bold text-sm">
                 {isEmpresaMode ? "Minha Empresa" : "Admin"}
               </span>
