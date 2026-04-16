@@ -5,7 +5,7 @@ import { useTrialStatus } from "@/hooks/useTrialStatus";
 
 export type ModuleName = "financeiro" | "equipe" | "relatorios" | "export_png" | "gps" | "agenda_compartilhada";
 
-const ALL_MODULE_NAMES: ModuleName[] = ["financeiro", "equipe", "relatorios", "export_png", "gps", "agenda_compartilhada"];
+const ALL_MODULE_NAMES: ModuleName[] = ["financeiro", "relatorios", "export_png", "gps", "agenda_compartilhada"];
 
 interface UserModule {
   id: string;

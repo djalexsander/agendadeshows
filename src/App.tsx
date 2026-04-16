@@ -29,7 +29,7 @@ import AdminModulePayments from "./pages/admin/AdminModulePayments";
 import AdminBasePlan from "./pages/admin/AdminBasePlan";
 import ModulesUpgrade from "./pages/ModulesUpgrade";
 import Financeiro from "./pages/Financeiro";
-import Equipe from "./pages/Equipe";
+
 import Relatorios from "./pages/Relatorios";
 import ClientBasePlan from "./pages/ClientBasePlan";
 import CompanyUsers from "./pages/CompanyUsers";
@@ -76,7 +76,6 @@ function AppRoutes() {
           <Route path="settings" element={<AdminSettings />} />
           {/* Minha Empresa routes */}
           <Route path="empresa" element={<Dashboard />} />
-          <Route path="empresa/equipe" element={<Equipe />} />
           <Route path="empresa/financeiro" element={<Financeiro />} />
           <Route path="empresa/relatorios" element={<Relatorios />} />
           <Route path="empresa/usuarios" element={<CompanyUsers />} />
@@ -108,7 +107,6 @@ function AppRoutes() {
               <Route path="/meu-plano" element={<ClientBasePlan />} />
               <Route path="/modulos" element={<ModulesUpgrade />} />
               <Route path="/financeiro" element={<Financeiro />} />
-              <Route path="/equipe" element={<Equipe />} />
               <Route path="/usuarios" element={<CompanyUsers />} />
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="*" element={<Navigate to="/" replace />} />
