@@ -344,7 +344,7 @@ function FinanceiroContent() {
             onClick={() => setShowEventSummaries(!showEventSummaries)}
           >
             <span className="flex items-center gap-2">
-              <Music className="h-3.5 w-3.5 text-primary" />
+              <CalendarDays className="h-3.5 w-3.5 text-primary" />
               Resumo por evento ({eventSummaries.length})
             </span>
             {showEventSummaries ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
@@ -359,7 +359,7 @@ function FinanceiroContent() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Music className="h-4 w-4 text-primary shrink-0" />
+                      <CalendarDays className="h-4 w-4 text-primary shrink-0" />
                       <span className="font-medium text-sm truncate">{ev.event_name}</span>
                       {ev.event_date && (
                         <span className="text-[10px] text-muted-foreground shrink-0">
@@ -502,7 +502,7 @@ function FinanceiroContent() {
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     {e.event_name ? (
                       <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md flex items-center gap-1.5 truncate">
-                        <Music className="h-3 w-3 shrink-0" />
+                        <CalendarDays className="h-3 w-3 shrink-0" />
                         {e.event_name}
                       </span>
                     ) : (
