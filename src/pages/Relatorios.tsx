@@ -141,41 +141,6 @@ function FinancialDetailDialog({ open, onOpenChange, totals, eventSummaries }: {
   );
 }
 
-function TeamDialog({ open, onOpenChange, members }: { open: boolean; onOpenChange: (o: boolean) => void; members: { id: string; name: string; role: string | null; phone: string | null; email: string | null }[] }) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            Equipe
-          </DialogTitle>
-          <DialogDescription>{members.length} membro(s)</DialogDescription>
-        </DialogHeader>
-        {members.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">Nenhum membro cadastrado</p>
-        ) : (
-          <div className="space-y-2 py-2">
-            {members.map((m) => (
-              <div key={m.id} className="rounded-xl bg-secondary/40 border border-border/50 p-3 flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Users className="h-4 w-4 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm text-foreground truncate">{m.name}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {m.role && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{m.role}</span>}
-                    {m.phone && <span className="text-[10px] text-muted-foreground">{m.phone}</span>}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 type DialogType = "all_events" | "confirmados" | "pendentes" | "finalizados" | "lancamentos" | "saldo" | null;
 
