@@ -43,8 +43,8 @@
     --sidebar-border: 240 6% 18%;
     --sidebar-ring: 258 70% 58%;
 
-    --show-indicator: 258 70% 58%;
-    --show-indicator-glow: 258 80% 65%;
+    --event-indicator: 258 70% 58%;
+    --event-indicator-glow: 258 80% 65%;
   }
 }
 
@@ -65,10 +65,10 @@
   color: hsl(var(--primary-foreground)) !important;
 }
 
-.show-dot {
+.event-dot {
   display: none;
 }
 
-.show-circle {
+.event-circle {
   display: none;
 }
