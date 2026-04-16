@@ -20,7 +20,7 @@ export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }:
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logoText}>🎵 Agenda de Shows</Text>
+          <Text style={logoText}>📅 Minha Agenda</Text>
         </Section>
         <Heading style={h1}>Confirme a alteração de e-mail</Heading>
         <Text style={text}>

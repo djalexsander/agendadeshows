@@ -19,7 +19,7 @@ export const InviteEmail = ({ siteName, siteUrl, confirmationUrl }: InviteEmailP
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <Text style={logoText}>🎵 Agenda de Shows</Text>
+          <Text style={logoText}>📅 Minha Agenda</Text>
         </Section>
         <Heading style={h1}>Você foi convidado!</Heading>
         <Text style={text}>
