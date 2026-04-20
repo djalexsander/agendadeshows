@@ -178,9 +178,9 @@ export default function Login() {
   };
 
   const features = [
-    { icon: CalendarDays, title: "Agenda inteligente", desc: "Calendário visual com seus próximos shows e eventos." },
+    { icon: CalendarDays, title: "Agenda inteligente", desc: "Visualize seus compromissos e eventos com facilidade." },
     { icon: DollarSign, title: "Financeiro completo", desc: "Receitas, despesas e relatórios em um só lugar." },
-    { icon: Users, title: "Equipe organizada", desc: "Convide colaboradores e gerencie sua produção." },
+    { icon: Users, title: "Tudo centralizado", desc: "Acompanhe suas informações em um só lugar." },
   ];
 
   return (
@@ -205,7 +205,7 @@ export default function Login() {
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight">Minha Agenda</h1>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Plataforma para músicos</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Gestão e organização</p>
             </div>
           </div>
 
@@ -213,13 +213,13 @@ export default function Login() {
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 backdrop-blur px-3 py-1">
                 <Sparkles className="h-3 w-3 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">SaaS para artistas</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Plataforma de organização</span>
               </div>
               <h2 className="text-3xl xl:text-4xl font-bold tracking-tight leading-tight">
-                Sua agenda, financeiro e equipe — <span className="text-primary">tudo em um só app</span>.
+                Sua agenda e financeiro — <span className="text-primary">tudo em um só app</span>.
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Organize seus shows, controle suas finanças e gerencie sua produção com a praticidade que você merece.
+                Organize seus compromissos, controle suas finanças e acompanhe sua rotina com mais praticidade no dia a dia.
               </p>
             </div>
 
@@ -254,7 +254,7 @@ export default function Login() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">Minha Agenda</h1>
-                <p className="text-xs text-muted-foreground mt-1">Agenda, financeiro e equipe — tudo em um só app.</p>
+                <p className="text-xs text-muted-foreground mt-1">Agenda e financeiro — tudo em um só app.</p>
               </div>
             </div>
 
