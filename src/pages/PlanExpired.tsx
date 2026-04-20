@@ -63,7 +63,7 @@ export default function PlanExpired() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Plano vencido</h1>
             <p className="text-muted-foreground mt-1">
-              Olá, <strong>{profile?.nome}</strong>! Seu plano mensal venceu. Renove para continuar usando o aplicativo.
+              Olá, <strong>{profile?.nome}</strong>! Renove em 1 clique para voltar a usar — seus dados continuam salvos.
             </p>
           </div>
         </div>
@@ -85,15 +85,15 @@ export default function PlanExpired() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso completo por mais 30 dias
+              Mais 30 dias de acesso completo
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Seus dados são mantidos
+              Sua agenda, financeiro e equipe intactos
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Renovação rápida
+              Pagamento por Pix com aprovação rápida
             </li>
           </ul>
           <Button
@@ -102,12 +102,12 @@ export default function PlanExpired() {
             className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
           >
             <Send className="h-5 w-5" />
-            {loading ? "Processando..." : "Renovar plano mensal"}
+            {loading ? "Processando..." : "Renovar agora"}
           </Button>
         </div>
 
         <p className="text-center text-xs text-muted-foreground px-4">
-          Após o pagamento, envie o comprovante e aguarde a aprovação do administrador.
+          Em seguida, envie o comprovante do Pix. A liberação acontece após confirmação do administrador.
         </p>
 
         <Button variant="ghost" onClick={signOut} className="w-full gap-2">

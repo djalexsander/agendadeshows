@@ -13,9 +13,9 @@ export default function PaymentReview() {
             <Clock className="h-8 w-8 text-blue-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Pagamento em Análise</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Pagamento em análise</h1>
             <p className="text-muted-foreground mt-2">
-              Olá, <strong>{profile?.nome}</strong>! Seu comprovante foi recebido e está sendo analisado pelo administrador.
+              Olá, <strong>{profile?.nome}</strong>! Recebemos seu comprovante. A liberação acontece após a confirmação pelo administrador — geralmente em poucas horas.
             </p>
           </div>
         </div>
@@ -24,19 +24,19 @@ export default function PaymentReview() {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-[hsl(140_60%_45%)]/20 flex items-center justify-center text-xs font-bold text-[hsl(140_60%_55%)]">1</div>
-              <p className="text-sm"><strong>Cadastro enviado</strong> — concluído ✓</p>
+              <p className="text-sm"><strong>Cadastro criado</strong> — concluído ✓</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-[hsl(140_60%_45%)]/20 flex items-center justify-center text-xs font-bold text-[hsl(140_60%_55%)]">2</div>
-              <p className="text-sm"><strong>Cadastro aprovado</strong> — concluído ✓</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-[hsl(140_60%_45%)]/20 flex items-center justify-center text-xs font-bold text-[hsl(140_60%_55%)]">3</div>
               <p className="text-sm"><strong>Comprovante enviado</strong> — concluído ✓</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">4</div>
-              <p className="text-sm"><strong>Pagamento em análise</strong> — aguardando</p>
+              <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs font-bold text-blue-400">3</div>
+              <p className="text-sm"><strong>Análise do pagamento</strong> — em andamento</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">4</div>
+              <p className="text-sm text-muted-foreground"><strong>Acesso liberado</strong> — próximo passo</p>
             </div>
           </div>
         </div>
