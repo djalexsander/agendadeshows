@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
 import { useToast } from "@/hooks/use-toast";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const adminNavItems = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
@@ -218,6 +219,7 @@ export default function AdminLayout() {
       </nav>
 
       <div className="p-4 border-t border-border space-y-2 shrink-0">
+        <ThemeToggle />
         <Button
           variant={pushEnabled ? "default" : "outline"}
           className="w-full justify-start gap-3 text-muted-foreground text-xs relative"
@@ -273,6 +275,7 @@ export default function AdminLayout() {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <ThemeToggle variant="compact" />
             <button
               onClick={() => window.location.reload()}
               className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50"
