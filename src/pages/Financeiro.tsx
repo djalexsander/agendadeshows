@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback } from "react";
-import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Trash2, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, CalendarDays, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
+import { useState, useCallback } from "react";
+import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, CalendarDays, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ModuleGate } from "@/components/modules/ModuleGate";
-import { useFinancialEntries, FinancialFilters } from "@/hooks/useFinancialEntries";
+import { useFinancialEntries } from "@/hooks/useFinancialEntries";
 import { FinancialDetailDrawer, DetailDrawerType } from "@/components/FinancialDetailDrawer";
 import { useSupabaseShows } from "@/hooks/useSupabaseShows";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCompany } from "@/hooks/useCompany";
 import { FinancialExportDialog } from "@/components/FinancialExportDialog";
 import { FinancialEntryViewModal } from "@/components/FinancialEntryViewModal";
+import { FINANCIAL_STATUS_LABELS, getFinancialStatusStyle, type FinancialStatus } from "@/lib/financialStatus";
 
 const CATEGORIAS_ENTRADA = [
   "Cachê do evento",
@@ -50,16 +51,16 @@ const CATEGORIAS_SAIDA = [
 
 const FORMAS_PAGAMENTO = ["PIX", "Dinheiro", "Cartão", "Boleto", "Transferência"];
 
-const STATUS_OPTIONS = [
-  { value: "pendente", label: "Pendente", color: "text-yellow-500 bg-yellow-500/10" },
-  { value: "pago", label: "Pago", color: "text-green-500 bg-green-500/10" },
-  { value: "recebido", label: "Recebido", color: "text-green-500 bg-green-500/10" },
-  { value: "vencido", label: "Vencido", color: "text-red-500 bg-red-500/10" },
-  { value: "cancelado", label: "Cancelado", color: "text-muted-foreground bg-muted" },
-];
+// Status options surfaced in form selects (uses centralized labels for consistency)
+const STATUS_OPTIONS: { value: FinancialStatus; label: string; color: string }[] =
+  (Object.keys(FINANCIAL_STATUS_LABELS) as FinancialStatus[]).map((value) => ({
+    value,
+    label: FINANCIAL_STATUS_LABELS[value].label,
+    color: FINANCIAL_STATUS_LABELS[value].color,
+  }));
 
 function getStatusStyle(status: string) {
-  return STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
+  return getFinancialStatusStyle(status);
 }
 
 interface FormState {
@@ -125,23 +126,19 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
 function FinanceiroContent() {
   const { user } = useAuth();
   const { company } = useCompany();
-  const { entries, allEntries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
+  const { entries, loading, addEntry, updateEntry, deleteEntry, totals, filters, setFilters, categories, eventSummaries } = useFinancialEntries();
   const { shows } = useSupabaseShows();
   const [detailDrawer, setDetailDrawer] = useState<DetailDrawerType>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [viewEntry, setViewEntry] = useState<typeof entries[0] | null>(null);
 
-  const CONFIRMED_STATUSES = ["pago", "recebido", "confirmado"];
-
-  const advancedTotals = useMemo(() => {
-    const totalEntradas = entries.filter((e) => e.type === "entrada").reduce((s, e) => s + Number(e.amount), 0);
-    const totalSaidas = entries.filter((e) => e.type === "saida").reduce((s, e) => s + Number(e.amount), 0);
-    const totalPendentes = entries.filter((e) => e.status === "pendente").reduce((s, e) => s + Number(e.amount), 0);
-    const entradasConfirmadas = entries.filter((e) => e.type === "entrada" && CONFIRMED_STATUSES.includes(e.status)).reduce((s, e) => s + Number(e.amount), 0);
-    const saidasConfirmadas = entries.filter((e) => e.type === "saida" && CONFIRMED_STATUSES.includes(e.status)).reduce((s, e) => s + Number(e.amount), 0);
-    const saldoConfirmado = entradasConfirmadas - saidasConfirmadas;
-    return { totalEntradas, totalSaidas, totalPendentes, entradasConfirmadas, saidasConfirmadas, saldoConfirmado };
-  }, [entries]);
+  // Totals come from the hook (single source of truth, shared with Relatórios).
+  const advancedTotals = {
+    totalEntradas: totals.entradas,
+    totalSaidas: totals.saidas,
+    totalPendentes: totals.pendentes,
+    saldoConfirmado: totals.saldoConfirmado,
+  };
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showFilters, setShowFilters] = useState(false);

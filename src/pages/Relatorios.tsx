@@ -66,7 +66,7 @@ function ShowListDialog({ open, onOpenChange, title, shows }: { open: boolean; o
 function FinancialDetailDialog({ open, onOpenChange, totals, eventSummaries }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  totals: { entradas: number; saidas: number; saldo: number };
+  totals: { entradas: number; saidas: number; saldo: number; saldoConfirmado: number; pendentes: number };
   eventSummaries: { show_id: string; event_name: string; event_date: string | null; entradas: number; saidas: number; saldo: number; count: number }[];
 }) {
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -81,7 +81,7 @@ function FinancialDetailDialog({ open, onOpenChange, totals, eventSummaries }: {
           <DialogDescription>Resumo geral e por evento</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
-          {/* General totals */}
+          {/* General totals — saldo here uses CONFIRMED values to match the Financeiro card */}
           <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl bg-green-500/10 p-3 text-center">
               <TrendingUp className="h-4 w-4 text-green-500 mx-auto mb-1" />
@@ -95,10 +95,17 @@ function FinancialDetailDialog({ open, onOpenChange, totals, eventSummaries }: {
             </div>
             <div className="rounded-xl bg-primary/10 p-3 text-center">
               <Wallet className="h-4 w-4 text-primary mx-auto mb-1" />
-              <p className={`text-sm font-bold ${totals.saldo >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(totals.saldo)}</p>
-              <p className="text-[10px] text-muted-foreground">Saldo</p>
+              <p className={`text-sm font-bold ${totals.saldoConfirmado >= 0 ? "text-green-500" : "text-red-500"}`}>{fmt(totals.saldoConfirmado)}</p>
+              <p className="text-[10px] text-muted-foreground">Saldo confirmado</p>
             </div>
           </div>
+
+          {totals.pendentes > 0 && (
+            <div className="rounded-xl bg-yellow-500/10 border border-yellow-500/20 p-3 flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Pendente</span>
+              <span className="text-sm font-bold text-yellow-500">{fmt(totals.pendentes)}</span>
+            </div>
+          )}
 
           {eventSummaries.length > 0 && (
             <>
@@ -170,8 +177,7 @@ function RelatoriosContent() {
     { label: "Pendentes", value: String(statusCounts["pendente"] || 0), icon: BarChart3, color: "bg-yellow-500/15 text-yellow-500", dialog: "pendentes", subtitle: "Ver lista" },
     { label: "Finalizados", value: String(statusCounts["finalizado"] || 0), icon: BarChart3, color: "bg-blue-500/15 text-blue-500", dialog: "finalizados", subtitle: "Ver lista" },
     { label: "Lançamentos financeiros", value: String(allEntries.length), icon: DollarSign, color: "bg-primary/15 text-primary", dialog: "lancamentos", subtitle: "Ver lançamentos" },
-    { label: "Saldo financeiro", value: fmt(totals.saldo), icon: DollarSign, color: totals.saldo >= 0 ? "bg-green-500/15 text-green-500" : "bg-red-500/15 text-red-500", dialog: "saldo", subtitle: "Ver detalhes" },
-    
+    { label: "Saldo confirmado", value: fmt(totals.saldoConfirmado), icon: DollarSign, color: totals.saldoConfirmado >= 0 ? "bg-green-500/15 text-green-500" : "bg-red-500/15 text-red-500", dialog: "saldo", subtitle: "Ver detalhes" },
   ];
 
   const handleClick = (dialog: DialogType) => {
