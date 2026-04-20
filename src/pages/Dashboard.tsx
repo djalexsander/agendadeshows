@@ -182,30 +182,42 @@ export default function Dashboard() {
           rightSlot={isEmbedded ? embeddedExportButton : headerActions}
         />
 
-        {/* Quick nav for modules (standalone only) */}
-        {!isEmbedded && (
-          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-            {[
-              { label: "Financeiro", icon: DollarSign, path: "/financeiro" },
-              { label: "Relatórios", icon: FileBarChart, path: "/relatorios" },
-              ...(hasModule("agenda_compartilhada") ? [{ label: "Usuários", icon: UsersRound, path: "/usuarios" }] : []),
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <Button
-                  key={item.path}
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl gap-2 shrink-0 border-border bg-card hover:bg-secondary/60"
-                  onClick={() => navigate(item.path)}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              );
-            })}
-          </div>
-        )}
+        {/* Quick nav — atalhos discretos para áreas operacionais */}
+        {(() => {
+          const items = isEmbedded
+            ? [
+                { label: "Financeiro", icon: DollarSign, path: "/admin/empresa/financeiro" },
+                { label: "Relatórios", icon: FileBarChart, path: "/admin/empresa/relatorios" },
+                { label: "Usuários", icon: UsersRound, path: "/admin/empresa/usuarios" },
+              ]
+            : [
+                { label: "Financeiro", icon: DollarSign, path: "/financeiro" },
+                { label: "Relatórios", icon: FileBarChart, path: "/relatorios" },
+                ...(hasModule("agenda_compartilhada")
+                  ? [{ label: "Usuários", icon: UsersRound, path: "/usuarios" }]
+                  : []),
+              ];
+          if (items.length === 0) return null;
+          return (
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-thin">
+              {items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Button
+                    key={item.path}
+                    variant="outline"
+                    size="sm"
+                    className="rounded-xl gap-2 shrink-0 border-border bg-card hover:bg-secondary/60 hover:border-primary/40 hover:text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary/40"
+                    onClick={() => navigate(item.path)}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Button>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
