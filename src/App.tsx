@@ -42,6 +42,7 @@ const ModulesUpgrade = lazy(() => import("./pages/ModulesUpgrade"));
 const ClientBasePlan = lazy(() => import("./pages/ClientBasePlan"));
 const CompanyUsers = lazy(() => import("./pages/CompanyUsers"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient();
 
@@ -60,12 +61,25 @@ function AppRoutes() {
     return <PageFallback />;
   }
 
+  // Public route: reset-password (precisa funcionar logado ou não, pois Supabase
+  // cria sessão temporária ao clicar no link de recovery)
+  if (typeof window !== "undefined" && window.location.pathname === "/reset-password") {
+    return (
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
   // Not logged in
   if (!user) {
     return (
       <Suspense fallback={<PageFallback />}>
         <Routes>
           <Route path="/unsubscribe" element={<Unsubscribe />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Login />} />
         </Routes>
       </Suspense>

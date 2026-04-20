@@ -27,10 +27,12 @@ import { APP_VERSION } from "@/lib/version";
 import { signupSchema, loginSchema, firstZodError } from "@/lib/validation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { lovable } from "@/integrations/lovable/index";
+import { ForgotPasswordDialog } from "@/components/ForgotPasswordDialog";
 
 export default function Login() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -404,7 +406,18 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">{isSignup ? "Senha *" : "Senha"}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">{isSignup ? "Senha *" : "Senha"}</Label>
+                    {!isSignup && (
+                      <button
+                        type="button"
+                        onClick={() => setForgotOpen(true)}
+                        className="text-xs font-medium text-primary hover:text-primary/80 transition-base"
+                      >
+                        Esqueci minha senha
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <Input
                       id="password"
@@ -465,6 +478,12 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      <ForgotPasswordDialog
+        open={forgotOpen}
+        onOpenChange={setForgotOpen}
+        initialEmail={email}
+      />
     </div>
   );
 }
