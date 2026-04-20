@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink, Clock, UserPlus, ChevronRight } from "lucide-react";
+import { Users, DollarSign, UserCheck, Bell, CheckCircle, X, ExternalLink, Clock, UserPlus, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { MetricCard } from "@/components/admin/dashboard/MetricCard";
+import { QuickActions } from "@/components/admin/dashboard/QuickActions";
+import { AttentionPanel } from "@/components/admin/dashboard/AttentionPanel";
+import { ClientStatusBreakdown } from "@/components/admin/dashboard/ClientStatusBreakdown";
+import { RevenueOverview } from "@/components/admin/dashboard/RevenueOverview";
 
 interface PaymentProof {
   id: string;
