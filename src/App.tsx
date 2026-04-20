@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,82 +10,95 @@ import { CompanyProvider } from "@/hooks/useCompany";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { TrialBanner } from "@/components/TrialBanner";
 import { TrialExpiredModal } from "@/components/TrialExpiredModal";
+
+// Eager: páginas críticas para o bootstrap (login, dashboard principal e estados de bloqueio leves).
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 import PlanChoice from "./pages/PlanChoice";
 import TrialExpired from "./pages/TrialExpired";
 import PlanExpired from "./pages/PlanExpired";
 import PaymentPending from "./pages/PaymentPending";
 import PaymentReview from "./pages/PaymentReview";
 import RejectedPage from "./pages/RejectedPage";
-import Dashboard from "./pages/Dashboard";
-import AdminLayout from "./pages/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminClients from "./pages/admin/AdminClients";
-import AdminFinancial from "./pages/admin/AdminFinancial";
-import AdminPix from "./pages/admin/AdminPix";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminModuleRequests from "./pages/admin/AdminModuleRequests";
-import AdminModuleCatalog from "./pages/admin/AdminModuleCatalog";
-import AdminModulePayments from "./pages/admin/AdminModulePayments";
-import AdminBasePlan from "./pages/admin/AdminBasePlan";
-import ModulesUpgrade from "./pages/ModulesUpgrade";
-import Financeiro from "./pages/Financeiro";
-
-import Relatorios from "./pages/Relatorios";
-import ClientBasePlan from "./pages/ClientBasePlan";
-import CompanyUsers from "./pages/CompanyUsers";
-import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 
+// Lazy: páginas administrativas (só carregam para admins).
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminClients = lazy(() => import("./pages/admin/AdminClients"));
+const AdminFinancial = lazy(() => import("./pages/admin/AdminFinancial"));
+const AdminPix = lazy(() => import("./pages/admin/AdminPix"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminModuleRequests = lazy(() => import("./pages/admin/AdminModuleRequests"));
+const AdminModuleCatalog = lazy(() => import("./pages/admin/AdminModuleCatalog"));
+const AdminModulePayments = lazy(() => import("./pages/admin/AdminModulePayments"));
+const AdminBasePlan = lazy(() => import("./pages/admin/AdminBasePlan"));
+
+// Lazy: páginas secundárias do cliente (Financeiro/Relatórios usam libs grandes como jspdf/recharts sob demanda).
+const Financeiro = lazy(() => import("./pages/Financeiro"));
+const Relatorios = lazy(() => import("./pages/Relatorios"));
+const ModulesUpgrade = lazy(() => import("./pages/ModulesUpgrade"));
+const ClientBasePlan = lazy(() => import("./pages/ClientBasePlan"));
+const CompanyUsers = lazy(() => import("./pages/CompanyUsers"));
+const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
+
 const queryClient = new QueryClient();
+
+function PageFallback() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function AppRoutes() {
   const { user, role, profile, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageFallback />;
   }
 
   // Not logged in
   if (!user) {
     return (
-      <Routes>
-        <Route path="/unsubscribe" element={<Unsubscribe />} />
-        <Route path="*" element={<Login />} />
-      </Routes>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/unsubscribe" element={<Unsubscribe />} />
+          <Route path="*" element={<Login />} />
+        </Routes>
+      </Suspense>
     );
   }
 
   // Admin routes
   if (role === "admin") {
     return (
-      <Routes>
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="agenda" element={<Dashboard />} />
-          <Route path="clients" element={<AdminClients />} />
-          <Route path="financial" element={<AdminFinancial />} />
-          <Route path="pix" element={<AdminPix />} />
-          <Route path="modules" element={<AdminModuleRequests />} />
-          <Route path="module-catalog" element={<AdminModuleCatalog />} />
-          <Route path="module-payments" element={<AdminModulePayments />} />
-          <Route path="base-plan" element={<AdminBasePlan />} />
-          <Route path="settings" element={<AdminSettings />} />
-          {/* Minha Empresa routes */}
-          <Route path="empresa" element={<Dashboard />} />
-          <Route path="empresa/financeiro" element={<Financeiro />} />
-          <Route path="empresa/relatorios" element={<Relatorios />} />
-          <Route path="empresa/usuarios" element={<CompanyUsers />} />
-          <Route path="empresa/modulos" element={<ModulesUpgrade />} />
-          <Route path="empresa/meu-plano" element={<ClientBasePlan />} />
-        </Route>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="*" element={<Navigate to="/admin" replace />} />
-      </Routes>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="agenda" element={<Dashboard />} />
+            <Route path="clients" element={<AdminClients />} />
+            <Route path="financial" element={<AdminFinancial />} />
+            <Route path="pix" element={<AdminPix />} />
+            <Route path="modules" element={<AdminModuleRequests />} />
+            <Route path="module-catalog" element={<AdminModuleCatalog />} />
+            <Route path="module-payments" element={<AdminModulePayments />} />
+            <Route path="base-plan" element={<AdminBasePlan />} />
+            <Route path="settings" element={<AdminSettings />} />
+            {/* Minha Empresa routes */}
+            <Route path="empresa" element={<Dashboard />} />
+            <Route path="empresa/financeiro" element={<Financeiro />} />
+            <Route path="empresa/relatorios" element={<Relatorios />} />
+            <Route path="empresa/usuarios" element={<CompanyUsers />} />
+            <Route path="empresa/modulos" element={<ModulesUpgrade />} />
+            <Route path="empresa/meu-plano" element={<ClientBasePlan />} />
+          </Route>
+          <Route path="/" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Routes>
+      </Suspense>
     );
   }
 
@@ -94,7 +108,11 @@ function AppRoutes() {
 
     switch (effectiveStatus) {
       case "pending_plan_choice":
-        return <Routes><Route path="*" element={<PlanChoice />} /></Routes>;
+        return (
+          <Suspense fallback={<PageFallback />}>
+            <Routes><Route path="*" element={<PlanChoice />} /></Routes>
+          </Suspense>
+        );
 
       case "trial":
       case "active":
@@ -102,15 +120,17 @@ function AppRoutes() {
           <>
             <TrialBanner />
             <TrialExpiredModal />
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/meu-plano" element={<ClientBasePlan />} />
-              <Route path="/modulos" element={<ModulesUpgrade />} />
-              <Route path="/financeiro" element={<Financeiro />} />
-              <Route path="/usuarios" element={<CompanyUsers />} />
-              <Route path="/relatorios" element={<Relatorios />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Suspense fallback={<PageFallback />}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/meu-plano" element={<ClientBasePlan />} />
+                <Route path="/modulos" element={<ModulesUpgrade />} />
+                <Route path="/financeiro" element={<Financeiro />} />
+                <Route path="/usuarios" element={<CompanyUsers />} />
+                <Route path="/relatorios" element={<Relatorios />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
           </>
         );
 
