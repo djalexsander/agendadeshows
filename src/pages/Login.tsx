@@ -145,7 +145,7 @@ export default function Login() {
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Minha Agenda</h1>
-            <p className="text-muted-foreground mt-1">Gerencie sua agenda com facilidade</p>
+            <p className="text-muted-foreground mt-1">Agenda, financeiro e equipe — tudo em um só app.</p>
           </div>
         </div>
 
@@ -311,8 +311,8 @@ export default function Login() {
 
         <p className="text-center text-xs text-muted-foreground">
           {isSignup
-            ? "Após o cadastro, efetue o pagamento para liberar o acesso."
-            : "Acesso fornecido pelo administrador"}
+            ? "Após criar a conta você poderá ativar o teste grátis ou contratar o plano."
+            : "Problemas para entrar? Fale com o administrador."}
         </p>
         <p className="text-center text-[10px] text-muted-foreground/50">{APP_VERSION}</p>
       </div>
