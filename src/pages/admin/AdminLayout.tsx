@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminMode } from "@/hooks/useAdminMode";
@@ -24,8 +24,10 @@ import {
   FileBarChart,
   MapPin,
   Image,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { APP_VERSION } from "@/lib/version";
 import { useToast } from "@/hooks/use-toast";
@@ -82,6 +84,7 @@ export default function AdminLayout() {
   const { mode, setMode, isEmpresaMode } = useAdminMode();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = isEmpresaMode ? empresaNavItems : adminNavItems;
 
@@ -92,6 +95,7 @@ export default function AdminLayout() {
     } else {
       navigate("/admin");
     }
+    setMobileOpen(false);
   };
 
   // Sync mode based on current route
@@ -101,6 +105,7 @@ export default function AdminLayout() {
     } else {
       if (isEmpresaMode) setMode("admin");
     }
+    setMobileOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -136,7 +141,7 @@ export default function AdminLayout() {
       <button
         onClick={() => handleModeSwitch("admin")}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all flex-1 justify-center",
           !isEmpresaMode
             ? "bg-primary text-primary-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
@@ -148,7 +153,7 @@ export default function AdminLayout() {
       <button
         onClick={() => handleModeSwitch("empresa")}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all",
+          "flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all flex-1 justify-center",
           isEmpresaMode
             ? "bg-primary text-primary-foreground shadow-sm"
             : "text-muted-foreground hover:text-foreground"
@@ -160,111 +165,112 @@ export default function AdminLayout() {
     </div>
   );
 
-  return (
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-card border-r border-border flex-col hidden md:flex">
-        <div className="p-6 flex items-center gap-3 border-b border-border">
-          <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-            <CalendarDays className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold tracking-tight">Minha Agenda</h1>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              {isEmpresaMode ? "Minha Empresa" : "Painel Master"}
-            </p>
-          </div>
+  const SidebarBody = ({ onNavigate }: { onNavigate?: () => void }) => (
+    <div className="flex flex-col h-full">
+      <div className="p-6 flex items-center gap-3 border-b border-border shrink-0">
+        <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
+          <CalendarDays className="h-5 w-5 text-primary" />
         </div>
-
-        {/* Mode toggle */}
-        <div className="px-4 pt-4">
-          <ModeToggle />
+        <div>
+          <h1 className="text-sm font-bold tracking-tight">Minha Agenda</h1>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+            {isEmpresaMode ? "Minha Empresa" : "Painel Master"}
+          </p>
         </div>
+      </div>
 
-        <nav className="flex-1 p-4 space-y-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary/15 text-primary"
-                    : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
-                )
-              }
-            >
-              <item.icon className="h-5 w-5" />
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="p-4 border-t border-border space-y-2">
-          <Button
-            variant={pushEnabled ? "default" : "outline"}
-            className="w-full justify-start gap-3 text-muted-foreground text-xs"
-            onClick={togglePush}
+      <div className="px-4 pt-4 shrink-0">
+        <ModeToggle />
+      </div>
+
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            onClick={onNavigate}
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+              )
+            }
           >
-            {pushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-            {pushEnabled ? "Desativar notificações" : "Ativar notificações"}
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={signOut}>
-            <LogOut className="h-5 w-5" />
-            Sair
-          </Button>
-          <p className="text-[10px] text-muted-foreground/50 text-center">{APP_VERSION}</p>
-        </div>
+            <item.icon className="h-5 w-5" />
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="p-4 border-t border-border space-y-2 shrink-0">
+        <Button
+          variant={pushEnabled ? "default" : "outline"}
+          className="w-full justify-start gap-3 text-muted-foreground text-xs"
+          onClick={togglePush}
+        >
+          {pushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+          {pushEnabled ? "Desativar notificações" : "Ativar notificações"}
+        </Button>
+        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={signOut}>
+          <LogOut className="h-5 w-5" />
+          Sair
+        </Button>
+        <p className="text-[10px] text-muted-foreground/50 text-center">{APP_VERSION}</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="h-screen bg-background flex overflow-hidden">
+      {/* Desktop Sidebar — fixed, full height, independent scroll */}
+      <aside className="w-64 bg-card border-r border-border hidden md:flex shrink-0 h-screen sticky top-0">
+        <SidebarBody />
       </aside>
 
-      {/* Mobile header */}
-      <div className="flex-1 flex flex-col">
-        <header className="md:hidden flex flex-col border-b border-border bg-card sticky top-0 z-50">
-          <div className="flex items-center justify-between p-4">
+      {/* Main column */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Mobile header */}
+        <header className="md:hidden flex items-center justify-between border-b border-border bg-card sticky top-0 z-40 px-4 py-3 shrink-0">
+          <div className="flex items-center gap-2">
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="p-2 -ml-2 text-foreground rounded-lg hover:bg-secondary/50"
+                  aria-label="Abrir menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-72 bg-card border-r border-border">
+                <SidebarBody onNavigate={() => setMobileOpen(false)} />
+              </SheetContent>
+            </Sheet>
             <div className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-primary" />
               <span className="font-bold text-sm">
                 {isEmpresaMode ? "Minha Empresa" : "Admin"}
               </span>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => window.location.reload()}
-                className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50"
-                title="Atualizar"
-              >
-                <RefreshCw className="h-5 w-5" />
-              </button>
-              <button onClick={signOut} className="p-2 text-muted-foreground">
-                <LogOut className="h-5 w-5" />
-              </button>
-            </div>
           </div>
-          {/* Mode toggle mobile */}
-          <div className="px-4 pb-3">
-            <ModeToggle className="w-full" />
-          </div>
-          {/* Nav items */}
-          <div className="flex items-center gap-1 overflow-x-auto px-4 pb-3">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  cn(
-                    "p-2 rounded-lg transition-colors flex-shrink-0",
-                    isActive ? "bg-primary/15 text-primary" : "text-muted-foreground"
-                  )
-                }
-              >
-                <item.icon className="h-5 w-5" />
-              </NavLink>
-            ))}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => window.location.reload()}
+              className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50"
+              title="Atualizar"
+            >
+              <RefreshCw className="h-5 w-5" />
+            </button>
+            <button onClick={signOut} className="p-2 text-muted-foreground rounded-lg hover:bg-secondary/50" aria-label="Sair">
+              <LogOut className="h-5 w-5" />
+            </button>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto">
+
+        {/* Scrollable content area */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <Outlet />
         </main>
       </div>
