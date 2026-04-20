@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AdminModeProvider } from "@/hooks/useAdminMode";
 import { CompanyProvider } from "@/hooks/useCompany";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { TrialBanner } from "@/components/TrialBanner";
 import { TrialExpiredModal } from "@/components/TrialExpiredModal";
@@ -166,19 +167,21 @@ function AppRoutes() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <CompanyProvider>
-            <AdminModeProvider>
-              <AppRoutes />
-            </AdminModeProvider>
-          </CompanyProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <CompanyProvider>
+              <AdminModeProvider>
+                <AppRoutes />
+              </AdminModeProvider>
+            </CompanyProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
