@@ -9,6 +9,47 @@ export type EffectivePlanStatus =
   | "blocked"
   | "pending_plan_choice";
 
+/**
+ * Plan-type identifier used in `profiles.plan_type` for the free trial.
+ * Centralized here so PlanChoice / TrialExpired / admin screens stay aligned.
+ */
+export const FREE_TRIAL_PLAN_TYPE = "free_trial_7_days" as const;
+
+/**
+ * Statuses where the user is still building/paying their first subscription.
+ * Used to decide whether ModulesUpgrade should show toggles + summary card
+ * or the regular "contract module" UI.
+ *
+ * Single source of truth — keep callers consuming this helper instead of
+ * duplicating the array in components.
+ */
+export function isPreSubscriptionStatus(status: EffectivePlanStatus): boolean {
+  return (
+    status === "trial" ||
+    status === "trial_expired" ||
+    status === "pending_plan_choice" ||
+    status === "pending_payment" ||
+    status === "expired"
+  );
+}
+
+/**
+ * Human-readable Brazilian Portuguese labels for the effective plan status.
+ * Use this everywhere a plan-status badge is rendered to keep wording
+ * consistent across client and admin screens.
+ */
+export const EFFECTIVE_PLAN_STATUS_LABELS: Record<EffectivePlanStatus, string> = {
+  trial: "Em teste",
+  trial_expired: "Teste expirado",
+  pending_payment: "Aguardando pagamento",
+  pending_review: "Pagamento em análise",
+  active: "Ativo",
+  expired: "Plano vencido",
+  rejected: "Pagamento recusado",
+  blocked: "Bloqueado",
+  pending_plan_choice: "Escolhendo plano",
+};
+
 interface PlanProfile {
   status_plano?: string | null;
   plan_type?: string | null;
