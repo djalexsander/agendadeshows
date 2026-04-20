@@ -401,7 +401,13 @@ export default function AdminClients() {
 
       <AdminAccessControlDialog
         open={!!accessControlTarget}
-        onOpenChange={(o) => !o && setAccessControlTarget(null)}
+        onOpenChange={(o) => {
+          if (!o) {
+            setAccessControlTarget(null);
+            // Refresh so manual plan/module changes are reflected on the card badge
+            fetchClients();
+          }
+        }}
         targetUserId={accessControlTarget?.user_id ?? ""}
         targetUserName={accessControlTarget?.nome ?? ""}
       />
