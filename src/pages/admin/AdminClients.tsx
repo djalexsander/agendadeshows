@@ -53,6 +53,7 @@ function toDateInputValue(dateStr: string | null | undefined): string {
 
 export default function AdminClients() {
   const [clients, setClients] = useState<ClientProfile[]>([]);
+  const [manualPlanUserIds, setManualPlanUserIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ClientProfile | null>(null);
@@ -68,8 +69,14 @@ export default function AdminClients() {
   });
 
   const fetchClients = async () => {
-    const { data } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
-    if (data) setClients(data as ClientProfile[]);
+    const [profilesRes, overridesRes] = await Promise.all([
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+      (supabase.from("manual_plan_overrides") as any)
+        .select("user_id")
+        .eq("is_active", true),
+    ]);
+    if (profilesRes.data) setClients(profilesRes.data as ClientProfile[]);
+    setManualPlanUserIds(new Set(((overridesRes.data ?? []) as Array<{ user_id: string }>).map((o) => o.user_id)));
   };
 
   useEffect(() => {
@@ -174,6 +181,10 @@ export default function AdminClients() {
   });
 
   const getDisplayStatus = (c: ClientProfile) => {
+    // Highest priority: manual plan override granted by admin via "Controle de Acesso"
+    if (manualPlanUserIds.has(c.user_id)) {
+      return { label: "Liberado (Manual)", color: "bg-purple-500/20 text-purple-400" };
+    }
     if (c.plan_type === "free_trial_7_days") {
       const trialEnd = c.trial_ends_at ? new Date(c.trial_ends_at) : null;
       const isExpired = trialEnd && new Date() > trialEnd;
@@ -390,7 +401,13 @@ export default function AdminClients() {
 
       <AdminAccessControlDialog
         open={!!accessControlTarget}
-        onOpenChange={(o) => !o && setAccessControlTarget(null)}
+        onOpenChange={(o) => {
+          if (!o) {
+            setAccessControlTarget(null);
+            // Refresh so manual plan/module changes are reflected on the card badge
+            fetchClients();
+          }
+        }}
         targetUserId={accessControlTarget?.user_id ?? ""}
         targetUserName={accessControlTarget?.nome ?? ""}
       />
