@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { format, isSameMonth, parseISO, isAfter, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ptBR } from "date-fns/locale";
-import { CalendarDays, Image, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, Users, UsersRound, FileBarChart, Crown } from "lucide-react";
+import { CalendarDays, Image, BarChart3, MapPin, LogOut, Clock, Navigation, Bell, RefreshCw, Puzzle, Lock, DollarSign, UsersRound, FileBarChart, Crown } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -15,6 +15,9 @@ import type { Show, ShowStatus } from "@/hooks/useSupabaseShows";
 import { useLocation, useNavigate } from "react-router-dom";
 import { APP_VERSION } from "@/lib/version";
 import { useModules } from "@/hooks/useModules";
+import { AgendaHero } from "@/components/agenda/AgendaHero";
+import { AgendaSummaryCard } from "@/components/agenda/AgendaSummaryCard";
+import { EventListItem } from "@/components/agenda/EventListItem";
 
 export default function Dashboard() {
   const location = useLocation();
