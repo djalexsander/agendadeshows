@@ -2,10 +2,10 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrialStatus } from "@/hooks/useTrialStatus";
+import { ALL_MODULE_NAMES, type ModuleName } from "@/lib/modules";
 
-export type ModuleName = "financeiro" | "relatorios" | "export_png" | "gps" | "agenda_compartilhada";
-
-const ALL_MODULE_NAMES: ModuleName[] = ["financeiro", "relatorios", "export_png", "gps", "agenda_compartilhada"];
+// Re-export so existing imports from "@/hooks/useModules" keep working.
+export type { ModuleName };
 
 interface UserModule {
   id: string;
