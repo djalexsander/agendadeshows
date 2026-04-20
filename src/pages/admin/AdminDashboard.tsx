@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, DollarSign, UserCheck, UserX, Bell, CheckCircle, X, ExternalLink, Clock, UserPlus, ChevronRight } from "lucide-react";
+import { Users, DollarSign, UserCheck, Bell, CheckCircle, X, ExternalLink, Clock, UserPlus, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { MetricCard } from "@/components/admin/dashboard/MetricCard";
+import { QuickActions } from "@/components/admin/dashboard/QuickActions";
+import { AttentionPanel } from "@/components/admin/dashboard/AttentionPanel";
+import { ClientStatusBreakdown } from "@/components/admin/dashboard/ClientStatusBreakdown";
+import { RevenueOverview } from "@/components/admin/dashboard/RevenueOverview";
 
 interface PaymentProof {
   id: string;
@@ -42,7 +48,20 @@ interface AdminNotification {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0, pendentes_pagamento: 0, pendentes_aprovacao: 0 });
+  const [stats, setStats] = useState({
+    total: 0,
+    ativos: 0,
+    inativos: 0,
+    aguardando_pagamento: 0,
+    pagos: 0,
+    pendentes: 0,
+    pendentes_pagamento: 0,
+    pendentes_aprovacao: 0,
+    base_plan_pending: 0,
+    module_payments_pending: 0,
+    module_requests_pending: 0,
+    revenue_month: 0,
+  });
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
@@ -50,12 +69,31 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   const load = async () => {
-    const [profilesRes, paymentsRes, pendingPaymentsRes, proofsRes, notificationsRes] = await Promise.all([
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthStartIso = monthStart.toISOString().split("T")[0];
+
+    const [
+      profilesRes,
+      paymentsRes,
+      pendingPaymentsRes,
+      proofsRes,
+      notificationsRes,
+      basePlanPendingRes,
+      modulePaymentsPendingRes,
+      moduleRequestsPendingRes,
+      monthRevenueRes,
+    ] = await Promise.all([
       supabase.from("profiles").select("user_id, nome, email, telefone, status_plano, created_at, origem_cadastro, valor_plano"),
       supabase.from("payments").select("status").eq("status", "pago"),
       supabase.from("payments").select("status").eq("status", "pendente"),
       (supabase.from("payment_proofs") as any).select("*").eq("status", "pendente").order("created_at", { ascending: false }),
       (supabase.from("admin_notifications") as any).select("*").eq("lida", false).order("created_at", { ascending: false }),
+      supabase.from("base_plan_payments").select("id", { count: "exact", head: true }).eq("status", "pendente"),
+      supabase.from("module_payments").select("id", { count: "exact", head: true }).eq("status", "pendente"),
+      supabase.from("module_requests").select("id", { count: "exact", head: true }).eq("status", "pendente"),
+      supabase.from("payments").select("valor").eq("status", "pago").gte("data_pagamento", monthStartIso),
     ]);
 
     const profiles = profilesRes.data || [];
@@ -64,14 +102,24 @@ export default function AdminDashboard() {
     const pending = profiles.filter((p: any) => p.status_plano === "pendente_aprovacao");
     setPendingUsers(pending as PendingUser[]);
 
+    const monthRevenue = (monthRevenueRes.data || []).reduce(
+      (sum: number, p: any) => sum + (Number(p.valor) || 0),
+      0,
+    );
+
     setStats({
       total: profiles.length,
       ativos: profiles.filter((p: any) => p.status_plano === "ativo").length,
       inativos: profiles.filter((p: any) => p.status_plano === "inativo" || p.status_plano === "rejeitado").length,
+      aguardando_pagamento: profiles.filter((p: any) => p.status_plano === "aguardando_pagamento").length,
       pagos: paymentsRes.data?.length || 0,
       pendentes: proofsList.length,
       pendentes_pagamento: pendingPaymentsRes.data?.length || 0,
       pendentes_aprovacao: pending.length,
+      base_plan_pending: basePlanPendingRes.count || 0,
+      module_payments_pending: modulePaymentsPendingRes.count || 0,
+      module_requests_pending: moduleRequestsPendingRes.count || 0,
+      revenue_month: monthRevenue,
     });
 
     const nameMap = new Map(profiles.map((p: any) => [p.user_id, p.nome]));
@@ -196,19 +244,35 @@ export default function AdminDashboard() {
     load();
   };
 
-  const cards = [
-    { label: "Total de Clientes", value: stats.total, icon: Users, color: "bg-primary/15 text-primary" },
-    { label: "Ativos", value: stats.ativos, icon: UserCheck, color: "bg-[hsl(140_60%_45%)]/15 text-[hsl(140_60%_55%)]" },
-    { label: "Aguardando Aprovação", value: stats.pendentes_aprovacao, icon: UserPlus, color: "bg-yellow-500/15 text-yellow-400" },
-    { label: "Pagamentos Recebidos", value: stats.pagos, icon: DollarSign, color: "bg-primary/15 text-primary" },
-    { label: "Pagamentos Pendentes", value: stats.pendentes_pagamento, icon: Clock, color: "bg-orange-500/15 text-orange-400" },
-  ];
+  const todayLabel = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-4 md:space-y-6">
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground text-xs md:text-sm">Visão geral da plataforma</p>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-5 md:space-y-7">
+      {/* Premium header */}
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-card to-card p-5 md:p-7">
+        <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
+        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Painel Master</span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-sm text-muted-foreground capitalize mt-1">{todayLabel}</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="rounded-xl bg-card/60 border border-border px-4 py-2.5 backdrop-blur">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Clientes ativos</p>
+              <p className="text-lg font-bold tabular-nums">{stats.ativos}<span className="text-muted-foreground/60 text-sm font-normal"> / {stats.total}</span></p>
+            </div>
+            <div className="rounded-xl bg-card/60 border border-border px-4 py-2.5 backdrop-blur">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Pendências</p>
+              <p className="text-lg font-bold tabular-nums">
+                {stats.pendentes_aprovacao + stats.pendentes + stats.base_plan_pending + stats.module_payments_pending + stats.module_requests_pending}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Notification list */}
@@ -264,18 +328,39 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Metric cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-        {cards.map((card) => (
-          <div key={card.label} className="rounded-2xl bg-card border border-border p-3 md:p-5 space-y-2 md:space-y-3">
-            <div className={`h-8 w-8 md:h-10 md:w-10 rounded-xl ${card.color} flex items-center justify-center`}>
-              <card.icon className="h-4 w-4 md:h-5 md:w-5" />
-            </div>
-            <div>
-              <p className="text-xl md:text-2xl font-bold">{card.value}</p>
-              <p className="text-[10px] md:text-sm text-muted-foreground leading-tight">{card.label}</p>
-            </div>
-          </div>
-        ))}
+        <MetricCard label="Total de Clientes" value={stats.total} icon={Users} accent="primary" />
+        <MetricCard label="Ativos" value={stats.ativos} icon={UserCheck} accent="success" />
+        <MetricCard label="Aguardando Aprovação" value={stats.pendentes_aprovacao} icon={UserPlus} accent="warning" />
+        <MetricCard label="Pagamentos Recebidos" value={stats.pagos} icon={DollarSign} accent="primary" />
+        <MetricCard label="Pagamentos Pendentes" value={stats.pendentes_pagamento} icon={Clock} accent="info" />
+      </div>
+
+      {/* Quick actions */}
+      <QuickActions />
+
+      {/* 3-column overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
+        <ClientStatusBreakdown
+          total={stats.total}
+          ativos={stats.ativos}
+          pendentes_aprovacao={stats.pendentes_aprovacao}
+          aguardando_pagamento={stats.aguardando_pagamento}
+          inativos={stats.inativos}
+        />
+        <RevenueOverview
+          totalReceived={stats.pagos}
+          pendingPaymentsCount={stats.pendentes_pagamento}
+          monthRevenue={stats.revenue_month}
+        />
+        <AttentionPanel
+          pendingUsers={stats.pendentes_aprovacao}
+          pendingProofs={stats.pendentes}
+          pendingBasePlanPayments={stats.base_plan_pending}
+          pendingModulePayments={stats.module_payments_pending}
+          pendingModuleRequests={stats.module_requests_pending}
+        />
       </div>
 
       {/* Pending user approvals */}
