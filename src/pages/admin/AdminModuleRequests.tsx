@@ -15,7 +15,6 @@ import { format } from "date-fns";
 
 const MODULE_LABELS: Record<string, string> = {
   financeiro: "Financeiro",
-  equipe: "Equipe",
   relatorios: "Relatórios",
   export_png: "Exportação PNG",
   gps: "Rotas / GPS",

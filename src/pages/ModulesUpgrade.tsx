@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Puzzle, DollarSign, Users, UsersRound, FileBarChart, ImageDown, MapPinned, ArrowLeft,
+  Puzzle, DollarSign, UsersRound, FileBarChart, ImageDown, MapPinned, ArrowLeft,
   CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw, AlertTriangle, Zap,
   ShieldCheck, Unlock,
 } from "lucide-react";
@@ -24,7 +24,6 @@ import { toast } from "sonner";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   financeiro: DollarSign,
-  equipe: Users,
   relatorios: FileBarChart,
   export_png: ImageDown,
   gps: MapPinned,
