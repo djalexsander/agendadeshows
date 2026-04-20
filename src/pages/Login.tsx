@@ -467,6 +467,12 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      <ForgotPasswordDialog
+        open={forgotOpen}
+        onOpenChange={setForgotOpen}
+        initialEmail={email}
+      />
     </div>
   );
 }
