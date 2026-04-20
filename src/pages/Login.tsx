@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { APP_VERSION } from "@/lib/version";
+import { signupSchema, loginSchema, firstZodError } from "@/lib/validation";
 
 export default function Login() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -67,28 +68,36 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // evita duplo submit
 
     if (isSignup) {
-      if (!nome || !email || !telefone || !password || !confirmPassword) {
-        toast({ title: "Erro", description: "Preencha todos os campos.", variant: "destructive" });
-        return;
-      }
-      const phoneDigits = telefone.replace(/\D/g, "");
-      if (phoneDigits.length < 10) {
-        toast({ title: "Erro", description: "Informe um telefone válido.", variant: "destructive" });
-        return;
-      }
-      if (password.length < 6) {
-        toast({ title: "Erro", description: "A senha deve ter pelo menos 6 caracteres.", variant: "destructive" });
-        return;
-      }
-      if (password !== confirmPassword) {
-        toast({ title: "Erro", description: "As senhas não coincidem.", variant: "destructive" });
+      const parsed = signupSchema.safeParse({
+        nome,
+        email,
+        telefone,
+        password,
+        confirmPassword,
+        cidade,
+        estado,
+      });
+      if (!parsed.success) {
+        toast({
+          title: "Erro",
+          description: firstZodError(parsed.error) ?? "Verifique os dados informados.",
+          variant: "destructive",
+        });
         return;
       }
 
       setLoading(true);
-      const { error, needsEmailConfirmation } = await signUp(email, password, nome, telefone, cidade, estado);
+      const { error, needsEmailConfirmation } = await signUp(
+        parsed.data.email,
+        parsed.data.password,
+        parsed.data.nome,
+        parsed.data.telefone,
+        parsed.data.cidade ?? "",
+        parsed.data.estado ?? "",
+      );
       setLoading(false);
 
       if (error) {
@@ -102,15 +111,23 @@ export default function Login() {
         return;
       }
 
-      // Auto-logged in — auth state will redirect to payment page
       toast({ title: "Cadastro realizado!", description: "Redirecionando para o pagamento..." });
       return;
     }
 
     // Login
-    if (!email || !password) return;
+    const parsed = loginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      toast({
+        title: "Erro",
+        description: firstZodError(parsed.error) ?? "Verifique os dados informados.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(parsed.data.email, parsed.data.password);
     setLoading(false);
 
     if (error) {
