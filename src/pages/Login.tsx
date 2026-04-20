@@ -147,6 +147,34 @@ export default function Login() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    if (googleLoading || loading) return;
+    setGoogleLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast({
+          title: "Erro ao entrar com Google",
+          description: result.error.message || "Tente novamente.",
+          variant: "destructive",
+        });
+        setGoogleLoading(false);
+        return;
+      }
+      // result.redirected => o navegador vai redirecionar para o Google.
+      // Se voltou tokens, o AuthProvider detecta o login automaticamente.
+    } catch (e: any) {
+      toast({
+        title: "Erro ao entrar com Google",
+        description: e?.message || "Tente novamente.",
+        variant: "destructive",
+      });
+      setGoogleLoading(false);
+    }
+  };
+
   const features = [
     { icon: CalendarDays, title: "Agenda inteligente", desc: "Calendário visual com seus próximos shows e eventos." },
     { icon: DollarSign, title: "Financeiro completo", desc: "Receitas, despesas e relatórios em um só lugar." },
