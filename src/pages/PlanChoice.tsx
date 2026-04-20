@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
-import { formatBillingPeriod } from "@/lib/planStatus";
+import { formatBillingPeriod, FREE_TRIAL_PLAN_TYPE } from "@/lib/planStatus";
 
 export default function PlanChoice() {
   const { user, profile, signOut } = useAuth();
@@ -33,7 +33,7 @@ export default function PlanChoice() {
     const { error } = await supabase
       .from("profiles")
       .update({
-        plan_type: "free_trial_7_days",
+        plan_type: FREE_TRIAL_PLAN_TYPE,
         trial_started_at: now.toISOString(),
         trial_ends_at: trialEnd.toISOString(),
         grace_ends_at: graceEnd.toISOString(),
