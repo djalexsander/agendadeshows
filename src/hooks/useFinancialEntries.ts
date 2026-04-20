@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompany } from "@/hooks/useCompany";
+import { isConfirmedFinancialStatus, isPendingFinancialStatus } from "@/lib/financialStatus";
 
 export interface FinancialEntry {
   id: string;
@@ -69,7 +70,7 @@ export function useFinancialEntries() {
     const { data } = await query;
     setEntries((data as FinancialEntry[]) ?? []);
     setLoading(false);
-  }, [user]);
+  }, [user, company]);
 
   useEffect(() => { fetchEntries(); }, [fetchEntries]);
 
@@ -153,15 +154,32 @@ export function useFinancialEntries() {
     return true;
   });
 
-  const totals = filtered.reduce((acc, e) => {
-    if (e.type === "entrada") acc.entradas += Number(e.amount);
-    else acc.saidas += Number(e.amount);
-    return acc;
-  }, { entradas: 0, saidas: 0 });
+  // Totals (consistent across Financeiro and Relatórios):
+  // - entradas/saidas: brutos (todos os lançamentos do filtro)
+  // - entradasConfirmadas/saidasConfirmadas: apenas status pago/recebido/confirmado
+  // - pendentes: status pendente
+  // - saldoConfirmado: o saldo "real" (dinheiro que entrou/saiu de fato)
+  const totals = filtered.reduce(
+    (acc, e) => {
+      const amount = Number(e.amount);
+      const confirmed = isConfirmedFinancialStatus(e.status);
+      const pending = isPendingFinancialStatus(e.status);
+      if (e.type === "entrada") {
+        acc.entradas += amount;
+        if (confirmed) acc.entradasConfirmadas += amount;
+      } else {
+        acc.saidas += amount;
+        if (confirmed) acc.saidasConfirmadas += amount;
+      }
+      if (pending) acc.pendentes += amount;
+      return acc;
+    },
+    { entradas: 0, saidas: 0, entradasConfirmadas: 0, saidasConfirmadas: 0, pendentes: 0 }
+  );
 
   const categories = [...new Set(entries.map((e) => e.categoria).filter(Boolean))] as string[];
 
-  // Event summaries
+  // Event summaries (event view uses confirmed values to match the global "Saldo" card)
   const eventSummaries: EventSummary[] = (() => {
     const map = new Map<string, EventSummary>();
     for (const e of entries) {
@@ -178,8 +196,9 @@ export function useFinancialEntries() {
         });
       }
       const s = map.get(e.show_id)!;
-      if (e.type === "entrada") s.entradas += Number(e.amount);
-      else s.saidas += Number(e.amount);
+      const amount = Number(e.amount);
+      if (e.type === "entrada") s.entradas += amount;
+      else s.saidas += amount;
       s.saldo = s.entradas - s.saidas;
       s.count++;
     }
@@ -194,7 +213,11 @@ export function useFinancialEntries() {
     updateEntry,
     deleteEntry,
     refresh: fetchEntries,
-    totals: { ...totals, saldo: totals.entradas - totals.saidas },
+    totals: {
+      ...totals,
+      saldo: totals.entradas - totals.saidas,
+      saldoConfirmado: totals.entradasConfirmadas - totals.saidasConfirmadas,
+    },
     filters,
     setFilters,
     categories,
