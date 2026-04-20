@@ -18,6 +18,7 @@ import { useModules } from "@/hooks/useModules";
 import { AgendaHero } from "@/components/agenda/AgendaHero";
 import { AgendaSummaryCard } from "@/components/agenda/AgendaSummaryCard";
 import { EventListItem } from "@/components/agenda/EventListItem";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Dashboard() {
   const location = useLocation();
@@ -140,6 +141,7 @@ export default function Dashboard() {
       >
         <Bell className="h-4 w-4" />
       </Button>
+      <ThemeToggle variant="compact" className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl" />
       <Button
         variant="ghost"
         size="icon"
