@@ -85,6 +85,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const navItems = isEmpresaMode ? empresaNavItems : adminNavItems;
 
@@ -112,21 +113,32 @@ export default function AdminLayout() {
     requestNotificationPermission();
     registerServiceWorker();
 
+    const loadUnread = async () => {
+      const { count } = await (supabase.from("admin_notifications") as any)
+        .select("id", { count: "exact", head: true })
+        .eq("lida", false);
+      setUnreadCount(count || 0);
+    };
+    loadUnread();
+
     const channel = supabase
       .channel("admin-push-notifications")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "admin_notifications" },
+        { event: "*", schema: "public", table: "admin_notifications" },
         (payload: any) => {
-          const data = payload.new;
-          showBrowserNotification(
-            data.titulo || "Nova notificação",
-            data.mensagem || "Você tem uma nova notificação"
-          );
-          toast({
-            title: data.titulo || "Nova notificação",
-            description: data.mensagem || "Você tem uma nova notificação",
-          });
+          if (payload.eventType === "INSERT") {
+            const data = payload.new;
+            showBrowserNotification(
+              data.titulo || "Nova notificação",
+              data.mensagem || "Você tem uma nova notificação"
+            );
+            toast({
+              title: data.titulo || "Nova notificação",
+              description: data.mensagem || "Você tem uma nova notificação",
+            });
+          }
+          loadUnread();
         }
       )
       .subscribe();
@@ -208,11 +220,16 @@ export default function AdminLayout() {
       <div className="p-4 border-t border-border space-y-2 shrink-0">
         <Button
           variant={pushEnabled ? "default" : "outline"}
-          className="w-full justify-start gap-3 text-muted-foreground text-xs"
+          className="w-full justify-start gap-3 text-muted-foreground text-xs relative"
           onClick={togglePush}
         >
           {pushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
           {pushEnabled ? "Desativar notificações" : "Ativar notificações"}
+          {unreadCount > 0 && !isEmpresaMode && (
+            <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-yellow-500 text-[10px] font-bold text-background tabular-nums shadow-sm shadow-yellow-500/40">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
         </Button>
         <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={signOut}>
           <LogOut className="h-5 w-5" />
