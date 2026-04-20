@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  Puzzle, DollarSign, UsersRound, FileBarChart, ImageDown, MapPinned, ArrowLeft,
+  Puzzle, ArrowLeft,
   CheckCircle2, Sparkles, Clock, Loader2, XCircle, Plus, Minus, Copy, RefreshCw, AlertTriangle, Zap,
   ShieldCheck, Unlock,
 } from "lucide-react";

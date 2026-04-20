@@ -13,12 +13,7 @@ import { useAdminModuleRequests, type AdminModuleRequest } from "@/hooks/useAdmi
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
-const MODULE_LABELS: Record<string, string> = {
-  financeiro: "Financeiro",
-  relatorios: "Relatórios",
-  export_png: "Exportação PNG",
-  gps: "Rotas / GPS",
-};
+import { MODULE_LABELS } from "@/lib/modules";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "Pendente",

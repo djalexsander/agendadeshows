@@ -2,15 +2,8 @@ import { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Puzzle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useModules, type ModuleName } from "@/hooks/useModules";
-
-const MODULE_LABELS: Record<ModuleName, string> = {
-  financeiro: "Financeiro",
-  relatorios: "Relatórios",
-  export_png: "Exportação PNG",
-  gps: "Rotas / GPS",
-  agenda_compartilhada: "Agenda Compartilhada",
-};
+import { useModules } from "@/hooks/useModules";
+import { MODULE_LABELS, type ModuleName } from "@/lib/modules";
 
 interface ModuleGateProps {
   moduleName: ModuleName;
