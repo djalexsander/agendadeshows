@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Pencil, Search, Trash2, Globe, Shield, Info, KeyRound } from "lucide-react";
 import { AdminAccessControlDialog } from "@/components/admin/AdminAccessControl";
-import { getEffectivePlanStatus, type EffectivePlanStatus } from "@/lib/planStatus";
+import { getEffectivePlanStatus, type EffectivePlanStatus, EFFECTIVE_PLAN_STATUS_LABELS } from "@/lib/planStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -304,17 +304,6 @@ export default function AdminClients() {
             {/* Computed real status */}
             {editingClient && (() => {
               const realStatus = getEffectivePlanStatus(editingClient);
-              const statusLabels: Record<EffectivePlanStatus, string> = {
-                trial: "Em teste",
-                trial_expired: "Trial expirado",
-                pending_payment: "Aguardando pagamento",
-                pending_review: "Em análise",
-                active: "Ativo",
-                expired: "Vencido",
-                rejected: "Recusado",
-                blocked: "Bloqueado",
-                pending_plan_choice: "Escolhendo plano",
-              };
               const statusColors: Record<EffectivePlanStatus, string> = {
                 trial: "bg-blue-500/20 text-blue-400",
                 trial_expired: "bg-destructive/20 text-destructive",
@@ -331,7 +320,7 @@ export default function AdminClients() {
                   <Info className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="text-xs text-muted-foreground">Status real:</span>
                   <span className={`text-xs font-semibold uppercase px-2 py-0.5 rounded-lg ${statusColors[realStatus]}`}>
-                    {statusLabels[realStatus]}
+                    {EFFECTIVE_PLAN_STATUS_LABELS[realStatus]}
                   </span>
                 </div>
               );

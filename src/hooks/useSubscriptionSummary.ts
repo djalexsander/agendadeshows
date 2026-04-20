@@ -6,7 +6,7 @@ import { useClientModulePayments } from "@/hooks/useClientModulePayments";
 import { useModules, type ModuleName } from "@/hooks/useModules";
 import { useTrialModuleSelections } from "@/hooks/useTrialModuleSelections";
 import { useAuth } from "@/hooks/useAuth";
-import { getEffectivePlanStatus } from "@/lib/planStatus";
+import { getEffectivePlanStatus, isPreSubscriptionStatus } from "@/lib/planStatus";
 
 export interface SubscriptionModuleItem {
   module_name: string;
@@ -64,12 +64,7 @@ export function useSubscriptionSummary(): SubscriptionSummary {
     );
 
     const planStatus = getEffectivePlanStatus(profile);
-    const isPreSubscription =
-      planStatus === "trial" ||
-      planStatus === "trial_expired" ||
-      planStatus === "pending_plan_choice" ||
-      planStatus === "pending_payment" ||
-      planStatus === "expired";
+    const isPreSubscription = isPreSubscriptionStatus(planStatus);
 
     const moduleItems: SubscriptionModuleItem[] = [];
 

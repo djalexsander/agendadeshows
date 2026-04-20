@@ -18,7 +18,7 @@ import { useSubscriptionSummary } from "@/hooks/useSubscriptionSummary";
 import { useBasePlanConfig } from "@/hooks/useBasePlanConfig";
 import { useAuth } from "@/hooks/useAuth";
 import { useTrialStatus } from "@/hooks/useTrialStatus";
-import { getEffectivePlanStatus } from "@/lib/planStatus";
+import { getEffectivePlanStatus, isPreSubscriptionStatus } from "@/lib/planStatus";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -146,12 +146,7 @@ export default function ModulesUpgrade() {
   const navigate = useNavigate();
 
   const planStatus = getEffectivePlanStatus(profile);
-  const isPreSubscription =
-    planStatus === "trial" ||
-    planStatus === "trial_expired" ||
-    planStatus === "pending_plan_choice" ||
-    planStatus === "pending_payment" ||
-    planStatus === "expired";
+  const isPreSubscription = isPreSubscriptionStatus(planStatus);
 
   const [toggling, setToggling] = useState<string | null>(null);
   const [pixData, setPixData] = useState<PixPaymentData | null>(null);
