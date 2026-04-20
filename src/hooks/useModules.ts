@@ -5,6 +5,11 @@ import { useTrialStatus } from "@/hooks/useTrialStatus";
 
 export type ModuleName = "financeiro" | "equipe" | "relatorios" | "export_png" | "gps" | "agenda_compartilhada";
 
+// NOTE: "equipe" existe no catálogo do banco (module_catalog) mas ainda não foi
+// lançado como feature ativa no app. Mantemos o tipo e os labels para que o
+// admin consiga visualizar/gerenciar pagamentos e requests existentes, porém
+// ele NÃO é incluído em ALL_MODULE_NAMES (não é liberado durante trial nem
+// considerado um módulo ativo no fluxo do cliente).
 const ALL_MODULE_NAMES: ModuleName[] = ["financeiro", "relatorios", "export_png", "gps", "agenda_compartilhada"];
 
 interface UserModule {
