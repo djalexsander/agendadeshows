@@ -406,7 +406,18 @@ export default function Login() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">{isSignup ? "Senha *" : "Senha"}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">{isSignup ? "Senha *" : "Senha"}</Label>
+                    {!isSignup && (
+                      <button
+                        type="button"
+                        onClick={() => setForgotOpen(true)}
+                        className="text-xs font-medium text-primary hover:text-primary/80 transition-base"
+                      >
+                        Esqueci minha senha
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <Input
                       id="password"
