@@ -19,4 +19,18 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
+  build: {
+    // Aumenta o limite do warning padrão (500kb) para evitar ruído.
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Bibliotecas pesadas isoladas em chunks próprios — só baixam quando o código que as usa é executado.
+          "vendor-pdf": ["jspdf"],
+          "vendor-charts": ["recharts"],
+          "vendor-qrcode": ["qrcode.react"],
+        },
+      },
+    },
+  },
 }));
