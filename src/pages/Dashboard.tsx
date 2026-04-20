@@ -243,12 +243,24 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
           {/* Calendar */}
           <div className="rounded-2xl bg-card border border-border p-4 md:p-6">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-              Calendário
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-primary/15 flex items-center justify-center">
+                  <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <h2 className="text-sm font-semibold tracking-wide">Calendário</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentMonth(new Date())}
+                className="text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1 rounded-lg hover:bg-secondary/40"
+              >
+                Hoje
+              </button>
+            </div>
             <Calendar
               mode="single"
               selected={selectedDate ? new Date(selectedDate + "T12:00:00") : undefined}
@@ -263,21 +275,22 @@ export default function Dashboard() {
                 months: "flex flex-col w-full",
                 month: "space-y-3 w-full",
                 caption: "flex justify-center pt-1 relative items-center",
-                caption_label: "text-base font-semibold capitalize",
+                caption_label: "text-base font-bold capitalize tracking-tight",
                 nav: "space-x-2 flex items-center",
                 nav_button:
-                  "h-10 w-10 bg-secondary/50 hover:bg-secondary rounded-xl p-0 flex items-center justify-center text-foreground opacity-80 hover:opacity-100 transition-opacity",
+                  "h-9 w-9 bg-secondary/60 hover:bg-primary/15 hover:text-primary rounded-xl p-0 flex items-center justify-center text-foreground transition-all",
                 nav_button_previous: "absolute left-1",
                 nav_button_next: "absolute right-1",
                 table: "w-full border-collapse",
                 head_row: "flex w-full",
-                head_cell: "text-muted-foreground rounded-md flex-1 font-medium text-xs uppercase",
+                head_cell:
+                  "text-muted-foreground/70 rounded-md flex-1 font-semibold text-[10px] uppercase tracking-wider pb-2",
                 row: "flex w-full mt-1",
                 cell: "flex-1 text-center text-sm p-0.5 relative",
                 day: "h-11 w-full rounded-xl font-medium hover:bg-secondary/60 transition-colors flex flex-col items-center justify-center gap-0.5",
                 day_range_end: "day-range-end",
                 day_selected:
-                  "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+                  "ring-2 ring-primary ring-offset-2 ring-offset-card",
                 day_today: "ring-1 ring-primary/50 text-primary font-bold",
                 day_outside: "text-muted-foreground opacity-30",
                 day_disabled: "text-muted-foreground opacity-50",
@@ -288,7 +301,7 @@ export default function Dashboard() {
                   const dateStr = format(date, "yyyy-MM-dd");
                   const isCurrentMonth = isSameMonth(date, currentMonth);
                   const dayShows = isCurrentMonth ? shows.filter((s) => s.date === dateStr) : [];
-                  
+
                   if (dayShows.length === 0) {
                     return (
                       <div className="w-full h-full flex items-center justify-center rounded-lg">
@@ -307,21 +320,21 @@ export default function Dashboard() {
                     : "finalizado";
 
                   const statusColors: Record<string, string> = {
-                    confirmado: "bg-[hsl(140,60%,45%)] text-white",
-                    finalizado: "bg-blue-500 text-white",
-                    pendente: "bg-yellow-500 text-white",
+                    confirmado: "bg-[hsl(140,60%,45%)] text-white shadow-sm shadow-[hsl(140,60%,45%)]/30",
+                    finalizado: "bg-blue-500 text-white shadow-sm shadow-blue-500/30",
+                    pendente: "bg-yellow-500 text-white shadow-sm shadow-yellow-500/30",
                   };
 
                   return (
                     <div
                       className={cn(
-                        "w-full h-full flex items-center justify-center rounded-lg font-bold transition-colors relative",
-                        statusColors[primaryStatus]
+                        "w-full h-full flex items-center justify-center rounded-lg font-bold transition-all relative",
+                        statusColors[primaryStatus],
                       )}
                     >
                       <span>{date.getDate()}</span>
                       {hasMultipleEvents && (
-                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-accent-foreground text-[9px] font-bold flex items-center justify-center border border-background">
+                        <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-card text-foreground text-[9px] font-bold flex items-center justify-center border border-border ring-1 ring-background">
                           {dayShows.length}
                         </span>
                       )}
@@ -330,73 +343,66 @@ export default function Dashboard() {
                 },
               }}
             />
+
+            {/* Legend */}
+            <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-center gap-3 flex-wrap text-[10px] uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-[hsl(140,60%,45%)]" /> Confirmado
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-yellow-500" /> Pendente
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-blue-500" /> Finalizado
+              </span>
+            </div>
           </div>
 
           {/* Events List */}
-          <div id="month-shows-list" className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-              Eventos em{" "}
-              <span className="capitalize text-foreground">
-                {format(currentMonth, "MMMM", { locale: ptBR })}
-              </span>
-            </h2>
+          <div
+            id="month-shows-list"
+            className="rounded-2xl bg-card border border-border p-4 md:p-6 flex flex-col"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-lg bg-primary/15 flex items-center justify-center">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <h2 className="text-sm font-semibold tracking-wide">
+                  Eventos em{" "}
+                  <span className="capitalize text-foreground">
+                    {format(currentMonth, "MMMM", { locale: ptBR })}
+                  </span>
+                </h2>
+              </div>
+              {monthShows.length > 0 && (
+                <span className="text-[10px] font-bold uppercase px-2 py-1 rounded-md bg-primary/15 text-primary tabular-nums">
+                  {monthShows.length}
+                </span>
+              )}
+            </div>
 
             {monthShows.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
                 <div className="h-14 w-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3">
                   <CalendarDays className="h-7 w-7 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground text-sm">Nenhum evento neste mês</p>
-                <p className="text-muted-foreground/60 text-xs mt-1">
-                  Toque em uma data para adicionar
+                <p className="text-foreground/80 text-sm font-medium">Nenhum evento neste mês</p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  Toque em uma data do calendário para adicionar
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[500px] pr-1">
+              <div className="space-y-2.5 flex-1 overflow-y-auto max-h-[500px] pr-1 -mr-1">
                 {monthShows
                   .sort((a, b) => a.date.localeCompare(b.date))
-                  .map((show) => {
-                    const d = parseISO(show.date);
-                    const dayNum = format(d, "dd");
-                    const dayName = format(d, "EEE", { locale: ptBR });
-                    return (
-                      <button
-                        key={show.id}
-                        onClick={() => handleShowClick(show.date)}
-                        className="w-full text-left rounded-xl bg-secondary/40 hover:bg-secondary/60 border border-border/50 p-3 sm:p-4 transition-colors flex items-center gap-3 sm:gap-4 group"
-                      >
-                        <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl bg-primary/15 flex flex-col items-center justify-center shrink-0">
-                          <span className="text-base sm:text-lg font-bold text-primary leading-none">
-                            {dayNum}
-                          </span>
-                          <span className="text-[9px] sm:text-[10px] uppercase text-primary/70 leading-none mt-0.5">
-                            {dayName}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm sm:text-base text-foreground line-clamp-1">{show.cidade}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
-                            <span className="text-xs sm:text-sm text-muted-foreground">{show.estado}</span>
-                            {show.horario && (
-                              <span className="text-[10px] sm:text-xs text-muted-foreground/70">· {show.horario}</span>
-                            )}
-                          </div>
-                        </div>
-                        <span
-                          className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 whitespace-nowrap ${
-                            show.status === "confirmado"
-                              ? "bg-[hsl(140_60%_45%)]/20 text-[hsl(140_60%_55%)]"
-                              : show.status === "finalizado"
-                              ? "bg-blue-500/20 text-blue-400"
-                              : "bg-yellow-500/20 text-yellow-400"
-                          }`}
-                        >
-                          {show.status || "pendente"}
-                        </span>
-                      </button>
-                    );
-                  })}
+                  .map((show) => (
+                    <EventListItem
+                      key={show.id}
+                      show={show}
+                      onClick={() => handleShowClick(show.date)}
+                    />
+                  ))}
               </div>
             )}
           </div>
