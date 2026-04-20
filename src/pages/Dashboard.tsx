@@ -79,118 +79,112 @@ export default function Dashboard() {
     await deleteShow(id);
   };
 
+  // Header action buttons (standalone mode only) — kept for parity
+  const headerActions = (
+    <div className="flex items-center gap-1 sm:gap-2">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
+        onClick={() => navigate("/meu-plano")}
+        title="Meu Plano"
+      >
+        <Crown className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
+        onClick={() => navigate("/modulos")}
+        title="Módulos"
+      >
+        <Puzzle className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
+        onClick={() => window.location.reload()}
+        title="Atualizar"
+      >
+        <RefreshCw className="h-4 w-4" />
+      </Button>
+      {hasModule("export_png") ? (
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border"
+          onClick={() => setExportOpen(true)}
+          disabled={shows.length === 0}
+          title="Exportar PNG"
+        >
+          <Image className="h-4 w-4" />
+        </Button>
+      ) : (
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border opacity-70"
+          onClick={() => navigate("/modulos")}
+          title="Módulo bloqueado"
+        >
+          <Lock className="h-4 w-4" />
+        </Button>
+      )}
+      <Button
+        variant={pushEnabled ? "default" : "outline"}
+        size="icon"
+        className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
+        onClick={togglePush}
+        title={pushEnabled ? "Desativar notificações" : "Ativar notificações"}
+      >
+        <Bell className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
+        onClick={signOut}
+        title="Sair"
+      >
+        <LogOut className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+
+  const embeddedExportButton = (
+    <Button
+      variant="outline"
+      size="sm"
+      className="gap-2 rounded-xl border-border"
+      onClick={() => setExportOpen(true)}
+      disabled={shows.length === 0}
+    >
+      <Image className="h-4 w-4" />
+      Exportar
+    </Button>
+  );
+
   return (
     <div className={isEmbedded ? "" : "min-h-screen bg-background"}>
-      {/* Header — only show when standalone */}
-      {!isEmbedded && (
-        <header className="px-4 md:px-8 pt-6 pb-4">
-          <div className="flex items-center justify-between max-w-6xl mx-auto">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <CalendarDays className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight">Minha Agenda</h1>
-                <p className="text-xs text-muted-foreground">
-                  {profile?.nome || "Sua agenda"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
-                onClick={() => navigate("/meu-plano")}
-                title="Meu Plano"
-              >
-                <Crown className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
-                onClick={() => navigate("/modulos")}
-                title="Módulos"
-              >
-                <Puzzle className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
-                onClick={() => window.location.reload()}
-                title="Atualizar página"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-              {hasModule("export_png") ? (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border"
-                  onClick={() => setExportOpen(true)}
-                  disabled={shows.length === 0}
-                >
-                  <Image className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl border-border opacity-70"
-                  onClick={() => navigate("/modulos")}
-                >
-                  <Lock className="h-4 w-4" />
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
-                onClick={signOut}
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={pushEnabled ? "default" : "outline"}
-                size="icon"
-                className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl"
-                onClick={togglePush}
-                title={pushEnabled ? "Desativar notificações" : "Ativar notificações"}
-              >
-                <Bell className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </header>
-      )}
+      <div
+        className={`max-w-6xl mx-auto ${
+          isEmbedded ? "p-4 md:p-8" : "px-4 md:px-8 pt-6 pb-8"
+        } space-y-5 md:space-y-6`}
+      >
+        {/* Premium hero */}
+        <AgendaHero
+          userName={profile?.nome}
+          totalShows={shows.length}
+          monthShowsCount={monthShows.length}
+          nextShow={nextShow}
+          embedded={isEmbedded}
+          rightSlot={isEmbedded ? embeddedExportButton : headerActions}
+        />
 
-      <div className={`max-w-6xl mx-auto ${isEmbedded ? 'p-6 md:p-8' : 'px-4 md:px-8 pb-8'} space-y-6`}>
-        {/* Embedded header */}
-        {isEmbedded && (
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Minha Agenda</h1>
-              <p className="text-muted-foreground text-sm">
-                {profile?.nome || "Sua agenda pessoal"}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 rounded-xl border-border"
-              onClick={() => setExportOpen(true)}
-              disabled={shows.length === 0}
-            >
-              <Image className="h-4 w-4" />
-              Exportar
-            </Button>
-          </div>
-        )}
-        {/* Quick nav for modules */}
+        {/* Quick nav for modules (standalone only) */}
         {!isEmbedded && (
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
             {[
               { label: "Financeiro", icon: DollarSign, path: "/financeiro" },
               { label: "Relatórios", icon: FileBarChart, path: "/relatorios" },
@@ -202,7 +196,7 @@ export default function Dashboard() {
                   key={item.path}
                   variant="outline"
                   size="sm"
-                  className="rounded-xl gap-2 shrink-0 border-border"
+                  className="rounded-xl gap-2 shrink-0 border-border bg-card hover:bg-secondary/60"
                   onClick={() => navigate(item.path)}
                 >
                   <Icon className="h-4 w-4" />
@@ -212,74 +206,40 @@ export default function Dashboard() {
             })}
           </div>
         )}
+
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {/* Card 1: Eventos no mês */}
-          <div
-            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+          <AgendaSummaryCard
+            icon={CalendarDays}
+            value={monthShows.length}
+            label="Eventos no mês"
+            accent="primary"
             onClick={() => {
               const el = document.getElementById("month-shows-list");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-          >
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <CalendarDays className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl sm:text-3xl font-bold leading-none">{monthShows.length}</p>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Eventos no mês</p>
-            </div>
-          </div>
-
-          {/* Card 2: Total de eventos */}
-          <div
-            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
+          />
+          <AgendaSummaryCard
+            icon={BarChart3}
+            value={shows.length}
+            label="Total de eventos"
+            accent="accent"
             onClick={() => setAllShowsOpen(true)}
-          >
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
-              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-accent-foreground" />
-            </div>
-            <div>
-              <p className="text-2xl sm:text-3xl font-bold leading-none">{shows.length}</p>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Total de eventos</p>
-            </div>
-          </div>
-
-          {/* Card 3: Próximo evento */}
-          <div
-            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
-            onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
-          >
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-lg sm:text-xl font-bold leading-tight">
-                {nextShow
-                  ? format(parseISO(nextShow.date), "dd/MM/yy")
-                  : "—"}
-              </p>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
-                {nextShow ? "Próximo evento" : "Sem eventos"}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4: Próxima cidade */}
-          <div
-            className="rounded-2xl bg-card border border-border p-4 sm:p-5 flex flex-col gap-3 cursor-pointer group hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 transition-all duration-200 active:scale-[0.98]"
-            onClick={() => { if (nextShow) handleShowClick(nextShow.date); }}
-          >
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
-              <Navigation className="h-4 w-4 sm:h-5 sm:w-5 text-accent-foreground" />
-            </div>
-            <div>
-              <p className="text-base sm:text-lg font-bold leading-tight line-clamp-1">
-                {nextShow ? nextShow.cidade : "—"}
-              </p>
-              <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Próxima cidade</p>
-            </div>
-          </div>
+          />
+          <AgendaSummaryCard
+            icon={Clock}
+            value={nextShow ? format(parseISO(nextShow.date), "dd/MM/yy") : "—"}
+            label={nextShow ? "Próximo evento" : "Sem eventos"}
+            accent="primary"
+            onClick={nextShow ? () => handleShowClick(nextShow.date) : undefined}
+          />
+          <AgendaSummaryCard
+            icon={Navigation}
+            value={nextShow ? nextShow.cidade : "—"}
+            label="Próxima cidade"
+            accent="accent"
+            onClick={nextShow ? () => handleShowClick(nextShow.date) : undefined}
+          />
         </div>
 
         {/* Main Content */}
