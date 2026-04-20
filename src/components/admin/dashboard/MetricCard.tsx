@@ -7,6 +7,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   accent?: "primary" | "success" | "warning" | "danger" | "info";
   hint?: string;
+  onClick?: () => void;
 }
 
 const accentMap = {
@@ -37,14 +38,12 @@ const accentMap = {
   },
 };
 
-export function MetricCard({ label, value, icon: Icon, accent = "primary", hint }: MetricCardProps) {
+export function MetricCard({ label, value, icon: Icon, accent = "primary", hint, onClick }: MetricCardProps) {
   const styles = accentMap[accent];
-  return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-2xl bg-card border border-border p-4 md:p-5 transition-all hover:border-border/80 hover:shadow-lg hover:-translate-y-0.5",
-      )}
-    >
+  const interactive = typeof onClick === "function";
+
+  const content = (
+    <>
       <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br opacity-60", styles.glow)} />
       <div className="relative space-y-3">
         <div className="flex items-start justify-between">
@@ -59,13 +58,30 @@ export function MetricCard({ label, value, icon: Icon, accent = "primary", hint 
           </div>
         </div>
         <div className="space-y-0.5">
-          <p className="text-2xl md:text-3xl font-bold tracking-tight">{value}</p>
+          <p className="text-2xl md:text-3xl font-bold tracking-tight tabular-nums">{value}</p>
           <p className="text-[11px] md:text-xs text-muted-foreground leading-tight font-medium uppercase tracking-wide">
             {label}
           </p>
           {hint && <p className="text-[10px] md:text-xs text-muted-foreground/70 pt-1">{hint}</p>}
         </div>
       </div>
-    </div>
+    </>
   );
+
+  const baseClass = cn(
+    "group relative overflow-hidden rounded-2xl bg-card border border-border p-4 md:p-5 transition-all",
+    interactive
+      ? "text-left w-full cursor-pointer hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary/40"
+      : "hover:border-border/80 hover:shadow-lg hover:-translate-y-0.5",
+  );
+
+  if (interactive) {
+    return (
+      <button type="button" onClick={onClick} className={baseClass}>
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={baseClass}>{content}</div>;
 }

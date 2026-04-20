@@ -328,17 +328,59 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Metric cards */}
+      {/* Metric cards — clickable for quick navigation */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-        <MetricCard label="Total de Clientes" value={stats.total} icon={Users} accent="primary" />
-        <MetricCard label="Ativos" value={stats.ativos} icon={UserCheck} accent="success" />
-        <MetricCard label="Aguardando Aprovação" value={stats.pendentes_aprovacao} icon={UserPlus} accent="warning" />
-        <MetricCard label="Pagamentos Recebidos" value={stats.pagos} icon={DollarSign} accent="primary" />
-        <MetricCard label="Pagamentos Pendentes" value={stats.pendentes_pagamento} icon={Clock} accent="info" />
+        <MetricCard
+          label="Total de Clientes"
+          value={stats.total}
+          icon={Users}
+          accent="primary"
+          onClick={() => navigate("/admin/clients")}
+        />
+        <MetricCard
+          label="Ativos"
+          value={stats.ativos}
+          icon={UserCheck}
+          accent="success"
+          onClick={() => navigate("/admin/clients?status=ativo")}
+        />
+        <MetricCard
+          label="Aguardando Aprovação"
+          value={stats.pendentes_aprovacao}
+          icon={UserPlus}
+          accent="warning"
+          onClick={() => {
+            const el = document.getElementById("pending-users-section");
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            else navigate("/admin/clients?status=pendente_aprovacao");
+          }}
+        />
+        <MetricCard
+          label="Pagamentos Recebidos"
+          value={stats.pagos}
+          icon={DollarSign}
+          accent="primary"
+          onClick={() => navigate("/admin/financial")}
+        />
+        <MetricCard
+          label="Pagamentos Pendentes"
+          value={stats.pendentes_pagamento}
+          icon={Clock}
+          accent="info"
+          onClick={() => navigate("/admin/financial")}
+        />
       </div>
 
-      {/* Quick actions */}
-      <QuickActions />
+      {/* Quick actions with pendency badges */}
+      <QuickActions
+        badges={{
+          clients: stats.pendentes_aprovacao,
+          financial: stats.pendentes,
+          basePlan: stats.base_plan_pending,
+          modules: stats.module_requests_pending,
+          modulePayments: stats.module_payments_pending,
+        }}
+      />
 
       {/* 3-column overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
