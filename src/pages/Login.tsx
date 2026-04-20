@@ -26,9 +26,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { APP_VERSION } from "@/lib/version";
 import { signupSchema, loginSchema, firstZodError } from "@/lib/validation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { lovable } from "@/integrations/lovable/index";
 
 export default function Login() {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
