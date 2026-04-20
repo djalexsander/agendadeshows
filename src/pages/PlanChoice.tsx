@@ -85,9 +85,9 @@ export default function PlanChoice() {
             <Sparkles className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Escolha seu plano</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Como você quer começar?</h1>
             <p className="text-muted-foreground mt-1">
-              Olá, <strong>{profile?.nome}</strong>! Escolha como quer começar.
+              Olá, <strong>{profile?.nome}</strong>! Escolha entre testar grátis ou já assinar o plano.
             </p>
           </div>
         </div>
@@ -95,29 +95,29 @@ export default function PlanChoice() {
         {/* Free Trial Card */}
         <div className="rounded-2xl bg-card border border-border p-6 space-y-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
-            Grátis
+            {trialDays} dias grátis
           </div>
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
               <Clock className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">Comece agora grátis</h2>
-              <p className="text-sm text-muted-foreground">Teste o aplicativo gratuitamente por {trialDays} dias</p>
+              <h2 className="text-lg font-bold">Testar grátis</h2>
+              <p className="text-sm text-muted-foreground">Conheça o app antes de assinar.</p>
             </div>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso completo por {trialDays} dias
+              {trialDays} dias com acesso completo
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Sem compromisso
+              Sem cartão de crédito
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Cancele quando quiser
+              Você decide se quer continuar depois
             </li>
           </ul>
           <Button
@@ -127,7 +127,7 @@ export default function PlanChoice() {
             className="w-full h-12 text-base gap-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
           >
             <Clock className="h-5 w-5" />
-            {loading === "trial" ? "Ativando..." : "Começar teste grátis"}
+            {loading === "trial" ? "Ativando..." : `Começar ${trialDays} dias grátis`}
           </Button>
         </div>
 
@@ -141,8 +141,8 @@ export default function PlanChoice() {
               <Crown className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold">Assine agora</h2>
-              <p className="text-sm text-muted-foreground">Plano mensal com acesso completo</p>
+              <h2 className="text-lg font-bold">Assinar agora</h2>
+              <p className="text-sm text-muted-foreground">Acesso completo desde o primeiro dia.</p>
               <p className="text-2xl font-bold text-primary">
                 R$ {price.toFixed(2)}
                 <span className="text-sm font-normal text-muted-foreground">{formatBillingPeriod(period)}</span>
@@ -152,15 +152,15 @@ export default function PlanChoice() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso completo ao aplicativo
+              Agenda, financeiro e relatórios completos
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Todas as funcionalidades
+              Pagamento via Pix com aprovação rápida
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Renovação mensal
+              Renovação mensal — cancele quando quiser
             </li>
           </ul>
           <Button
@@ -169,13 +169,13 @@ export default function PlanChoice() {
             className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
           >
             <Shield className="h-5 w-5" />
-            {loading === "monthly" ? "Processando..." : "Assinar plano mensal"}
+            {loading === "monthly" ? "Processando..." : "Contratar plano mensal"}
           </Button>
         </div>
 
         {/* Disclaimer */}
         <p className="text-center text-xs text-muted-foreground px-4">
-          Após os {trialDays} dias de teste, o acesso será bloqueado caso não haja assinatura do plano mensal ativa.
+          Ao final dos {trialDays} dias de teste, basta assinar o plano para continuar — seus dados ficam salvos.
         </p>
 
         <Button variant="ghost" onClick={signOut} className="w-full gap-2">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, Crown, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +12,15 @@ export default function TrialExpired() {
   const { toast } = useToast();
   const { config } = useBasePlanConfig();
   const [loading, setLoading] = useState(false);
+  const [trialDays, setTrialDays] = useState(7);
+
+  useEffect(() => {
+    supabase.from("signup_config").select("trial_days").limit(1).then(({ data }) => {
+      if (data && data.length > 0 && (data[0] as any).trial_days) {
+        setTrialDays((data[0] as any).trial_days);
+      }
+    });
+  }, []);
 
   const price = config?.price ?? 49.90;
   const period = config?.billing_period ?? "monthly";
@@ -46,9 +55,9 @@ export default function TrialExpired() {
             <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Teste grátis expirado</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Seu teste grátis acabou</h1>
             <p className="text-muted-foreground mt-1">
-              Seu período de teste de 7 dias terminou. Assine o plano mensal para continuar usando o aplicativo.
+              Os {trialDays} dias gratuitos terminaram. Continue com o plano mensal — seus dados estão salvos.
             </p>
           </div>
         </div>
@@ -70,11 +79,15 @@ export default function TrialExpired() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Acesso completo ao aplicativo
+              Continua com tudo que já cadastrou
             </li>
             <li className="flex items-center gap-2">
               <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-              Todas as funcionalidades
+              Acesso completo ao app
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+              Pagamento por Pix com aprovação rápida
             </li>
           </ul>
           <Button
@@ -83,7 +96,7 @@ export default function TrialExpired() {
             className="w-full h-12 text-base gap-2 bg-primary hover:bg-primary/90"
           >
             <Shield className="h-5 w-5" />
-            {loading ? "Processando..." : "Assinar plano mensal"}
+            {loading ? "Processando..." : "Contratar plano mensal"}
           </Button>
         </div>
 

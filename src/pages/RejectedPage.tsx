@@ -13,16 +13,16 @@ export default function RejectedPage() {
             <XCircle className="h-8 w-8 text-destructive" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Acesso Negado</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Cadastro não aprovado</h1>
             <p className="text-muted-foreground mt-2">
-              Olá, <strong>{profile?.nome}</strong>. Infelizmente seu cadastro foi rejeitado pelo administrador.
+              Olá, <strong>{profile?.nome}</strong>. Seu cadastro não foi aprovado pelo administrador.
             </p>
           </div>
         </div>
 
         <div className="rounded-2xl bg-card border border-border p-6">
           <p className="text-sm text-muted-foreground text-center">
-            Se acredita que houve um engano, entre em contato com o administrador para mais informações.
+            Se você acredita que houve um engano, entre em contato com o administrador para revisão.
           </p>
         </div>
 
