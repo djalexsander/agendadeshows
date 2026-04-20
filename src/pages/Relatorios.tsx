@@ -177,8 +177,7 @@ function RelatoriosContent() {
     { label: "Pendentes", value: String(statusCounts["pendente"] || 0), icon: BarChart3, color: "bg-yellow-500/15 text-yellow-500", dialog: "pendentes", subtitle: "Ver lista" },
     { label: "Finalizados", value: String(statusCounts["finalizado"] || 0), icon: BarChart3, color: "bg-blue-500/15 text-blue-500", dialog: "finalizados", subtitle: "Ver lista" },
     { label: "Lançamentos financeiros", value: String(allEntries.length), icon: DollarSign, color: "bg-primary/15 text-primary", dialog: "lancamentos", subtitle: "Ver lançamentos" },
-    { label: "Saldo financeiro", value: fmt(totals.saldo), icon: DollarSign, color: totals.saldo >= 0 ? "bg-green-500/15 text-green-500" : "bg-red-500/15 text-red-500", dialog: "saldo", subtitle: "Ver detalhes" },
-    
+    { label: "Saldo confirmado", value: fmt(totals.saldoConfirmado), icon: DollarSign, color: totals.saldoConfirmado >= 0 ? "bg-green-500/15 text-green-500" : "bg-red-500/15 text-red-500", dialog: "saldo", subtitle: "Ver detalhes" },
   ];
 
   const handleClick = (dialog: DialogType) => {
