@@ -6,7 +6,6 @@ import { useModules, type ModuleName } from "@/hooks/useModules";
 
 const MODULE_LABELS: Record<ModuleName, string> = {
   financeiro: "Financeiro",
-  equipe: "Equipe",
   relatorios: "Relatórios",
   export_png: "Exportação PNG",
   gps: "Rotas / GPS",

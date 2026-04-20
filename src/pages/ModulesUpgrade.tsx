@@ -24,7 +24,6 @@ import { toast } from "sonner";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   financeiro: DollarSign,
-  equipe: Users,
   relatorios: FileBarChart,
   export_png: ImageDown,
   gps: MapPinned,
