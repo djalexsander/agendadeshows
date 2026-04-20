@@ -48,7 +48,20 @@ interface AdminNotification {
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ total: 0, ativos: 0, inativos: 0, pagos: 0, pendentes: 0, pendentes_pagamento: 0, pendentes_aprovacao: 0 });
+  const [stats, setStats] = useState({
+    total: 0,
+    ativos: 0,
+    inativos: 0,
+    aguardando_pagamento: 0,
+    pagos: 0,
+    pendentes: 0,
+    pendentes_pagamento: 0,
+    pendentes_aprovacao: 0,
+    base_plan_pending: 0,
+    module_payments_pending: 0,
+    module_requests_pending: 0,
+    revenue_month: 0,
+  });
   const [proofs, setProofs] = useState<PaymentProof[]>([]);
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
@@ -56,12 +69,31 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   const load = async () => {
-    const [profilesRes, paymentsRes, pendingPaymentsRes, proofsRes, notificationsRes] = await Promise.all([
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthStartIso = monthStart.toISOString().split("T")[0];
+
+    const [
+      profilesRes,
+      paymentsRes,
+      pendingPaymentsRes,
+      proofsRes,
+      notificationsRes,
+      basePlanPendingRes,
+      modulePaymentsPendingRes,
+      moduleRequestsPendingRes,
+      monthRevenueRes,
+    ] = await Promise.all([
       supabase.from("profiles").select("user_id, nome, email, telefone, status_plano, created_at, origem_cadastro, valor_plano"),
       supabase.from("payments").select("status").eq("status", "pago"),
       supabase.from("payments").select("status").eq("status", "pendente"),
       (supabase.from("payment_proofs") as any).select("*").eq("status", "pendente").order("created_at", { ascending: false }),
       (supabase.from("admin_notifications") as any).select("*").eq("lida", false).order("created_at", { ascending: false }),
+      supabase.from("base_plan_payments").select("id", { count: "exact", head: true }).eq("status", "pendente"),
+      supabase.from("module_payments").select("id", { count: "exact", head: true }).eq("status", "pendente"),
+      supabase.from("module_requests").select("id", { count: "exact", head: true }).eq("status", "pendente"),
+      supabase.from("payments").select("valor").eq("status", "pago").gte("data_pagamento", monthStartIso),
     ]);
 
     const profiles = profilesRes.data || [];
@@ -70,14 +102,24 @@ export default function AdminDashboard() {
     const pending = profiles.filter((p: any) => p.status_plano === "pendente_aprovacao");
     setPendingUsers(pending as PendingUser[]);
 
+    const monthRevenue = (monthRevenueRes.data || []).reduce(
+      (sum: number, p: any) => sum + (Number(p.valor) || 0),
+      0,
+    );
+
     setStats({
       total: profiles.length,
       ativos: profiles.filter((p: any) => p.status_plano === "ativo").length,
       inativos: profiles.filter((p: any) => p.status_plano === "inativo" || p.status_plano === "rejeitado").length,
+      aguardando_pagamento: profiles.filter((p: any) => p.status_plano === "aguardando_pagamento").length,
       pagos: paymentsRes.data?.length || 0,
       pendentes: proofsList.length,
       pendentes_pagamento: pendingPaymentsRes.data?.length || 0,
       pendentes_aprovacao: pending.length,
+      base_plan_pending: basePlanPendingRes.count || 0,
+      module_payments_pending: modulePaymentsPendingRes.count || 0,
+      module_requests_pending: moduleRequestsPendingRes.count || 0,
+      revenue_month: monthRevenue,
     });
 
     const nameMap = new Map(profiles.map((p: any) => [p.user_id, p.nome]));
