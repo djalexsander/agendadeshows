@@ -107,6 +107,10 @@ export default function AdminLayout() {
     } else {
       if (isEmpresaMode) setMode("admin");
     }
+  }, [location.pathname, isEmpresaMode, setMode]);
+
+  // Auto-close mobile drawer on route change (modern app UX)
+  useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
