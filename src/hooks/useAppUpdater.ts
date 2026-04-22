@@ -44,6 +44,16 @@ function detectDesktop(): boolean {
   return Boolean(w.__TAURI_INTERNALS__ || w.__TAURI__);
 }
 
+interface TauriUpdateResult {
+  version: string;
+  currentVersion?: string;
+  date?: string;
+  body?: string;
+  downloadAndInstall: (
+    cb: (e: { event: string; data?: { contentLength?: number; chunkLength?: number } }) => void,
+  ) => Promise<void>;
+}
+
 export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
   const [isDesktop] = useState<boolean>(detectDesktop);
   const [phase, setPhase] = useState<UpdaterPhase>("idle");
@@ -57,9 +67,12 @@ export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
     setError(null);
     setPhase("checking");
     try {
-      const { check: tauriCheck } = await import(
-        /* @vite-ignore */ "@tauri-apps/plugin-updater"
+      // Specifier ofuscado para o Rollup não tentar resolver em build-time.
+      // O pacote só existe quando o app é empacotado com Tauri.
+      const mod = await import(
+        /* @vite-ignore */ ["@tauri-apps", "plugin-updater"].join("/")
       );
+      const tauriCheck = (mod as { check: () => Promise<TauriUpdateResult | null> }).check;
       const result = await tauriCheck();
       if (result) {
         setUpdate({
@@ -114,8 +127,10 @@ export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
       setPhase("ready");
       // Reinicia o app para aplicar a atualização.
       try {
-        const { relaunch } = await import(/* @vite-ignore */ "@tauri-apps/plugin-process");
-        await relaunch();
+        const proc = await import(
+          /* @vite-ignore */ ["@tauri-apps", "plugin-process"].join("/")
+        );
+        await (proc as { relaunch: () => Promise<void> }).relaunch();
       } catch (e) {
         console.warn("[updater] relaunch failed; user must restart manually", e);
       }
