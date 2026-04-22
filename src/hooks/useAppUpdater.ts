@@ -57,9 +57,12 @@ export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
     setError(null);
     setPhase("checking");
     try {
-      const { check: tauriCheck } = await import(
-        /* @vite-ignore */ "@tauri-apps/plugin-updater"
+      // Specifier ofuscado para o Rollup não tentar resolver em build-time.
+      // O pacote só existe quando o app é empacotado com Tauri.
+      const mod = await import(
+        /* @vite-ignore */ ["@tauri-apps", "plugin-updater"].join("/")
       );
+      const tauriCheck = (mod as { check: () => Promise<unknown> }).check;
       const result = await tauriCheck();
       if (result) {
         setUpdate({
