@@ -5,13 +5,13 @@ import { Progress } from "@/components/ui/progress";
 import { useAppUpdater } from "@/hooks/useAppUpdater";
 
 /**
- * Banner discreto que só aparece no app desktop (Tauri) quando há atualização.
- * No navegador web é totalmente inerte (retorna null).
+ * Banner de atualização do app.
+ * Aparece sempre que `/version.json` indica uma versão maior que `APP_VERSION` do bundle atual.
+ * Funciona em PWA instalado, navegador comum, WebView mobile e wrappers desktop.
  */
 export function UpdateBanner() {
-  const { isDesktop, phase, update, progress, error, downloadAndInstall, dismiss } = useAppUpdater(true);
+  const { phase, update, progress, error, downloadAndInstall, dismiss } = useAppUpdater(true);
 
-  if (!isDesktop) return null;
   if (phase === "idle" || phase === "checking" || phase === "up-to-date") return null;
 
   return (
@@ -41,8 +41,8 @@ export function UpdateBanner() {
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              {update.body && (
-                <p className="line-clamp-3 text-xs text-muted-foreground">{update.body}</p>
+              {update.notes && (
+                <p className="line-clamp-3 text-xs text-muted-foreground">{update.notes}</p>
               )}
               <div className="flex gap-2">
                 <Button size="sm" className="flex-1" onClick={downloadAndInstall}>
@@ -55,18 +55,14 @@ export function UpdateBanner() {
             </div>
           )}
 
-          {(phase === "downloading" || phase === "installing") && (
+          {phase === "downloading" && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-                <p className="text-sm font-medium">
-                  {phase === "downloading" ? "Baixando atualização…" : "Instalando…"}
-                </p>
+                <p className="text-sm font-medium">Baixando atualização…</p>
               </div>
-              <Progress value={phase === "installing" ? 100 : progress} />
-              <p className="text-xs text-muted-foreground">
-                {phase === "downloading" ? `${progress}%` : "Quase lá, não feche o app."}
-              </p>
+              <Progress value={progress} />
+              <p className="text-xs text-muted-foreground">{progress}%</p>
             </div>
           )}
 
