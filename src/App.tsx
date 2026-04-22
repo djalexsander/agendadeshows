@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { getEffectivePlanStatus } from "@/lib/planStatus";
 import { TrialBanner } from "@/components/TrialBanner";
 import { TrialExpiredModal } from "@/components/TrialExpiredModal";
+import { UpdateBanner } from "@/components/desktop/UpdateBanner";
 
 // Eager: páginas críticas para o bootstrap (login, dashboard principal e estados de bloqueio leves).
 import Login from "./pages/Login";
@@ -185,6 +186,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <UpdateBanner />
         <BrowserRouter>
           <AuthProvider>
             <CompanyProvider>
