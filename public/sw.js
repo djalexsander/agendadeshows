@@ -1,5 +1,5 @@
 // Service Worker for Web Push Notifications
-var CACHE_VERSION = 'v1.0.2';
+var CACHE_VERSION = 'v1.0.3';
 
 self.addEventListener('push', function(event) {
   let data = {};
