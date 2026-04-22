@@ -40,8 +40,8 @@ export function UpdateBanner() {
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-              {update.body && (
-                <p className="line-clamp-3 text-xs text-muted-foreground">{update.body}</p>
+              {update.notes && (
+                <p className="line-clamp-3 text-xs text-muted-foreground">{update.notes}</p>
               )}
               <div className="flex gap-2">
                 <Button size="sm" className="flex-1" onClick={downloadAndInstall}>
