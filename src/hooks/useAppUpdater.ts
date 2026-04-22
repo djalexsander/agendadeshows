@@ -62,7 +62,7 @@ export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
       const mod = await import(
         /* @vite-ignore */ ["@tauri-apps", "plugin-updater"].join("/")
       );
-      const tauriCheck = (mod as { check: () => Promise<unknown> }).check;
+      const tauriCheck = (mod as { check: () => Promise<TauriUpdateResult | null> }).check;
       const result = await tauriCheck();
       if (result) {
         setUpdate({
