@@ -5,8 +5,9 @@ import { Progress } from "@/components/ui/progress";
 import { useAppUpdater } from "@/hooks/useAppUpdater";
 
 /**
- * Banner discreto que só aparece no app desktop (Tauri) quando há atualização.
- * No navegador web é totalmente inerte (retorna null).
+ * Banner de atualização do app.
+ * Aparece sempre que `/version.json` indica uma versão maior que `APP_VERSION` do bundle atual.
+ * Funciona em PWA instalado, navegador comum, WebView mobile e wrappers desktop.
  */
 export function UpdateBanner() {
   const { phase, update, progress, error, downloadAndInstall, dismiss } = useAppUpdater(true);
