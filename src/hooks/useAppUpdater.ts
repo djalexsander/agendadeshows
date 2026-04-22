@@ -127,9 +127,13 @@ export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
       setPhase("ready");
       // Reinicia o app para aplicar a atualização.
       try {
-        const { relaunch } = await import(/* @vite-ignore */ "@tauri-apps/plugin-process");
-        await relaunch();
+        const proc = await import(
+          /* @vite-ignore */ ["@tauri-apps", "plugin-process"].join("/")
+        );
+        await (proc as { relaunch: () => Promise<void> }).relaunch();
       } catch (e) {
+        console.warn("[updater] relaunch failed; user must restart manually", e);
+      }
         console.warn("[updater] relaunch failed; user must restart manually", e);
       }
     } catch (e) {
