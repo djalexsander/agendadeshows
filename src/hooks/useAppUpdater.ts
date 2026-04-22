@@ -44,6 +44,16 @@ function detectDesktop(): boolean {
   return Boolean(w.__TAURI_INTERNALS__ || w.__TAURI__);
 }
 
+interface TauriUpdateResult {
+  version: string;
+  currentVersion?: string;
+  date?: string;
+  body?: string;
+  downloadAndInstall: (
+    cb: (e: { event: string; data?: { contentLength?: number; chunkLength?: number } }) => void,
+  ) => Promise<void>;
+}
+
 export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
   const [isDesktop] = useState<boolean>(detectDesktop);
   const [phase, setPhase] = useState<UpdaterPhase>("idle");
