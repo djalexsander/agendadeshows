@@ -9,9 +9,8 @@ import { useAppUpdater } from "@/hooks/useAppUpdater";
  * No navegador web é totalmente inerte (retorna null).
  */
 export function UpdateBanner() {
-  const { isDesktop, phase, update, progress, error, downloadAndInstall, dismiss } = useAppUpdater(true);
+  const { phase, update, progress, error, downloadAndInstall, dismiss } = useAppUpdater(true);
 
-  if (!isDesktop) return null;
   if (phase === "idle" || phase === "checking" || phase === "up-to-date") return null;
 
   return (
@@ -55,18 +54,14 @@ export function UpdateBanner() {
             </div>
           )}
 
-          {(phase === "downloading" || phase === "installing") && (
+          {phase === "downloading" && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-                <p className="text-sm font-medium">
-                  {phase === "downloading" ? "Baixando atualização…" : "Instalando…"}
-                </p>
+                <p className="text-sm font-medium">Baixando atualização…</p>
               </div>
-              <Progress value={phase === "installing" ? 100 : progress} />
-              <p className="text-xs text-muted-foreground">
-                {phase === "downloading" ? `${progress}%` : "Quase lá, não feche o app."}
-              </p>
+              <Progress value={progress} />
+              <p className="text-xs text-muted-foreground">{progress}%</p>
             </div>
           )}
 
