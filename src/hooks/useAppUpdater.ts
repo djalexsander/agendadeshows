@@ -134,8 +134,6 @@ export function useAppUpdater(autoCheck = true): UseAppUpdaterReturn {
       } catch (e) {
         console.warn("[updater] relaunch failed; user must restart manually", e);
       }
-        console.warn("[updater] relaunch failed; user must restart manually", e);
-      }
     } catch (e) {
       console.error("[updater] install failed", e);
       setError(e instanceof Error ? e.message : "Falha ao baixar/instalar atualização");
