@@ -91,9 +91,11 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories, even
   }, [filtered]);
 
   const titleMap: Record<string, string> = {
-    entradas: "Entradas",
-    saidas: "Saídas",
+    entradas: "Entradas (Pagas)",
+    saidas: "Saídas (Pagas)",
     pendentes: "Pendentes",
+    a_receber: "A Receber",
+    a_pagar: "A Pagar",
     saldo: "Saldo Confirmado",
   };
 
@@ -101,6 +103,8 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories, even
     entradas: "text-green-500",
     saidas: "text-red-500",
     pendentes: "text-yellow-500",
+    a_receber: "text-yellow-500",
+    a_pagar: "text-orange-500",
     saldo: "text-primary",
   };
 
