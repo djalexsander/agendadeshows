@@ -291,10 +291,13 @@ function FinanceiroContent() {
   const [exportOpen, setExportOpen] = useState(false);
   const [viewEntry, setViewEntry] = useState<typeof entries[0] | null>(null);
 
-  // Totals come from the hook (single source of truth, shared with Relatórios).
+  // Totais — apenas valores PAGOS contam para Entradas/Saídas/Saldo.
+  // Pendentes ficam segregados em "A Receber" e "A Pagar".
   const advancedTotals = {
-    totalEntradas: totals.entradas,
-    totalSaidas: totals.saidas,
+    totalEntradas: totals.entradasConfirmadas,
+    totalSaidas: totals.saidasConfirmadas,
+    aReceber: totals.entradasPendentes,
+    aPagar: totals.saidasPendentes,
     totalPendentes: totals.pendentes,
     saldoConfirmado: totals.saldoConfirmado,
   };
