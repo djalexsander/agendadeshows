@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { ArrowLeft, DollarSign, Plus, TrendingUp, TrendingDown, Wallet, Loader2, Filter, X, CalendarIcon, Upload, AlertCircle, CalendarDays, ChevronDown, ChevronUp, Pencil, Clock, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
