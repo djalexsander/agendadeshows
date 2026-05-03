@@ -435,7 +435,7 @@ function FinanceiroContent() {
   return (
     <>
       {/* Summary cards - clickable */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 sm:gap-3">
         <button
           className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-green-500/50 active:scale-[0.97] transition-all"
           onClick={() => setDetailDrawer("entradas")}
@@ -466,7 +466,7 @@ function FinanceiroContent() {
 
         <button
           className="rounded-2xl bg-card border border-yellow-500/30 p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-yellow-500/60 active:scale-[0.97] transition-all"
-          onClick={() => setDetailDrawer("pendentes")}
+          onClick={() => setDetailDrawer("a_receber")}
         >
           <div className="flex items-center justify-between w-full">
             <div className="h-8 w-8 rounded-xl bg-yellow-500/15 flex items-center justify-center">
@@ -474,12 +474,26 @@ function FinanceiroContent() {
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
-          <p className="text-xs sm:text-lg font-bold text-yellow-500 truncate w-full">{fmt(advancedTotals.totalPendentes)}</p>
-          <p className="text-[9px] sm:text-xs text-muted-foreground">Pendente</p>
+          <p className="text-xs sm:text-lg font-bold text-yellow-500 truncate w-full">{fmt(advancedTotals.aReceber)}</p>
+          <p className="text-[9px] sm:text-xs text-muted-foreground">A Receber</p>
         </button>
 
         <button
-          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-primary/50 active:scale-[0.97] transition-all"
+          className="rounded-2xl bg-card border border-orange-500/30 p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-orange-500/60 active:scale-[0.97] transition-all"
+          onClick={() => setDetailDrawer("a_pagar")}
+        >
+          <div className="flex items-center justify-between w-full">
+            <div className="h-8 w-8 rounded-xl bg-orange-500/15 flex items-center justify-center">
+              <Clock className="h-4 w-4 text-orange-500" />
+            </div>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+          <p className="text-xs sm:text-lg font-bold text-orange-500 truncate w-full">{fmt(advancedTotals.aPagar)}</p>
+          <p className="text-[9px] sm:text-xs text-muted-foreground">A Pagar</p>
+        </button>
+
+        <button
+          className="rounded-2xl bg-card border border-border p-2.5 sm:p-4 flex flex-col items-start gap-1.5 text-left hover:border-primary/50 active:scale-[0.97] transition-all col-span-2 sm:col-span-1"
           onClick={() => setDetailDrawer("saldo")}
         >
           <div className="flex items-center justify-between w-full">
