@@ -24,7 +24,7 @@ function getStatusStyle(status: string) {
   return STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
 }
 
-export type DetailDrawerType = "entradas" | "saidas" | "pendentes" | "saldo" | null;
+export type DetailDrawerType = "entradas" | "saidas" | "pendentes" | "a_receber" | "a_pagar" | "saldo" | null;
 
 interface Props {
   type: DetailDrawerType;
