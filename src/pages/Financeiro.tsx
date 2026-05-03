@@ -481,59 +481,11 @@ function FinanceiroContent() {
           <p className="text-muted-foreground text-sm">Nenhum lançamento encontrado</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {entries.map((e) => {
-            const st = getStatusStyle(e.status);
-            const isOverdue = e.status === "vencido" || (e.status === "pendente" && e.data_vencimento && e.data_vencimento < new Date().toISOString().slice(0, 10));
-            return (
-              <div
-                key={e.id}
-                className={cn(
-                  "rounded-xl bg-secondary/40 border p-3 sm:p-4 cursor-pointer hover:bg-secondary/60 active:scale-[0.99] transition-all",
-                  isOverdue ? "border-red-500/40" : "border-border/50"
-                )}
-                onClick={() => setViewEntry(e)}
-              >
-                {/* Event name - primary */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    {e.event_name ? (
-                      <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md flex items-center gap-1.5 truncate">
-                        <CalendarDays className="h-3 w-3 shrink-0" />
-                        {e.event_name}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground italic">Sem evento</span>
-                    )}
-                    {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
-                  </div>
-                  <span className={`text-sm font-bold shrink-0 ml-2 ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
-                    {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
-                  </span>
-                </div>
-
-                {/* Type icon + title */}
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className={`h-6 w-6 rounded-md flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
-                    {e.type === "entrada" ? <TrendingUp className="h-3 w-3 text-green-500" /> : <TrendingDown className="h-3 w-3 text-red-500" />}
-                  </div>
-                  <p className="text-sm text-foreground truncate">{e.title}</p>
-                </div>
-
-                {/* Status + date */}
-                <div className="flex items-center gap-2 pl-8">
-                  <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
-                  {e.data_lancamento && (
-                    <span className="text-[10px] text-muted-foreground">
-                      {format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}
-                    </span>
-                  )}
-                  {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <MonthlyGroupedList
+          entries={entries}
+          fmt={fmt}
+          onView={setViewEntry}
+        />
       )}
 
       {/* Dialog - Novo Lançamento */}
