@@ -123,6 +123,165 @@ function DatePickerField({ label, value, onChange, required }: { label: string; 
   );
 }
 
+type EntryItem = {
+  id: string;
+  type: string;
+  amount: number | string;
+  status: string;
+  title: string;
+  event_name?: string | null;
+  event_date?: string | null;
+  data_lancamento?: string | null;
+  data_vencimento?: string | null;
+  categoria?: string | null;
+  created_at?: string | null;
+};
+
+function getEntryDate(e: EntryItem): Date | null {
+  const raw = e.data_lancamento || e.event_date || e.created_at;
+  if (!raw) return null;
+  // date-only strings get noon to avoid TZ shift; full ISO passes through
+  const d = raw.length === 10 ? new Date(raw + "T12:00:00") : new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function MonthlyGroupedList({
+  entries,
+  fmt,
+  onView,
+}: {
+  entries: any[];
+  fmt: (v: number) => string;
+  onView: (e: any) => void;
+}) {
+  const groups = useMemo(() => {
+    const map = new Map<string, { key: string; year: number; month: number; label: string; total: number; items: any[] }>();
+    for (const e of entries) {
+      const d = getEntryDate(e);
+      if (!d) continue;
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+      let g = map.get(key);
+      if (!g) {
+        const label = format(d, "MMMM yyyy", { locale: ptBR });
+        g = {
+          key,
+          year: d.getFullYear(),
+          month: d.getMonth(),
+          label: label.charAt(0).toUpperCase() + label.slice(1),
+          total: 0,
+          items: [],
+        };
+        map.set(key, g);
+      }
+      const amt = Number(e.amount) || 0;
+      g.total += e.type === "entrada" ? amt : -amt;
+      g.items.push(e);
+    }
+    return Array.from(map.values()).sort((a, b) =>
+      b.year !== a.year ? b.year - a.year : b.month - a.month,
+    );
+  }, [entries]);
+
+  // Default: most recent month expanded, others collapsed
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
+    groups.length > 0 ? { [groups[0].key]: true } : {},
+  );
+
+  const toggle = (k: string) =>
+    setExpanded((s) => ({ ...s, [k]: !s[k] }));
+
+  return (
+    <div className="space-y-3">
+      {groups.map((g) => {
+        const isOpen = expanded[g.key] ?? false;
+        const totalColor = g.total >= 0 ? "text-green-500" : "text-red-500";
+        return (
+          <div key={g.key} className="rounded-xl border border-border bg-card overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggle(g.key)}
+              className="w-full flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 hover:bg-secondary/40 transition-colors"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                {isOpen ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                )}
+                <span className="text-sm font-semibold text-foreground truncate">
+                  {g.label}
+                </span>
+                <span className="text-[10px] text-muted-foreground shrink-0">
+                  ({g.items.length})
+                </span>
+              </div>
+              <span className={cn("text-sm font-bold shrink-0", totalColor)}>
+                {fmt(g.total)}
+              </span>
+            </button>
+            {isOpen && (
+              <div className="p-2 sm:p-3 pt-0 space-y-2">
+                {g.items.map((e) => {
+                  const st = getStatusStyle(e.status);
+                  const isOverdue =
+                    e.status === "vencido" ||
+                    (e.status === "pendente" &&
+                      e.data_vencimento &&
+                      e.data_vencimento < new Date().toISOString().slice(0, 10));
+                  return (
+                    <div
+                      key={e.id}
+                      className={cn(
+                        "rounded-xl bg-secondary/40 border p-3 sm:p-4 cursor-pointer hover:bg-secondary/60 active:scale-[0.99] transition-all",
+                        isOverdue ? "border-red-500/40" : "border-border/50",
+                      )}
+                      onClick={() => onView(e)}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {e.event_name ? (
+                            <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md flex items-center gap-1.5 truncate">
+                              <CalendarDays className="h-3 w-3 shrink-0" />
+                              {e.event_name}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground italic">Sem evento</span>
+                          )}
+                          {isOverdue && <AlertCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />}
+                        </div>
+                        <span className={`text-sm font-bold shrink-0 ml-2 ${e.type === "entrada" ? "text-green-500" : "text-red-500"}`}>
+                          {e.type === "entrada" ? "+" : "-"}{fmt(Number(e.amount))}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className={`h-6 w-6 rounded-md flex items-center justify-center shrink-0 ${e.type === "entrada" ? "bg-green-500/15" : "bg-red-500/15"}`}>
+                          {e.type === "entrada" ? <TrendingUp className="h-3 w-3 text-green-500" /> : <TrendingDown className="h-3 w-3 text-red-500" />}
+                        </div>
+                        <p className="text-sm text-foreground truncate">{e.title}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 pl-8">
+                        <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0 h-4 border-0", st.color)}>{st.label}</Badge>
+                        {e.data_lancamento && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {format(new Date(e.data_lancamento + "T12:00:00"), "dd/MM/yy")}
+                          </span>
+                        )}
+                        {e.categoria && <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{e.categoria}</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function FinanceiroContent() {
   const { user } = useAuth();
   const { company } = useCompany();
