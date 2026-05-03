@@ -24,7 +24,7 @@ function getStatusStyle(status: string) {
   return STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
 }
 
-export type DetailDrawerType = "entradas" | "saidas" | "pendentes" | "saldo" | null;
+export type DetailDrawerType = "entradas" | "saidas" | "pendentes" | "a_receber" | "a_pagar" | "saldo" | null;
 
 interface Props {
   type: DetailDrawerType;
@@ -50,9 +50,13 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories, even
     if (!type) return [];
     switch (type) {
       case "entradas":
-        return entries.filter((e) => e.type === "entrada");
+        return entries.filter((e) => e.type === "entrada" && CONFIRMED_STATUSES.includes(e.status));
       case "saidas":
-        return entries.filter((e) => e.type === "saida");
+        return entries.filter((e) => e.type === "saida" && CONFIRMED_STATUSES.includes(e.status));
+      case "a_receber":
+        return entries.filter((e) => e.type === "entrada" && e.status === "pendente");
+      case "a_pagar":
+        return entries.filter((e) => e.type === "saida" && e.status === "pendente");
       case "pendentes":
         return entries.filter((e) => e.status === "pendente");
       case "saldo":
@@ -87,9 +91,11 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories, even
   }, [filtered]);
 
   const titleMap: Record<string, string> = {
-    entradas: "Entradas",
-    saidas: "Saídas",
+    entradas: "Entradas (Pagas)",
+    saidas: "Saídas (Pagas)",
     pendentes: "Pendentes",
+    a_receber: "A Receber",
+    a_pagar: "A Pagar",
     saldo: "Saldo Confirmado",
   };
 
@@ -97,6 +103,8 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories, even
     entradas: "text-green-500",
     saidas: "text-red-500",
     pendentes: "text-yellow-500",
+    a_receber: "text-yellow-500",
+    a_pagar: "text-orange-500",
     saldo: "text-primary",
   };
 

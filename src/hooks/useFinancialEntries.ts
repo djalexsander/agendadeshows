@@ -167,14 +167,16 @@ export function useFinancialEntries() {
       if (e.type === "entrada") {
         acc.entradas += amount;
         if (confirmed) acc.entradasConfirmadas += amount;
+        if (pending) acc.entradasPendentes += amount;
       } else {
         acc.saidas += amount;
         if (confirmed) acc.saidasConfirmadas += amount;
+        if (pending) acc.saidasPendentes += amount;
       }
       if (pending) acc.pendentes += amount;
       return acc;
     },
-    { entradas: 0, saidas: 0, entradasConfirmadas: 0, saidasConfirmadas: 0, pendentes: 0 }
+    { entradas: 0, saidas: 0, entradasConfirmadas: 0, saidasConfirmadas: 0, entradasPendentes: 0, saidasPendentes: 0, pendentes: 0 }
   );
 
   const categories = [...new Set(entries.map((e) => e.categoria).filter(Boolean))] as string[];
