@@ -50,9 +50,13 @@ export function FinancialDetailDrawer({ type, onClose, entries, categories, even
     if (!type) return [];
     switch (type) {
       case "entradas":
-        return entries.filter((e) => e.type === "entrada");
+        return entries.filter((e) => e.type === "entrada" && CONFIRMED_STATUSES.includes(e.status));
       case "saidas":
-        return entries.filter((e) => e.type === "saida");
+        return entries.filter((e) => e.type === "saida" && CONFIRMED_STATUSES.includes(e.status));
+      case "a_receber":
+        return entries.filter((e) => e.type === "entrada" && e.status === "pendente");
+      case "a_pagar":
+        return entries.filter((e) => e.type === "saida" && e.status === "pendente");
       case "pendentes":
         return entries.filter((e) => e.status === "pendente");
       case "saldo":
