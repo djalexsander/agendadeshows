@@ -262,39 +262,51 @@ export default function AdminClients() {
 
       <div className="space-y-2 md:space-y-3">
         {filtered.map((c) => (
-          <div key={c.id} className="rounded-xl bg-card border border-border p-3 md:p-4 space-y-2 md:space-y-0 md:flex md:items-center md:gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold truncate text-sm md:text-base">{c.nome}</p>
+          <div key={c.id} className="rounded-xl bg-card border border-border p-3 md:p-4 space-y-2 md:space-y-0 md:flex md:items-start md:gap-4">
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-semibold truncate text-sm md:text-base">{c.nome || "(sem nome)"}</p>
                 {c.origem_cadastro === "publico_link" ? (
-                  <span title="Cadastro pelo link"><Globe className="h-3.5 w-3.5 text-blue-400 shrink-0" /></span>
+                  <span title="Cadastro pelo link público" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">
+                    <Globe className="h-3 w-3" /> Link público
+                  </span>
                 ) : (
-                  <span title="Criado pelo admin"><Shield className="h-3.5 w-3.5 text-primary shrink-0" /></span>
+                  <span title="Criado pelo admin" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary">
+                    <Shield className="h-3 w-3" /> Admin
+                  </span>
                 )}
               </div>
               {c.nome_artistico && (
                 <p className="text-xs md:text-sm text-primary truncate">{c.nome_artistico}</p>
               )}
               <p className="text-xs md:text-sm text-muted-foreground truncate">{c.email}</p>
-              {c.plan_type === "free_trial_7_days" && c.trial_ends_at && (
-                <p className="text-xs text-muted-foreground">
-                  Expira: {new Date(c.trial_ends_at).toLocaleDateString("pt-BR")}
-                </p>
-              )}
-              {c.plan_type === "lifetime" && c.is_paid && (
-                <p className="text-xs text-muted-foreground">Plano vitalício</p>
-              )}
-              {c.plan_type !== "free_trial_7_days" && !(c.plan_type === "lifetime" && c.is_paid) && c.valor_plano != null && c.valor_plano > 0 && (
-                <p className="text-xs text-muted-foreground">R$ {c.valor_plano.toFixed(2)}</p>
-              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 text-[11px] text-muted-foreground pt-1">
+                <p>📅 Criado: <span className="text-foreground/80">{formatDateTime(c.created_at)}</span></p>
+                <p>📦 Plano: <span className="text-foreground/80">{formatPlanType(c.plan_type)}</span></p>
+                {c.telefone && <p>📞 {c.telefone}</p>}
+                {(c.cidade || c.estado) && <p>📍 {[c.cidade, c.estado].filter(Boolean).join(" / ")}</p>}
+                {c.plan_type === "free_trial_7_days" && c.trial_ends_at && (
+                  <p>⏳ Trial expira: <span className="text-foreground/80">{formatDate(c.trial_ends_at)}</span></p>
+                )}
+                {c.current_period_end && (
+                  <p>🔁 Vencimento: <span className="text-foreground/80">{formatDate(c.current_period_end)}</span></p>
+                )}
+                {c.valor_plano != null && c.valor_plano > 0 && (
+                  <p>💰 Valor: <span className="text-foreground/80">R$ {Number(c.valor_plano).toFixed(2)}</span></p>
+                )}
+                <p>💳 Pago: <span className={c.is_paid ? "text-green-400" : "text-orange-400"}>{c.is_paid ? "Sim" : "Não"}</span></p>
+              </div>
             </div>
-            <div className="flex items-center justify-between md:justify-end gap-2">
+            <div className="flex items-center justify-between md:justify-end gap-2 md:pt-1">
               {(() => { const s = getDisplayStatus(c); return (
                 <span className={`text-[10px] font-semibold uppercase px-2 py-1 rounded-lg shrink-0 ${s.color}`}>
                   {s.label}
                 </span>
               ); })()}
               <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" title="Ver todos os detalhes" onClick={() => setDetailsTarget(c)}>
+                  <Info className="h-4 w-4" />
+                </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-purple-400 hover:text-purple-300" title="Controle de acesso" onClick={() => setAccessControlTarget(c)}>
                   <KeyRound className="h-4 w-4" />
                 </Button>
@@ -312,6 +324,7 @@ export default function AdminClients() {
           <p className="text-center text-muted-foreground py-8">Nenhum cliente encontrado</p>
         )}
       </div>
+
 
       <Dialog open={dialogOpen} onOpenChange={(o) => !o && setDialogOpen(false)}>
         <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[90vh] overflow-y-auto">
