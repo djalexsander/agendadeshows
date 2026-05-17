@@ -66,6 +66,8 @@ function formatDate(dateStr: string | null | undefined): string {
 function formatOrigem(origem: string | null | undefined): string {
   if (origem === "publico_link") return "Link público (auto-cadastro)";
   if (origem === "admin_manual") return "Criado pelo admin";
+  if (origem === "google_oauth") return "Login com Google";
+  if (origem?.endsWith("_oauth")) return `Login com ${origem.replace("_oauth", "")}`;
   return origem || "—";
 }
 
@@ -269,6 +271,10 @@ export default function AdminClients() {
                 {c.origem_cadastro === "publico_link" ? (
                   <span title="Cadastro pelo link público" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">
                     <Globe className="h-3 w-3" /> Link público
+                  </span>
+                ) : c.origem_cadastro?.endsWith("_oauth") ? (
+                  <span title={`Cadastro via ${c.origem_cadastro.replace("_oauth", "")}`} className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">
+                    <Globe className="h-3 w-3" /> {c.origem_cadastro.replace("_oauth", "")}
                   </span>
                 ) : (
                   <span title="Criado pelo admin" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary">
