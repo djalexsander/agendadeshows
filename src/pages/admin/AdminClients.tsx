@@ -93,6 +93,7 @@ export default function AdminClients() {
   const [deleteTarget, setDeleteTarget] = useState<ClientProfile | null>(null);
   const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
   const [accessControlTarget, setAccessControlTarget] = useState<ClientProfile | null>(null);
+  const [detailsTarget, setDetailsTarget] = useState<ClientProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
