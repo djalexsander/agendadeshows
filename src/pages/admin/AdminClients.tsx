@@ -272,6 +272,10 @@ export default function AdminClients() {
                   <span title="Cadastro pelo link público" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">
                     <Globe className="h-3 w-3" /> Link público
                   </span>
+                ) : c.origem_cadastro?.endsWith("_oauth") ? (
+                  <span title={`Cadastro via ${c.origem_cadastro.replace("_oauth", "")}`} className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">
+                    <Globe className="h-3 w-3" /> {c.origem_cadastro.replace("_oauth", "")}
+                  </span>
                 ) : (
                   <span title="Criado pelo admin" className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-primary/15 text-primary">
                     <Shield className="h-3 w-3" /> Admin
