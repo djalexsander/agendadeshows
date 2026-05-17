@@ -459,6 +459,44 @@ export default function AdminClients() {
         targetUserId={accessControlTarget?.user_id ?? ""}
         targetUserName={accessControlTarget?.nome ?? ""}
       />
+
+      <Dialog open={!!detailsTarget} onOpenChange={(o) => !o && setDetailsTarget(null)}>
+        <DialogContent className="sm:max-w-lg mx-4 rounded-2xl bg-card border-border max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Cliente</DialogTitle>
+            <DialogDescription>Todas as informações registradas</DialogDescription>
+          </DialogHeader>
+          {detailsTarget && (
+            <div className="space-y-2 text-sm">
+              {[
+                ["Nome", detailsTarget.nome || "—"],
+                ["Nome artístico", detailsTarget.nome_artistico || "—"],
+                ["E-mail", detailsTarget.email],
+                ["Telefone", detailsTarget.telefone || "—"],
+                ["Cidade / UF", [detailsTarget.cidade, detailsTarget.estado].filter(Boolean).join(" / ") || "—"],
+                ["Origem do cadastro", formatOrigem(detailsTarget.origem_cadastro)],
+                ["Data de criação", formatDateTime(detailsTarget.created_at)],
+                ["Última atualização", formatDateTime(detailsTarget.updated_at)],
+                ["Tipo de plano", formatPlanType(detailsTarget.plan_type)],
+                ["Status (admin)", detailsTarget.status_plano || "—"],
+                ["Pago", detailsTarget.is_paid ? "Sim ✅" : "Não ❌"],
+                ["Valor do plano", detailsTarget.valor_plano != null ? `R$ ${Number(detailsTarget.valor_plano).toFixed(2)}` : "—"],
+                ["Trial iniciado em", formatDateTime(detailsTarget.trial_started_at)],
+                ["Trial expira em", formatDateTime(detailsTarget.trial_ends_at)],
+                ["Carência expira em", formatDateTime(detailsTarget.grace_ends_at)],
+                ["Vencimento atual", formatDateTime(detailsTarget.current_period_end)],
+                ["Observações", detailsTarget.observacoes || "—"],
+                ["User ID", detailsTarget.user_id],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-3 border-b border-border/40 py-1.5">
+                  <span className="text-muted-foreground shrink-0">{k}</span>
+                  <span className="text-right break-all">{v}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
