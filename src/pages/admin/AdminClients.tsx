@@ -40,7 +40,41 @@ interface ClientProfile {
   plan_type: string | null;
   trial_started_at: string | null;
   trial_ends_at: string | null;
+  grace_ends_at: string | null;
   is_paid: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+function formatDateTime(dateStr: string | null | undefined): string {
+  if (!dateStr) return "—";
+  try {
+    return new Date(dateStr).toLocaleString("pt-BR", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    });
+  } catch { return "—"; }
+}
+
+function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "—";
+  try {
+    return new Date(dateStr).toLocaleDateString("pt-BR");
+  } catch { return "—"; }
+}
+
+function formatOrigem(origem: string | null | undefined): string {
+  if (origem === "publico_link") return "Link público (auto-cadastro)";
+  if (origem === "admin_manual") return "Criado pelo admin";
+  return origem || "—";
+}
+
+function formatPlanType(plan: string | null | undefined): string {
+  if (plan === "free_trial_7_days") return "Trial 7 dias";
+  if (plan === "lifetime") return "Vitalício";
+  if (plan === "monthly") return "Mensal";
+  if (plan === "yearly") return "Anual";
+  return plan || "—";
 }
 
 function toDateInputValue(dateStr: string | null | undefined): string {
