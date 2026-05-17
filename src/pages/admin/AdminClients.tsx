@@ -66,6 +66,8 @@ function formatDate(dateStr: string | null | undefined): string {
 function formatOrigem(origem: string | null | undefined): string {
   if (origem === "publico_link") return "Link público (auto-cadastro)";
   if (origem === "admin_manual") return "Criado pelo admin";
+  if (origem === "google_oauth") return "Login com Google";
+  if (origem?.endsWith("_oauth")) return `Login com ${origem.replace("_oauth", "")}`;
   return origem || "—";
 }
 
