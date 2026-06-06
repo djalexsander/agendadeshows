@@ -410,7 +410,7 @@ function FinanceiroContent() {
         const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
         const res = await addEntry({
           ...payload,
-          title: form.title + suffix,
+          title: finalTitle + suffix,
           parcelas,
           parcela_atual: i + 1,
         });
