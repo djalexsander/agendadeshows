@@ -323,6 +323,36 @@ function FinanceiroContent() {
   const currentCategories = form.type === "entrada" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
   const allFilterCategories = [...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])];
 
+  // Shows organizados para o select de vínculo: ordem ascendente,
+  // com seção "Sem vínculo financeiro" listando apenas eventos ainda não vinculados.
+  const linkedShowIds = useMemo(
+    () => new Set(eventSummaries.map((e) => e.show_id)),
+    [eventSummaries],
+  );
+  const showsAsc = useMemo(
+    () => [...shows].sort((a, b) => a.date.localeCompare(b.date)),
+    [shows],
+  );
+  const unlinkedShows = useMemo(
+    () => showsAsc.filter((s) => !linkedShowIds.has(s.id)),
+    [showsAsc, linkedShowIds],
+  );
+  const showsByMonth = useMemo(() => {
+    const map = new Map<string, { key: string; label: string; items: typeof showsAsc }>();
+    for (const s of showsAsc) {
+      const d = new Date(s.date + "T12:00:00");
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+      let g = map.get(key);
+      if (!g) {
+        const label = format(d, "MMMM yyyy", { locale: ptBR });
+        g = { key, label: label.charAt(0).toUpperCase() + label.slice(1), items: [] };
+        map.set(key, g);
+      }
+      g.items.push(s);
+    }
+    return Array.from(map.values());
+  }, [showsAsc]);
+
   const handleAmountChange = (raw: string) => {
     const cleaned = raw.replace(/[^\d]/g, "");
     if (!cleaned) { setForm((f) => ({ ...f, amount: "" })); return; }
