@@ -786,7 +786,8 @@ function FinanceiroContent() {
                 </div>
               </div>
               <div>
-                <Label className="text-xs">Título *</Label>
+              <div>
+                <Label className="text-xs">Título</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={form.type === "entrada" ? "Ex: Cachê do evento" : "Ex: Pedágio ida e volta"} />
               </div>
               <div className="grid grid-cols-2 gap-3">
