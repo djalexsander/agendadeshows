@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -319,6 +320,7 @@ function FinanceiroContent() {
   const [comprovante, setComprovante] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "events">("list");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [eventPickerOpen, setEventPickerOpen] = useState(false);
 
   const currentCategories = form.type === "entrada" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
   const allFilterCategories = [...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])];
@@ -374,14 +376,15 @@ function FinanceiroContent() {
   };
 
   const handleSave = async () => {
-    if (!form.title) { toast.error("Preencha o título"); return; }
     if (!form.amount) { toast.error("Preencha o valor"); return; }
     if (!form.data_lancamento) { toast.error("Selecione a data do lançamento"); return; }
     setSaving(true);
 
     const selectedShow = form.show_id ? shows.find((s) => s.id === form.show_id) : null;
+    const fallbackTitle = form.categoria || (selectedShow ? (selectedShow.evento || selectedShow.cidade) : "") || (form.type === "entrada" ? "Entrada" : "Saída");
+    const finalTitle = form.title.trim() || fallbackTitle;
     const payload = {
-      title: form.title,
+      title: finalTitle,
       type: form.type,
       amount: parseFloat(form.amount),
       notes: form.notes || undefined,
@@ -409,7 +412,7 @@ function FinanceiroContent() {
         const suffix = parcelas > 1 ? ` (${i + 1}/${parcelas})` : "";
         const res = await addEntry({
           ...payload,
-          title: form.title + suffix,
+          title: finalTitle + suffix,
           parcelas,
           parcela_atual: i + 1,
         });
@@ -719,41 +722,101 @@ function FinanceiroContent() {
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Evento</p>
               <div>
                 <Label className="text-xs">Vincular a um evento</Label>
-                <Select value={form.show_id || "none"} onValueChange={(v) => setForm({ ...form, show_id: v === "none" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="Selecionar evento" /></SelectTrigger>
-                  <SelectContent className="max-h-[60vh]">
-                    <SelectItem value="none">Sem vínculo</SelectItem>
-
-                    {unlinkedShows.length > 0 && (
-                      <SelectGroup>
-                        <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">
-                          Sem vínculo financeiro ({unlinkedShows.length})
-                        </SelectLabel>
-                        {unlinkedShows.map((s) => (
-                          <SelectItem key={`unlinked-${s.id}`} value={s.id}>
-                            {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    )}
-
-                    {showsByMonth.map((g) => (
-                      <SelectGroup key={g.key}>
-                        <SelectLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          {g.label}
-                        </SelectLabel>
-                        {g.items.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
-                            {!linkedShowIds.has(s.id) && (
-                              <span className="ml-1 text-[10px] text-primary">•</span>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {(() => {
+                  const selected = form.show_id ? shows.find((s) => s.id === form.show_id) : null;
+                  const selectedLabel = selected
+                    ? `${selected.evento || selected.cidade} — ${format(new Date(selected.date + "T12:00:00"), "dd/MM/yy")}`
+                    : "Sem vínculo";
+                  const pick = (id: string) => {
+                    setForm({ ...form, show_id: id });
+                    setEventPickerOpen(false);
+                  };
+                  return (
+                    <Popover open={eventPickerOpen} onOpenChange={setEventPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between font-normal h-10 rounded-xl",
+                            !selected && "text-muted-foreground",
+                          )}
+                        >
+                          <span className="truncate">{selectedLabel}</span>
+                          <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="p-0 w-[--radix-popover-trigger-width] max-h-[60vh] overflow-y-auto bg-popover border-border"
+                        align="start"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => pick("")}
+                          className={cn(
+                            "w-full text-left px-3 py-2.5 text-sm hover:bg-accent transition-colors border-b border-border",
+                            !form.show_id && "bg-primary/10 text-primary font-medium",
+                          )}
+                        >
+                          Sem vínculo
+                        </button>
+                        <Accordion type="multiple" className="w-full">
+                          {unlinkedShows.length > 0 && (
+                            <AccordionItem value="unlinked" className="border-b border-border">
+                              <AccordionTrigger className="px-3 py-2.5 hover:no-underline hover:bg-accent/50">
+                                <span className="text-sm font-semibold text-primary">
+                                  Sem vínculo financeiro <span className="text-muted-foreground font-normal">({unlinkedShows.length})</span>
+                                </span>
+                              </AccordionTrigger>
+                              <AccordionContent className="pb-0">
+                                {unlinkedShows.map((s) => (
+                                  <button
+                                    key={`u-${s.id}`}
+                                    type="button"
+                                    onClick={() => pick(s.id)}
+                                    className={cn(
+                                      "w-full text-left px-5 py-2 text-sm hover:bg-accent transition-colors",
+                                      form.show_id === s.id && "bg-primary/10 text-primary",
+                                    )}
+                                  >
+                                    {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
+                                  </button>
+                                ))}
+                              </AccordionContent>
+                            </AccordionItem>
+                          )}
+                          {showsByMonth.map((g) => (
+                            <AccordionItem key={g.key} value={g.key} className="border-b border-border last:border-b-0">
+                              <AccordionTrigger className="px-3 py-2.5 hover:no-underline hover:bg-accent/50">
+                                <span className="text-sm font-semibold">
+                                  {g.label} <span className="text-muted-foreground font-normal">({g.items.length})</span>
+                                </span>
+                              </AccordionTrigger>
+                              <AccordionContent className="pb-0">
+                                {g.items.map((s) => (
+                                  <button
+                                    key={s.id}
+                                    type="button"
+                                    onClick={() => pick(s.id)}
+                                    className={cn(
+                                      "w-full text-left px-5 py-2 text-sm hover:bg-accent transition-colors flex items-center gap-2",
+                                      form.show_id === s.id && "bg-primary/10 text-primary",
+                                    )}
+                                  >
+                                    <span className="truncate">{s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}</span>
+                                    {!linkedShowIds.has(s.id) && (
+                                      <span className="ml-auto text-[10px] text-primary">•</span>
+                                    )}
+                                  </button>
+                                ))}
+                              </AccordionContent>
+                            </AccordionItem>
+                          ))}
+                        </Accordion>
+                      </PopoverContent>
+                    </Popover>
+                  );
+                })()}
               </div>
             </div>
 
@@ -785,7 +848,7 @@ function FinanceiroContent() {
                 </div>
               </div>
               <div>
-                <Label className="text-xs">Título *</Label>
+                <Label className="text-xs">Título</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder={form.type === "entrada" ? "Ex: Cachê do evento" : "Ex: Pedágio ida e volta"} />
               </div>
               <div className="grid grid-cols-2 gap-3">
