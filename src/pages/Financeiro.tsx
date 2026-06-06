@@ -721,12 +721,36 @@ function FinanceiroContent() {
                 <Label className="text-xs">Vincular a um evento</Label>
                 <Select value={form.show_id || "none"} onValueChange={(v) => setForm({ ...form, show_id: v === "none" ? "" : v })}>
                   <SelectTrigger><SelectValue placeholder="Selecionar evento" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[60vh]">
                     <SelectItem value="none">Sem vínculo</SelectItem>
-                    {shows.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
-                      </SelectItem>
+
+                    {unlinkedShows.length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="text-[10px] uppercase tracking-wider text-primary">
+                          Sem vínculo financeiro ({unlinkedShows.length})
+                        </SelectLabel>
+                        {unlinkedShows.map((s) => (
+                          <SelectItem key={`unlinked-${s.id}`} value={s.id}>
+                            {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
+
+                    {showsByMonth.map((g) => (
+                      <SelectGroup key={g.key}>
+                        <SelectLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {g.label}
+                        </SelectLabel>
+                        {g.items.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.evento || s.cidade} — {format(new Date(s.date + "T12:00:00"), "dd/MM/yy")}
+                            {!linkedShowIds.has(s.id) && (
+                              <span className="ml-1 text-[10px] text-primary">•</span>
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     ))}
                   </SelectContent>
                 </Select>
