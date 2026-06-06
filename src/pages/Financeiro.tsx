@@ -379,8 +379,10 @@ function FinanceiroContent() {
     setSaving(true);
 
     const selectedShow = form.show_id ? shows.find((s) => s.id === form.show_id) : null;
+    const fallbackTitle = form.categoria || (selectedShow ? (selectedShow.evento || selectedShow.cidade) : "") || (form.type === "entrada" ? "Entrada" : "Saída");
+    const finalTitle = form.title.trim() || fallbackTitle;
     const payload = {
-      title: form.title,
+      title: finalTitle,
       type: form.type,
       amount: parseFloat(form.amount),
       notes: form.notes || undefined,
