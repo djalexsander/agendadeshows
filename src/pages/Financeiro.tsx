@@ -177,9 +177,18 @@ function MonthlyGroupedList({
       g.total += e.type === "entrada" ? amt : -amt;
       g.items.push(e);
     }
-    return Array.from(map.values()).sort((a, b) =>
+    const arr = Array.from(map.values()).sort((a, b) =>
       b.year !== a.year ? b.year - a.year : b.month - a.month,
     );
+    // Sort items inside each month ascending by date (oldest → newest)
+    for (const g of arr) {
+      g.items.sort((a, b) => {
+        const da = getEntryDate(a)?.getTime() ?? 0;
+        const db = getEntryDate(b)?.getTime() ?? 0;
+        return da - db;
+      });
+    }
+    return arr;
   }, [entries]);
 
   // Default: most recent month expanded, others collapsed
