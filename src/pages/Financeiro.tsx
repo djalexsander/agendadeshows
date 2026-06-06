@@ -374,7 +374,6 @@ function FinanceiroContent() {
   };
 
   const handleSave = async () => {
-    if (!form.title) { toast.error("Preencha o título"); return; }
     if (!form.amount) { toast.error("Preencha o valor"); return; }
     if (!form.data_lancamento) { toast.error("Selecione a data do lançamento"); return; }
     setSaving(true);
