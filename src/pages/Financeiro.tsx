@@ -320,6 +320,7 @@ function FinanceiroContent() {
   const [comprovante, setComprovante] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "events">("list");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [eventPickerOpen, setEventPickerOpen] = useState(false);
 
   const currentCategories = form.type === "entrada" ? CATEGORIAS_ENTRADA : CATEGORIAS_SAIDA;
   const allFilterCategories = [...new Set([...CATEGORIAS_ENTRADA, ...CATEGORIAS_SAIDA, ...categories])];
